@@ -15,7 +15,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Set up arduino-cli
       run: |
@@ -34,7 +34,7 @@ jobs:
         ./bin/arduino-cli compile --fqbn esp32:esp32:esp32cam:PSRAM=enabled,PartitionScheme=min_spiffs ESP32-CAM_MJPEG2SD.ino
 
     - name: Archive firmware
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: firmware
         path: |
@@ -50,7 +50,7 @@ jobs:
       contents: write
     steps:
       - name: Download firmware artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: firmware
           path: firmware
