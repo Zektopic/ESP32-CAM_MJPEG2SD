@@ -28,8 +28,8 @@
 
 // User's ESP32S3 cam board
 #elif defined(CONFIG_IDF_TARGET_ESP32S3)
-#define CAMERA_MODEL_FREENOVE_ESP32S3_CAM
-//#define CAMERA_MODEL_ESP32_S3_CAM
+#define CAMERA_MODEL_ESP32_S3_CAM
+//#define CAMERA_MODEL_FREENOVE_ESP32S3_CAM
 //#define CAMERA_MODEL_XIAO_ESP32S3
 //#define CAMERA_MODEL_NEW_ESPS3_RE1_0
 //#define CAMERA_MODEL_M5STACK_CAMS3_UNIT
@@ -52,7 +52,6 @@
 #error "Must select ESP32 or ESP32S3 board for camera"
 #endif
 
-
 /***************************************************************
   Optional features NOT included by default to reduce heap use 
   To include a particular feature, change false to true
@@ -74,15 +73,20 @@
 #define INCLUDE_MCPWM false   // mcpwm.cpp (BDC motor control). Needs INCLUDE_PERIPH true
 #define INCLUDE_RTSP false    // rtsp.cpp (RTSP Streaming). Requires additional library: ESP32-RTSPServer
 #define INCLUDE_DS18B20 false // if true, requires INCLUDE_PERIPH and additional libraries: OneWire and DallasTemperature
+#define INCLUDE_AF false      // for auto focused equipped OV5640. Requires additional library: OV5640_Auto_Focus_for_ESP32_Camera
+#define INCLUDE_NEW_JPG false // true to use esp_new_jpg library, which must be installed first. Faster but uses more memory
 #define INCLUDE_I2C false     // periphsI2C.cpp (support for I2C peripherals)
 
-// if INCLUDE_I2C true, set each I2C device used to true 
-#define USE_SSD1306 false
-#define USE_BMx280 false
-#define USE_MPU6050 false
-#define USE_MPU9250 false
-#define USE_DS3231 false
-#define USE_LCD1602 false
+// if INCLUDE_I2C true, set each I2C device used to true and instal additional library if required
+#define USE_SSD1306 false  // esp8266-oled-ssd1306 library
+#define USE_BMx280 false   // BMx280MI library
+#define USE_MPU6050 false  // none
+#define USE_MPU9250 false  // hideakitai MPU9250 library
+#define USE_DS3231 false   // Makuna Rtc library
+#define USE_LCD1602 false  // none
+#if (USE_MPU6050 && USE_MPU9250)
+#error "Cannot use MPU6050 and MPU9250 simultaneously"
+#endif
 
 // To include Edge Impulse arduino library for additional motion detect filtering
 // Use Edge Impulse Studio to create model:
@@ -104,9 +108,8 @@
 
 #define USE_IP6 false // if true use IPv6 when available, else use IPv4
 
-#define MAX_FRAMES 20000 // max number of frames allowed in single avi file
 
-/*********************** Fixed defines leave as is ***********************/ 
+/*********************** Fixed defines leave as is ************************/ 
 /** Do not change anything below here unless you know what you are doing **/
 
 #ifndef AUXILIARY
@@ -118,11 +121,11 @@
 #define DEBUG_MEM false // leave as false
 #define FLUSH_DELAY 0 // for debugging crashes
 #define DBG_ON false // esp debug output
-#define DBG_LVL ESP_LOG_ERROR // level if DBG_ON true: ESP_LOG_ERROR, ESP_LOG_WARN, ESP_LOG_INFO, ESP_LOG_DEBUG, ESP_LOG_VERBOSE
+#define DBG_LVL ESP_LOG_ERROR // level to use if DBG_ON true: ESP_LOG_ERROR, ESP_LOG_WARN, ESP_LOG_INFO, ESP_LOG_DEBUG, ESP_LOG_VERBOSE
 #define DOT_MAX 50
 #define HOSTNAME_GRP 99
  
-#define APP_VER "10.7.3"
+#define APP_VER "10.9.1"
 
 #if defined(AUXILIARY)
 #define APP_NAME "ESP-CAM_AUX" // max 15 chars
@@ -142,7 +145,7 @@
 #define FILE_NAME_LEN 64
 #define IN_FILE_NAME_LEN (FILE_NAME_LEN * 2)
 #define JSON_BUFF_LEN (32 * 1024) // set big enough to hold all file names in a folder
-#define MAX_CONFIGS 210 // must be > number of entries in configs.txt
+#define MAX_CONFIGS 220 // must be > number of entries in configs.txt
 #define MIN_RAM 8 // min object size stored in ram instead of PSRAM default is 4096
 #define MAX_RAM 4096 // max object size stored in ram instead of PSRAM default is 4096
 #define TLS_HEAP (64 * 1024) // min free heap for TLS session
@@ -151,6 +154,7 @@
 #define MAX_FRAME_WAIT 1200
 #define RGB888_BYTES 3 // number of bytes per pixel
 #define GRAYSCALE_BYTES 1 // number of bytes per pixel 
+#define EXTHB_LEN 64
 
 #ifdef NO_SD
 #define STORAGE LittleFS
@@ -163,7 +167,7 @@
 #define ISCAM // cam specific code in generic cpp files
 
 // to determine if newer data files need to be loaded
-#define CFG_VER 30
+#define CFG_VER 36
 
 #define AVI_EXT "avi"
 #define CSV_EXT "csv"
@@ -196,7 +200,7 @@
 #define AUDIO_STACK_SIZE (1024 * 4)
 #define MICREM_STACK_SIZE (1024 * 2)
 #define MQTT_STACK_SIZE (1024 * 4)
-#define PING_STACK_SIZE (1024 * 5)
+#define PING_STACK_SIZE (1024 * 6)
 #define PLAYBACK_STACK_SIZE (1024 * 2)
 #define SERVO_STACK_SIZE (1024)
 #define SUSTAIN_STACK_SIZE (1024 * 4)
@@ -205,6 +209,7 @@
 #define HB_STACK_SIZE (1024 * 2)
 #define UART_STACK_SIZE (1024 * 2)
 #define INTERCOM_STACK_SIZE (1024 * 2)
+#define SENSOR_STACK_SIZE (1024 * 2)
 
 // task priorities
 #define CAPTURE_PRI 6
@@ -226,6 +231,7 @@
 #define UART_PRI 1
 #define DS18B20_PRI 1
 #define BATT_PRI 1
+#define SENSOR_PRI 1
 
 /******************** Function declarations *******************/
 
@@ -254,6 +260,7 @@ void buildAviHdr(uint8_t FPS, uint8_t frameType, uint16_t frameCnt, bool isTL = 
 void buildAviIdx(size_t dataSize, bool isVid = true, bool isTL = false);
 size_t buildSubtitle(int srtSeqNo, uint32_t sampleInterval);
 void buzzerAlert(bool buzzerOn);
+bool checkAccelMove();
 int8_t checkPotVol(int8_t adjVol);
 bool checkSDFiles();
 void currentStackUsage();
@@ -261,7 +268,7 @@ void displayAudioLed(int16_t audioSample);
 void finalizeAviIndex(uint16_t frameCnt, bool isTL = false);
 void finishAudioRecord(bool isValid);
 float* getBMx280();
-float* getMPU9250();
+float* getMPUdata();
 mjpegStruct getNextFrame(bool firstCall = false);
 int getInputPeripheral(uint8_t cmd);
 bool getPIRval();
@@ -269,6 +276,7 @@ bool haveWavFile(bool isTL = false);
 bool identifyBMx();
 void intercom();
 bool isNight(uint8_t nightSwitch);
+void laserLevel() ;
 void micTaskStatus();
 void motorSpeed(int speedVal, bool leftMotor = true);
 void openSDfile(const char* streamFile);
@@ -310,10 +318,9 @@ size_t writeAviIndex(byte* clientBuf, size_t buffSize, bool isTL = false);
 bool writeUart(uint8_t cmd, uint32_t outputData);
 size_t writeWavFile(byte* clientBuf, size_t buffSize);
 
-#ifndef CONFIG_IDF_TARGET_ESP32C3
+#ifndef AUXILIARY
 bool checkMotion(camera_fb_t* fb, bool motionStatus, bool lightLevelOnly = false);
 void keepFrame(camera_fb_t* fb);
-void notifyMotion(camera_fb_t* fb);
 #endif
 
 /******************** Global app declarations *******************/
@@ -344,7 +351,6 @@ extern bool dbgMotion;
 extern bool doPlayback;
 extern bool doRecording; // whether to capture to SD or not
 extern bool forceRecord; // Recording enabled by rec button or dashcam slider
-extern bool forcePlayback; // playback enabled by user
 extern uint8_t FPS;
 extern uint8_t fsizePtr; // index to frameData[] for record
 extern bool isCapturing;
@@ -372,7 +378,7 @@ extern bool streamSrt;
 extern uint8_t numStreams;
 extern uint8_t vidStreams;
 
-#ifndef CONFIG_IDF_TARGET_ESP32C3
+#ifndef AUXILIARY
 extern framesize_t maxFS;
 #endif
 
@@ -390,7 +396,7 @@ extern size_t audioBytes;
 extern char srtBuffer[];
 extern size_t srtBytes;
 extern size_t maxFrameBuffSize;
-extern size_t maxAlertBuffSize;
+
 
 // Auxiliary use
 extern bool useUart;
@@ -399,6 +405,8 @@ extern int uartRxdPin;
 
 // peripherals used
 extern bool pirUse; // true to use PIR or radar sensor (RCWL-0516) for motion detection
+extern bool accelUse; // true to use MPU6050 or MPU9250 accelerometer for motion detection
+extern int accelDeg; // minimum accelerometer movement for motion detection
 extern bool lampAuto; // if true in conjunction with usePir, switch on lamp when PIR activated
 extern bool lampNight;
 extern int lampType;
@@ -413,7 +421,6 @@ extern bool relayMode;
 // sensors 
 extern int pirPin; // if usePir is true
 extern int lampPin; // if useLamp is true
-extern int wakePin; // if wakeUse is true
 extern int lightsPin;
 extern bool teleUse;
 extern int srtInterval;
@@ -553,22 +560,22 @@ struct frameStruct {
 // and update corresponding frameSizeData[] entries in avi.cpp 
 // https://github.com/espressif/esp32-camera/blob/master/driver/include/sensor.h
 const frameStruct frameData[] = {
-  {"96X96", 96, 96, 30, 1, 1},   // 2MP sensors // PY260
+  {"96X96", 96, 96, 30, 1, 1},     // 2MP sensors // PY260
   {"QQVGA", 160, 120, 30, 1, 1},
   {"128X128", 128, 128, 30, 1, 1}, // PY260
   {"QCIF", 176, 144, 30, 1, 1}, 
   {"HQVGA", 240, 176, 30, 2, 1}, 
   {"240X240", 240, 240, 30, 2, 1}, 
-  {"QVGA", 320, 240, 30, 2, 1},  // PY260
-  {"320X320", 320, 320, 30, 2, 1}, // PY260
+  {"QVGA", 320, 240, 30, 2, 1},    // PY260
+  {"320X320", 320, 320, 30, 2, 1}, // PY260 only
   {"CIF", 400, 296, 30, 2, 1},  
   {"HVGA", 480, 320, 30, 2, 1}, 
-  {"VGA", 640, 480, 20, 3, 1},  // PY260
+  {"VGA", 640, 480, 20, 3, 1},     // PY260
   {"SVGA", 800, 600, 20, 3, 1}, 
   {"XGA", 1024, 768, 5, 3, 1},   
-  {"HD", 1280, 720, 5, 3, 1}, // PY260
+  {"HD", 1280, 720, 5, 3, 1},      // PY260
   {"SXGA", 1280, 1024, 5, 3, 1}, 
-  {"UXGA", 1600, 1200, 5, 4, 1},  // PY260
+  {"UXGA", 1600, 1200, 5, 4, 1},   // PY260
   {"FHD", 1920, 1080, 5, 3, 1},    // 3MP Sensors only // PY260
   {"P_HD", 720, 1280, 5, 3, 1},    //
   {"P_3MP", 864, 1536, 5, 3, 1},   //
@@ -577,5 +584,5 @@ const frameStruct frameData[] = {
   {"WQXGA", 2560, 1600, 5, 4, 1},  //
   {"P_FHD", 1080, 1920, 5, 4, 1},  //
   {"QSXGA", 2560, 1920, 4, 4, 1},  //
-  {"5MP", 2592, 1944, 4, 4, 1}     // PY260
+  {"5MP", 2592, 1944, 4, 4, 1}     // PY260 only
 };

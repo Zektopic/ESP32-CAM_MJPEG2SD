@@ -10,8 +10,6 @@
 void setup() {
   logSetup();
   LOG_INF("Selected board %s", CAM_BOARD);
-  
-  if (!DBG_ON) esp_log_level_set("*", ESP_LOG_ERROR); // show ESP_LOG_ERROR messages during init
   // prep storage
   if (startStorage()) {
     // Load saved user configuration
@@ -27,18 +25,14 @@ void setup() {
 #endif
     }
   }
-  if (!DBG_ON) esp_log_level_set("*", ESP_LOG_NONE); // suppress ESP_LOG_ERROR messages
 
 #ifdef DEV_ONLY
   devSetup();
 #endif
 
-  // connect wifi or start config AP if router details not available
-  startWifi();
-
-  startWebServer();
-  if (strlen(startupFailure)) LOG_WRN("%s", startupFailure);
-  else {
+  // connect network (WiFi or Ethernet per config)
+  startNetwork();
+  if (startWebServer()) {
     // start rest of services
 #ifndef AUXILIARY
     startSustainTasks(); 
@@ -65,7 +59,7 @@ void setup() {
     prepTelegram();
 #endif
 #if INCLUDE_I2C
-  prepI2C();
+    prepI2C();
   #if INCLUDE_TELEM
     prepTelemetry();
   #endif
@@ -77,10 +71,10 @@ void setup() {
  #if INCLUDE_RTSP
     prepRTSP();
  #endif
- if (!prepRecording()) {
-   snprintf(startupFailure, SF_LEN, STARTUP_FAIL "Insufficient memory, remove optional features");
-   LOG_WRN("%s", startupFailure);
- }
+    if (!prepRecording()) {
+      snprintf(startupFailure, SF_LEN, STARTUP_FAIL "Insufficient memory, remove optional features");
+      LOG_WRN("%s", startupFailure);
+    }
 #endif
     checkMemory();
   }

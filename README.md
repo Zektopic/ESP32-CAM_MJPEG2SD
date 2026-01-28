@@ -3,7 +3,7 @@
 
 Application for ESP32 / ESP32S3 with OV2640 / OV3660 / OV5640 / PY260 camera to record JPEGs to SD card as AVI files and playback to browser as an MJPEG stream. The AVI format allows recordings to replay at correct frame rate on media players. If a microphone is installed then a WAV file is also created and stored in the AVI file.  
 The application supports:
-* [Motion detection by camera](#motion-detection-by-camera) or PIR / radar sensor
+* [Motion detection by camera](#motion-detection-by-camera) or PIR / radar sensor / accelerometer
 * [Continuous recording](#continuous-recording) - Time lapse or dashcam style
 * [Audio Recording](#audio-recording) from I2S or PDM microphones
 * Camera pan / tilt servos and lamp control
@@ -16,27 +16,32 @@ The application supports:
 * [MQTT](#mqtt) control with Home Assistant integration.
 * [External Heartbeat](#external-heartbeat) support.
 * Support for peripherals: SG90 servos, MX1508 H-bridge, 28BYJ-48 stepper, HW-504 joystick, BMP280, MPU9250, MY9221 / WS2812 / SK6812 Led
-* Support for [I2C devices](#i2c-devices): BMP280, BME280, MPU6050, MPU9350, SSD1306, LCD1602, etc.
+* Support for [I2C devices](#i2c-devices): BMP280, BME280, MPU6050, MPU9250, SSD1306, LCD1602, etc.
 * Interface for [Machine Learning](#machine-learning) support.
 * [Camera Hub](#camera-hub) feature to access other ESP32-CAM_MJPEG2SD devices.
 * [Photogrammetry](#photogrammetry) feature to capture photos for 3D imaging.
 * Use of [Auxiliary Board](#auxiliary-board) for additional pins.
 * [Intercom](#intercom) feature using mic and speaker on ESP and mic and speaker on user device browser.
+* Option of [Ethernet](#configuration-web-page) network selection instead of Wifi
 
 The ESP32 cannot support all of the features as it will run out of heap space. For better functionality and performance, use one of the new ESP32S3 camera boards, eg Freenove ESP32S3 Cam, ESP32S3 XIAO Sense, ESP32-S3-Cam (AI Thinker style), but avoid no-name boards marked `ESPS3 RE:1.0`
 
 ***This is a complex app and some users are raising issues when the app reports a warning, but this is the app notifying the user that there is an problem with their setup, which only the user can fix. Be aware that some clone boards have different specs to the original, eg PSRAM size. Please only raise issues for actual bugs (ERR messages, unhandled library error or crash). Thanks.  
 To suggest an improvement or enhancement use Discussions.*** 
 
-Changes for version 10.7.3:
-* Reworked for new jpeg decoder in arduino-esp32 core v3.3.0
-* Added Dashcam style continuous recording
-* Initial support for [PY260](#py260) camera model
-* [HTTPS](#https) support reworked due to change in Espressif library
+Changes for version up to 10.9.1:
+* Addition of [Ethernet](#configuration-web-page) network selection instead of Wifi
+* Pins added for [`CAMERA_MODEL_Waveshare_ESP32_S3_ETH`](https://www.waveshare.com/wiki/ESP32-S3-ETH)
+* Define pins for external W5500 Ethernet controller
+* Fix for issue [#650](https://github.com/s60sc/ESP32-CAM_MJPEG2SD/issues/650)
+* Motion detection by MPU6050 or MPU9250 accelerometer
+* Support for OV5640 auto focus
+* Logging and memory usage improvements
+* Fix for issue #697
 
 ## Purpose
 
-The application enables video capture of motion detection or continuous recording. Examples include security cameras, wildlife monitoring, rocket flight monitoring, FPV vehicle control.  This [instructable](https://www.instructables.com/How-to-Make-a-WiFi-Security-Camera-ESP32-CAM-DIY-R/) by [Max Imagination](https://www.instructables.com/member/Max+Imagination/) shows how to build a WiFi Security Camera using an earlier version of this code, plus a later video on how to [install and use](https://www.youtube.com/watch?v=k_PJLkfqDuI&t=247s) the app.
+The application enables video capture of motion detection or continuous recording. Examples include security cameras, wildlife monitoring, rocket flight monitoring, FPV vehicle control.
 
 Saving a set of JPEGs as a single file is faster than as individual files and is easier to manage, particularly for small image sizes. Actual rate depends on quality and size of SD card and complexity and quality of images. A no-name 4GB SDHC labelled as Class 6 was 3 times slower than a genuine Sandisk 4GB SDHC Class 2. The following recording rates were achieved on a freshly formatted Sandisk 4GB SDHC Class 2 on a AI Thinker OV2640 board, set to maximum JPEG quality and clock rate of 20MHz. With a clock rate of 24Mhz on ESP32S3, the maximum frame rates can increase 50->60, 25->30 but it may be necessary to reduce JPEG quality.
 
@@ -98,7 +103,7 @@ Browser functions only fully tested on Chrome.
 
 ## Main Function
 
-A recording is generated either by the camera itself detecting motion, or by holding a given pin high (kept low by internal pulldown when released), eg by using an active high motion sensor such as PIR or RCWL-0516 microwave radar.
+A recording is generated either by the camera itself detecting motion, or by holding a given pin high (kept low by internal pulldown when released), eg by using an active high motion sensor such as a PIR (HC-SR501) or microwave radar (CWL-0516), or an I2C accelerometer (MPU6050), or a non motion detector such as a sound sensor (KY-037).
 In addition a recording can be requested manually using the **Start Recording** button on the web page.
 
 To play back a recording, select the file using **Playback & File Transfers** sidebar button to select the day folder then the required AVI file.
@@ -126,9 +131,10 @@ Time Lapse & Dashcam features are mutually exclusive.
 The operation of the application can be modified dynamically as below, by using the main web page, which should mostly be self explanatory.
 
 Connections:
-* The FTP / HTTPS, Wifi, SMTP, and time zone parameters can be defined in **Access Settings** sidebar button. 
+* The Wifi/Ethernet choice, Time zone, FTP/HTTPS, SMTP, and authentication parameters can be defined in **Access Settings** sidebar button. 
   - for **Time Zone** use dropdown, or paste in values from second column [here](https://raw.githubusercontent.com/nayarsystems/posix_tz_db/master/zones.csv)
 * To make the changes persistent, press the **Save** button
+    * For network changes, ESP must be rebooted.
 * mdns name services in order to use `http://[Host Name]` instead of ip address.
 
 To change the recording parameters:
@@ -155,8 +161,20 @@ View application log via web page, displayed using **Show Log** tab:
 
 More configuration details accessed via **Edit Config** tab, which displays further buttons:
 
-**Wifi**:
-Additional WiFi and webserver settings.
+**Network**:
+* Default network interface is Wifi, but Ethernet can be used instead using boards with built in Ethernet, eg: [`CAMERA_MODEL_Waveshare_ESP32_S3_ETH`](https://www.waveshare.com/wiki/ESP32-S3-ETH), or by connecting an external W5500 Ethernet controller.
+* Feature only available for ESP32S3 boards.
+* All existing services automatically use the selected network interface after reboot.
+* If Network interface in **Access Settings** side tab was previously set to Ethernet:
+  * App runs in quiet mode (WiFi and BLE off).
+  * First boot still prepares the SD `/data` folder and UI.
+  * WiFi AP wizard is suppressed; access the device by its DHCP IP or mDNS `http(s)://<hostname>.local` if your network supports it.
+  * PoE variants are supported at the hardware level; power delivery is handled by the board.
+  * Contributed by [@RedCanti](https://github.com/RedCanti)
+* If Network interface in **Access Settings** side tab was previously set to Eth+AP:
+  * Wifi AP is available concurrently with Ethernet, but uses a separate network.
+  * Do not open web pages on each network concurrently.
+* To use an external W5500 Ethernet controller, after selecting Ethernet or Eth+AP, an additional tab **Ethernet** is present in the **Edit Config** tab for entering the SPI pins numbers used to connect to the W5500 Ethernet controller.
 
 **Motion**: 
 See [**Motion detection by Camera**](#motion-detection-by-camera) section.
@@ -263,10 +281,12 @@ QHD | 6
 FHD | 6
 P_FHD | 6
 
+To use the Auto Focus feature on suitably equipped modules, instal `ESP32_OV5640_AF` library and in `appConfigs.h` set `#define INCLUDE_AF true`
+
 ## PY260
 
 The PY260 is a 5MP camera supplied with the M5Stack Unit CamS3 5MP module (CAMERA_MODEL_M5STACK_CAMS3_UNIT).  
-It has different sensor settings to the Omnivision series cameras, so not all entries in **Picture Settings** will be compatible.
+It has different sensor settings to the Omnivision series cameras, defined in side tab **Picture Settings**
 
 ## Auxiliary Board
 

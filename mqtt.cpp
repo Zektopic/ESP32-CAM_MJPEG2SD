@@ -83,7 +83,7 @@ static void mqtt_connected_handler(void *handler_args, esp_event_base_t base, in
   id = esp_mqtt_client_subscribe(mqtt_client, HASIO_AVAILABILITY, 1);
   if (id == -1){
     LOG_WRN("Mqtt failed to subscribe: %s", HASIO_AVAILABILITY );
-  }else LOG_VRB("Mqtt subscribed: %s", HASIO_AVAILABILITY );
+  } else LOG_VRB("Mqtt subscribed: %s", HASIO_AVAILABILITY );
 #endif 
 }
 
@@ -135,7 +135,7 @@ void sendMqttImage(){
      int id = esp_mqtt_client_publish(mqtt_client, image_topic, picBuff, alertBufferSize, MQTT_QOS, 0);
      LOG_VRB("Sent pic, size: %lu", alertBufferSize );
   }else{
-    LOG_INF("Fail to send image");
+    LOG_WRN("Fail to send image");
   }
 }
 
@@ -154,9 +154,11 @@ void checkForRemoteQuery() {
             
         } else {  
 #ifdef ISCAM
+#ifndef AUXILIARY
           //Block other tasks from accessing the camera
           if (!strcmp(query, "fps")) setFPS(atoi(value));
           else if (!strcmp(query, "framesize"))  setFPSlookup(fsizePtr);
+#endif
 #endif
           updateStatus(query, value);
         }          
@@ -200,13 +202,13 @@ static void mqttTask(void* parameter) {
       checkForRemoteQuery();
       if (mqttTaskDelay > 0 ) vTaskDelay(mqttTaskDelay / portTICK_RATE_MS);
     } else { //Disconnected      
-      LOG_WRN("Disconnected wait..");
+      LOG_WRN("Disconnected, wait..");
       vTaskDelay(2000 / portTICK_RATE_MS);
-    }        
-    //xTaskNotifyGive(mqttTaskHandle);    
+    }
   }
   mqttRunning = false;
   LOG_VRB("Mqtt Task exiting..");  
+  mqttTaskHandle = NULL;
   vTaskDelete(NULL);
 }
 
@@ -241,9 +243,9 @@ void startMqttClient(void){
     return;
   }
     
-  if (WiFi.status() != WL_CONNECTED) {
+  if (!netIsConnected()) {
     mqttConnected = false;
-    LOG_VRB("Wifi disconnected.. Retry mqtt on connect");
+    LOG_VRB("Network disconnected.. Retry mqtt on connect");
     return;
   }
   
@@ -276,16 +278,21 @@ void startMqttClient(void){
   LOG_INF("Mqtt connect to %s...", mqtt_uri);
   //LOG_INF("Mqtt connect pass: %s...", mqtt_user_Pass);
   if (mqtt_client != NULL) {
-    ESP_ERROR_CHECK_WITHOUT_ABORT(esp_mqtt_client_register_event(mqtt_client, esp_mqtt_event_id_t::MQTT_EVENT_CONNECTED, mqtt_connected_handler, NULL));
-    ESP_ERROR_CHECK_WITHOUT_ABORT(esp_mqtt_client_register_event(mqtt_client, esp_mqtt_event_id_t::MQTT_EVENT_DISCONNECTED, mqtt_disconnected_handler, NULL));
-    ESP_ERROR_CHECK_WITHOUT_ABORT(esp_mqtt_client_register_event(mqtt_client, esp_mqtt_event_id_t::MQTT_EVENT_DATA, mqtt_data_handler, mqtt_client));
-    ESP_ERROR_CHECK_WITHOUT_ABORT(esp_mqtt_client_register_event(mqtt_client, esp_mqtt_event_id_t::MQTT_EVENT_ERROR, mqtt_error_handler, mqtt_client));
+    if ( mqttTaskHandle == NULL ) {
+      ESP_ERROR_CHECK_WITHOUT_ABORT(esp_mqtt_client_register_event(mqtt_client, esp_mqtt_event_id_t::MQTT_EVENT_CONNECTED, mqtt_connected_handler, NULL));
+      ESP_ERROR_CHECK_WITHOUT_ABORT(esp_mqtt_client_register_event(mqtt_client, esp_mqtt_event_id_t::MQTT_EVENT_DISCONNECTED, mqtt_disconnected_handler, NULL));
+      ESP_ERROR_CHECK_WITHOUT_ABORT(esp_mqtt_client_register_event(mqtt_client, esp_mqtt_event_id_t::MQTT_EVENT_DATA, mqtt_data_handler, mqtt_client));
+      ESP_ERROR_CHECK_WITHOUT_ABORT(esp_mqtt_client_register_event(mqtt_client, esp_mqtt_event_id_t::MQTT_EVENT_ERROR, mqtt_error_handler, mqtt_client));
+    } else {
+      vTaskDelete(mqttTaskHandle);
+      mqttTaskHandle = NULL;
+    }
     if (ESP_ERROR_CHECK_WITHOUT_ABORT(esp_mqtt_client_start(mqtt_client)) != ESP_OK) {
       LOG_WRN("Mqtt start failed");
     } else {
       LOG_VRB("Mqtt started");        
       // Create a mqtt task
-      BaseType_t xReturned = xTaskCreate(&mqttTask, "mqttTask", MQTT_STACK_SIZE, NULL, MQTT_PRI, &mqttTaskHandle);
+      BaseType_t xReturned = xTaskCreateWithCaps(&mqttTask, "mqttTask", MQTT_STACK_SIZE, NULL, MQTT_PRI, &mqttTaskHandle, HEAP_MEM);
       LOG_INF("Created mqtt task: %u", xReturned );
       mqttRunning = true;
     }
@@ -338,9 +345,9 @@ void sendHasEntities (const char *name, const char *displayName, const char *uni
       p += sprintf(p, "\"name\":\"%s\",", hostName);
       p += sprintf(p, "\"ids\":[\"%s-%s\"],", hostName, ESP.getChipModel());
       p += sprintf(p, "\"sw\":\"%s\",", APP_VER);
-      p += sprintf(p, "\"cns\":[[ \"mac\",\"%s\"]],", WiFi.macAddress().c_str() );
+      p += sprintf(p, "\"cns\":[[ \"mac\",\"%s\"]],", netMacAddress().c_str() );
       p += sprintf(p, "\"mdl\":\"%s-%i\",", ESP.getChipModel(), ESP.getChipRevision());
-      p += sprintf(p, "\"cu\":\"http://%s/\",", WiFi.localIP().toString().c_str());
+      p += sprintf(p, "\"cu\":\"http://%s/\",", netLocalIP().toString().c_str());
       p += sprintf(p, "\"mf\":\"%s\"", "esp32cam");
     *p++ = '}';
   *p++ = '}';
@@ -382,7 +389,6 @@ void sendMqttHasDiscovery(){
   //Home Asssistant Camera
   sendHasEntities (hostName, "cam", "", "mdi:video", "camera", "still");
   mqttPublishPath("cmd", "still");
-    
   if (isCapturing) mqttPublishPath("record", "on");
   else mqttPublishPath("record", "off");
   mqttPublishPath("motion", "off"); 
@@ -399,9 +405,9 @@ void sendMqttHasState(){
     sprintf(p, "%0.1f", aTemp);
     mqttPublishPath("atemp", p);
   }
-  sprintf(p, "%i", WiFi.RSSI());
+  sprintf(p, "%i", netRSSI());
   mqttPublishPath("wifi_rssi", p);
-  sprintf(p, "%s", WiFi.localIP().toString().c_str());
+  sprintf(p, "%s", netLocalIP().toString().c_str());
   mqttPublishPath("wifi_ip", p);
   sprintf(p, "%s", fmtSize(ESP.getFreeHeap()) );
   mqttPublishPath("free_heap", p);
@@ -410,5 +416,5 @@ void sendMqttHasState(){
   sprintf(p, "%s", fmtSize(STORAGE.totalBytes() - STORAGE.usedBytes()) );
   mqttPublishPath("free_bytes", p);
 }
-#endif
-#endif
+#endif // INCLUDE_HASIO
+#endif // INCLUDE_MQTT

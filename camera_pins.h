@@ -374,7 +374,7 @@
 #define SD_MMC_CLK 39 
 #define SD_MMC_CMD 38
 #define SD_MMC_D0 40
-#if defined(CAMERA_MODEL_PCBFUN_ESP32S3_CAM)
+#if defined(CAMERA_MODEL_ESP32_S3_CAM)
 // uncomment following pins for SD MMC 4 bit mode
 //#define SD_MMC_D1 41
 //#define SD_MMC_D2 14
@@ -387,6 +387,7 @@
 #define I2S_WS 42
 #define I2S_SCK 41
 #endif
+
 
 #elif defined(CAMERA_MODEL_DFRobot_FireBeetle2_ESP32S3) || defined(CAMERA_MODEL_DFRobot_Romeo_ESP32S3)
 #define CAM_BOARD "CAMERA_MODEL_DFRobot_ESP32S3"
@@ -579,6 +580,15 @@
 #define I2S_SD 34           // I2S Microphone
 #define I2S_WS 33
 #define I2S_SCK 35          // clock
+
+// Ethernet W5500 (SPI) pins for this board
+#define ETH_MOSI 11
+#define ETH_MISO 12
+#define ETH_SCLK 13
+#define ETH_CS   14
+#define ETH_RST  9
+#define ETH_INT  10
+
 
 #elif defined(CAMERA_MODEL_DFRobot_ESP32_S3_AI_CAM)
 // https://wiki.dfrobot.com/SKU_DFR1154_ESP32_S3_AI_CAM
