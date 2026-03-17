@@ -445,7 +445,8 @@ void buildJsonString(uint8_t filter) {
       p += sprintf(p, "\"extIP\":\"%s\",", extIP); 
       p += sprintf(p, "\"httpPort\":\"%u\",", HTTP_PORT); 
       p += sprintf(p, "\"httpsPort\":\"%u\",", HTTPS_PORT); 
-      p += sprintf(p, "\"ip\":\"%s\",", netLocalIP().toString().c_str());
+      IPAddress ipLocal = netLocalIP();
+      p += sprintf(p, "\"ip\":\"%u.%u.%u.%u\",", ipLocal[0], ipLocal[1], ipLocal[2], ipLocal[3]);
     }
   } else {
     // build json string for requested config group
