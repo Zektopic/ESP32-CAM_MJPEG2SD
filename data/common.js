@@ -617,9 +617,17 @@
 
           // user command entered on Log tab
           document.addEventListener("keydown", function (event) {
+            let keyPress = event.keyCode || event.which;
             if (event.target.id == 'txtCmd') {
-              let keyPress = event.keyCode || event.which;
               if (keyPress == 13) sendWsCmd();
+            }
+            // trigger click for elements with role="button" or SVG rects when Enter or Space is pressed
+            if (keyPress === 13 || keyPress === 32) {
+              const e = event.target;
+              if (e.getAttribute('role') === 'button' || e.nodeName === 'rect') {
+                event.preventDefault(); // prevent scrolling for Space
+                e.click();
+              }
             }
           });
 
@@ -882,6 +890,9 @@
           const removeButton = document.createElement('span');
           removeButton.classList.add('removeButton');
           removeButton.classList.add('iconSize');
+          removeButton.setAttribute('role', 'button');
+          removeButton.setAttribute('tabindex', '0');
+          removeButton.setAttribute('aria-label', 'Remove IP');
           removeButton.innerHTML = '×';
           removeButton.onclick = function (event) {
             event.stopPropagation(); // Prevent container click from triggering at the same time
