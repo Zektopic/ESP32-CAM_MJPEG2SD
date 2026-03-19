@@ -317,6 +317,7 @@ static bool handleCopy() {
 }
 
 bool handleWebDav(httpd_req_t* rreq) {
+  if (!checkAuth(rreq)) return true;
   // extract method to determine which WebDAV action to take
   //showHttpHeaders(rreq);
   req = rreq;

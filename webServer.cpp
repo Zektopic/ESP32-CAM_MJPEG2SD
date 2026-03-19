@@ -1,5 +1,5 @@
 // Provides web server for user control of app
-// 
+//
 // s60sc 2022 - 2023
 
 #include "appGlobals.h"
@@ -7,8 +7,8 @@
 #define MAX_HANDLERS 12
 
 char inFileName[IN_FILE_NAME_LEN];
-static char variable[FILE_NAME_LEN]; 
-static char value[IN_FILE_NAME_LEN]; 
+static char variable[FILE_NAME_LEN];
+static char value[IN_FILE_NAME_LEN];
 static char retainAction[2];
 int refreshVal = 5000; // msecs
 
@@ -22,7 +22,7 @@ bool heartBeatDone = false;
 
 static byte* chunk;
 
-esp_err_t sendChunks(File df, httpd_req_t *req, bool endChunking) {   
+esp_err_t sendChunks(File df, httpd_req_t *req, bool endChunking) {
   // use chunked encoding to send large content to browser
   size_t chunksize = 0;
   esp_err_t res = ESP_OK;
@@ -30,7 +30,7 @@ esp_err_t sendChunks(File df, httpd_req_t *req, bool endChunking) {
     res = httpd_resp_send_chunk(req, (char*)chunk, chunksize);
     if (res != ESP_OK) break;
     // httpd_sess_update_lru_counter(req->handle, httpd_req_to_sockfd(req));
-  } 
+  }
   if (endChunking) {
     df.close();
     httpd_resp_sendstr_chunk(req, NULL);
@@ -48,21 +48,21 @@ esp_err_t fileHandler(httpd_req_t* req, bool download) {
     LOG_WRN("File does not exist or cannot be opened: %s", inFileName);
     httpd_resp_send_404(req);
     return ESP_FAIL;
-  } 
+  }
   if (!df.size()) {
     // file is empty
     df.close();
     httpd_resp_sendstr(req, NULL);
     return ESP_OK;
   }
-  
+
   // Check if browser already has this version of the file
   char inVer[10];
   if (httpd_req_get_hdr_value_str(req, "If-None-Match", inVer, sizeof(inVer)) == ESP_OK) {
     if (atoi(inVer) == CFG_VER) {
       // already has version cached, no need to resend
       httpd_resp_set_status(req, "304 Not Modified");
-      return httpd_resp_send(req, NULL, 0); 
+      return httpd_resp_send(req, NULL, 0);
     }
   }
   // this version not cached, so send it
@@ -76,19 +76,19 @@ static void displayLog(httpd_req_t *req) {
   // output ram log to browser
   if (logType == 0) {
     int startPtr, endPtr;
-    startPtr = endPtr = mlogEnd;  
-    httpd_resp_set_type(req, "text/plain"); 
-    
+    startPtr = endPtr = mlogEnd;
+    httpd_resp_set_type(req, "text/plain");
+
     // output log in chunks
     do {
       int maxChunk = startPtr < endPtr ? endPtr - startPtr : RAM_LOG_LEN - startPtr;
-      size_t chunkSize = std::min(CHUNKSIZE, maxChunk);    
-      if (chunkSize > 0) httpd_resp_send_chunk(req, messageLog + startPtr, chunkSize); 
+      size_t chunkSize = std::min(CHUNKSIZE, maxChunk);
+      if (chunkSize > 0) httpd_resp_send_chunk(req, messageLog + startPtr, chunkSize);
       startPtr += chunkSize;
       if (startPtr >= RAM_LOG_LEN) startPtr = 0;
     } while (startPtr != endPtr);
     httpd_resp_sendstr_chunk(req, NULL);
-  } 
+  }
 }
 
 bool checkAuth(httpd_req_t* req) {
@@ -127,7 +127,7 @@ static esp_err_t indexHandler(httpd_req_t* req) {
     httpd_resp_sendstr_chunk(req, failPageE_html);
     httpd_resp_sendstr_chunk(req, NULL);
     return ESP_OK;
-  } 
+  }
   // Show wifi wizard if not setup, using access point mode
   if (!STORAGE.exists(INDEX_PAGE_PATH) && WiFi.status() != WL_CONNECTED) {
     // Open a basic wifi setup page
@@ -156,7 +156,7 @@ esp_err_t extractQueryKeyVal(httpd_req_t *req, char* variable, char* value) {
   size_t queryLen = httpd_req_get_url_query_len(req) + 1;
   httpd_req_get_url_query_str(req, variable, queryLen);
   urlDecode(variable);
-  // extract key 
+  // extract key
   char* endPtr = strchr(variable, '=');
   if (endPtr != NULL) {
     *endPtr = 0; // split variable into 2 strings, first is key name
@@ -171,6 +171,7 @@ esp_err_t extractQueryKeyVal(httpd_req_t *req, char* variable, char* value) {
 }
 
 static esp_err_t webHandler(httpd_req_t* req) {
+  if (!checkAuth(req)) return ESP_OK;
   // return required web page or component to browser using filename from query string
   size_t queryLen = httpd_req_get_url_query_len(req) + 1;
   httpd_req_get_url_query_str(req, variable, queryLen);
@@ -179,7 +180,7 @@ static esp_err_t webHandler(httpd_req_t* req) {
   // check file extension to determine required processing before response sent to browser
   if (!strcmp(variable, "OTA.htm")) {
     // request for built in OTA page, if index html defective
-    httpd_resp_set_type(req, "text/html"); 
+    httpd_resp_set_type(req, "text/html");
     return httpd_resp_sendstr(req, otaPage_html);
   } else if (!strcmp(HTML_EXT, variable+(strlen(variable)-strlen(HTML_EXT)))) {
     // any other html file
@@ -199,36 +200,38 @@ static esp_err_t webHandler(httpd_req_t* req) {
   } else if (!strcmp(SVG_EXT, variable+(strlen(variable)-strlen(SVG_EXT)))) {
     // any svg file
     httpd_resp_set_type(req, "image/svg+xml");
-  } else LOG_WRN("Unknown file type %s", variable);  
-  int dlen = snprintf(inFileName, IN_FILE_NAME_LEN - 1, "%s/%s", DATA_DIR, variable);               
+  } else LOG_WRN("Unknown file type %s", variable);
+  int dlen = snprintf(inFileName, IN_FILE_NAME_LEN - 1, "%s/%s", DATA_DIR, variable);
   if (dlen >= IN_FILE_NAME_LEN) LOG_WRN("file name truncated");
   return fileHandler(req);
 }
 
 static esp_err_t controlHandler(httpd_req_t *req) {
-  // process control query from browser 
+  // process control query from browser
   // obtain details from query string
   httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+  if (!checkAuth(req)) return ESP_OK;
   if (extractQueryKeyVal(req, variable, value) != ESP_OK) return ESP_FAIL;
   if (!strcmp(variable, "displayLog")) displayLog(req);
   else {
     strcpy(value, variable + strlen(variable) + 1); // value points to second part of string
     if (!strcmp(variable, "reset")) {
       httpd_resp_sendstr(req, NULL); // stop browser resending reset
-      doRestart(value); 
+      doRestart(value);
       return ESP_OK;
     }
-    if (!strcmp(variable, "startOTA")) snprintf(inFileName, IN_FILE_NAME_LEN - 1, "%s/%s", DATA_DIR, value); 
+    if (!strcmp(variable, "startOTA")) snprintf(inFileName, IN_FILE_NAME_LEN - 1, "%s/%s", DATA_DIR, value);
     else {
       // if not handled by appSpecificWebHandler(), try updateStatus()
       if (appSpecificWebHandler(req, variable, value) == ESP_FAIL) updateStatus(variable, value);
     }
   }
-  httpd_resp_sendstr(req, NULL); 
+  httpd_resp_sendstr(req, NULL);
   return ESP_OK;
 }
 
 static esp_err_t statusHandler(httpd_req_t *req) {
+  if (!checkAuth(req)) return ESP_OK;
   uint8_t filter = (uint8_t)httpd_req_get_url_query_len(req); // filter number is length of query string
   buildJsonString(filter);
   httpd_resp_set_type(req, "application/json");
@@ -237,11 +240,11 @@ static esp_err_t statusHandler(httpd_req_t *req) {
 }
 
 bool parseJson(int rxSize) {
-  // process json in jsonBuff to extract properly formatted flat key:value pairs  
-  jsonBuff[rxSize - 1] = ','; // replace final '}' 
+  // process json in jsonBuff to extract properly formatted flat key:value pairs
+  jsonBuff[rxSize - 1] = ','; // replace final '}'
   jsonBuff[rxSize] = 0; // terminator
   char* ptr = jsonBuff + 1; // skip over initial '{'
-  size_t itemLen = 0; 
+  size_t itemLen = 0;
   bool retAction = false;
   do {
     // get and process each key:value in turn
@@ -266,6 +269,7 @@ bool parseJson(int rxSize) {
 }
 
 static esp_err_t sseHandler(httpd_req_t *req) {
+  if (!checkAuth(req)) return ESP_OK;
   // enable Server Sent Events
   const char* sseHeader = "HTTP/1.1 200 OK\r\n"
                           "Cache-Control: no-store\r\n"
@@ -273,7 +277,7 @@ static esp_err_t sseHandler(httpd_req_t *req) {
                           "Content-Type: text/event-stream\r\n\r\n";
   sseSocketHD = req->handle;
   sseSocketFD = httpd_req_to_sockfd(req);
-  httpd_socket_send(sseSocketHD, sseSocketFD, sseHeader, strlen(sseHeader), 0); 
+  httpd_socket_send(sseSocketHD, sseSocketFD, sseHeader, strlen(sseHeader), 0);
   sendSSE("open", "opened");
   return ESP_OK;
 }
@@ -294,37 +298,39 @@ void sendSSE(const char* eventType, const char* eventData) {
 }
 
 static esp_err_t updateHandler(httpd_req_t *req) {
+  if (!checkAuth(req)) return ESP_OK;
   // bulk update of config, extract key pairs from received json string
   size_t rxSize = min(req->content_len, (size_t)JSON_BUFF_LEN);
   int ret = 0;
   // obtain json payload
   do {
     ret = httpd_req_recv(req, jsonBuff, rxSize);
-    if (ret < 0) {  
+    if (ret < 0) {
       if (ret == HTTPD_SOCK_ERR_TIMEOUT) continue;
       else {
         LOG_WRN("Update request failed with status %i", ret);
       }
     }
   } while (ret > 0);
-  httpd_resp_sendstr(req, NULL); 
-  if (ret >= 0 && parseJson(rxSize)) appSpecificWebHandler(req, "action", retainAction); 
+  httpd_resp_sendstr(req, NULL);
+  if (ret >= 0 && parseJson(rxSize)) appSpecificWebHandler(req, "action", retainAction);
   return ret < 0 ? ESP_FAIL : ESP_OK;
 }
 
 void progress(size_t prg, size_t sz) {
   static uint8_t pcProgress = 0;
-  if (calcProgress(prg, sz, 5, pcProgress)) LOG_INF("OTA uploaded %d%%", pcProgress); 
+  if (calcProgress(prg, sz, 5, pcProgress)) LOG_INF("OTA uploaded %d%%", pcProgress);
 }
 
 esp_err_t uploadHandler(httpd_req_t *req) {
+  if (!checkAuth(req)) return ESP_OK;
   // upload file for storage or firmware update
   esp_err_t res = ESP_OK;
   size_t fileSize = req->content_len;
   size_t rxSize = min(fileSize, (size_t)JSON_BUFF_LEN);
   int bytesRead = -1;
   LOG_INF("Upload file %s", inFileName);
-  
+
   if (strstr(inFileName, ".bin") != NULL) {
     // partition update - sketch or SPIFFS
     LOG_INF("Firmware update using file %s", inFileName);
@@ -336,7 +342,7 @@ esp_err_t uploadHandler(httpd_req_t *req) {
     if (Update.begin(UPDATE_SIZE_UNKNOWN, cmd)) {
       do {
         bytesRead = httpd_req_recv(req, jsonBuff, rxSize);
-        if (bytesRead < 0) {  
+        if (bytesRead < 0) {
           if (bytesRead == HTTPD_SOCK_ERR_TIMEOUT) {
             delay(10);
             continue;
@@ -355,7 +361,7 @@ esp_err_t uploadHandler(httpd_req_t *req) {
     else LOG_INF("OTA update complete for %s", cmd == U_FLASH ? "Sketch" : "SPIFFS");
     httpd_resp_set_hdr(req, "Connection", "close");
     httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
-    httpd_resp_sendstr(req, Update.hasError() ? "OTA update failed, restarting ..." : "OTA update complete, restarting ...");   
+    httpd_resp_sendstr(req, Update.hasError() ? "OTA update failed, restarting ..." : "OTA update complete, restarting ...");
     doRestart("Restart after OTA");
 
   } else {
@@ -366,7 +372,7 @@ esp_err_t uploadHandler(httpd_req_t *req) {
       // obtain file content
       do {
         bytesRead = httpd_req_recv(req, jsonBuff, rxSize);
-        if (bytesRead < 0) {  
+        if (bytesRead < 0) {
           if (bytesRead == HTTPD_SOCK_ERR_TIMEOUT) {
             delay(10);
             continue;
@@ -381,13 +387,14 @@ esp_err_t uploadHandler(httpd_req_t *req) {
       res = bytesRead < 0 ? ESP_FAIL : ESP_OK;
       httpd_resp_sendstr(req, res == ESP_OK ? "Completed upload file" : "Failed to upload file, retry");
       if (res == ESP_OK) LOG_INF("Uploaded file %s", inFileName);
-      else LOG_WRN("Failed to upload file %s", inFileName);     
+      else LOG_WRN("Failed to upload file %s", inFileName);
     }
   }
   return res;
 }
 
 static esp_err_t setupHandler(httpd_req_t *req) {
+  if (!checkAuth(req)) return ESP_OK;
   // Scan for WiFi networks
   int w = (netMode == 0) ? WiFi.scanNetworks() : 0;
   // Start building the JSON string
@@ -411,7 +418,7 @@ static esp_err_t setupHandler(httpd_req_t *req) {
 void showHttpHeaders(httpd_req_t *req) {
   // httpd_req_aux struct members hidden so need to access them via offsets
   // to calculate offset any element not on 4 byte boundary has to be packed
-  LOG_DBG("HTTP: %s %s", HTTP_METHOD_STRING(req->method), req->uri); 
+  LOG_DBG("HTTP: %s %s", HTTP_METHOD_STRING(req->method), req->uri);
 #if ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 3, 0)
   size_t maxHdrLen = max(CONFIG_HTTPD_MAX_REQ_HDR_LEN, CONFIG_HTTPD_MAX_URI_LEN);
 #else
@@ -433,7 +440,7 @@ static esp_err_t sendCrossOriginHeader(httpd_req_t *req) {
   httpd_resp_set_hdr(req, "Access-Control-Allow-Methods", "POST,GET,HEAD,OPTIONS");
   httpd_resp_set_hdr(req, "Access-Control-Allow-Headers", "*");
   httpd_resp_set_status(req, "204");
-  httpd_resp_sendstr(req, NULL); 
+  httpd_resp_sendstr(req, NULL);
   return ESP_OK;
 }
 
@@ -454,7 +461,7 @@ bool wsAsyncSendText(const char* wsData) {
     esp_err_t ret = httpd_ws_send_frame_async(httpServer, fdWs, &wsPkt);
     if (ret != ESP_OK) LOG_WRN("websocket send failed with %s", esp_err_to_name(ret));
     return ret == ESP_OK ? true : false;
-  } 
+  }
   return false;
 }
 
@@ -489,6 +496,7 @@ static esp_err_t wsHandler(httpd_req_t *req) {
   // page on the newer connection may need to be manually refreshed to take over the log
   esp_err_t ret = ESP_OK;
   if (req->method == HTTP_GET) {
+    if (!checkAuth(req)) return ESP_OK;
     // websocket connection request from browser client
     if (fdWs != -1) {
       if (fdWs != httpd_req_to_sockfd(req)) {
@@ -509,7 +517,7 @@ static esp_err_t wsHandler(httpd_req_t *req) {
     uint8_t wsMsg[MAX_PAYLOAD_LEN];
     memset(&wsPkt, 0, sizeof(httpd_ws_frame_t));
     wsPkt.payload = wsMsg;
-    ret = httpd_ws_recv_frame(req, &wsPkt, MAX_PAYLOAD_LEN); 
+    ret = httpd_ws_recv_frame(req, &wsPkt, MAX_PAYLOAD_LEN);
     if (ret == ESP_OK) {
       if (wsPkt.len >= MAX_PAYLOAD_LEN) LOG_ERR("websocket payload too long %d", wsPkt.len);
       wsMsg[wsPkt.len] = 0; // terminator
@@ -556,15 +564,15 @@ bool startWebServer() {
     httpd_ssl_config_t config = HTTPD_SSL_CONFIG_DEFAULT();
 #if CONFIG_IDF_TARGET_ESP32S3
     config.httpd.stack_size = SERVER_STACK_SIZE;
-#endif  
+#endif
     config.prvtkey_pem = (const uint8_t*)serverCerts[0];
     config.prvtkey_len = strlen(serverCerts[0]) + 1;
     config.servercert = (const uint8_t*)serverCerts[1];
     config.servercert_len = strlen(serverCerts[1]) + 1;
-  
+
     //config.user_cb = https_server_user_callback;
     config.httpd.server_port = HTTPS_PORT;
-    config.httpd.lru_purge_enable = true; // close least used socket 
+    config.httpd.lru_purge_enable = true; // close least used socket
     config.httpd.max_uri_handlers = MAX_HANDLERS;
     config.httpd.max_open_sockets = HTTP_CLIENTS + MAX_STREAMS;
     config.httpd.task_priority = HTTP_PRI;
