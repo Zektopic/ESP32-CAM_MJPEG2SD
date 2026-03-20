@@ -109,7 +109,7 @@ bool retrieveConfigVal(const char* variable, char* value) {
   return false; 
 }
 
-static void loadVectItem(const std::string keyValGrpLabel) {
+static void loadVectItem(const std::string& keyValGrpLabel) {
   // extract a config tokens from input and load into configs vector
   // comprises key : val : group : type : label
   const int tokens = 5;

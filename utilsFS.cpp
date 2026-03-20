@@ -279,7 +279,7 @@ bool listDir(const char* fname, char* jsonBuff, size_t jsonBuffLen, const char* 
   else {
     // build json string content
     sort(fileVec.begin(), fileVec.end(), std::greater<std::string>());
-    for (auto fileInfo : fileVec) {
+    for (const auto& fileInfo : fileVec) {
       if (strlen(jsonBuff) + strlen(fileInfo.c_str()) < jsonBuffLen) strcat(jsonBuff, fileInfo.c_str());
       else {
         LOG_WRN("Too many folders/files to list %u+%u in %u bytes", strlen(jsonBuff), strlen(partJson), jsonBuffLen);
