@@ -626,7 +626,13 @@
               const e = event.target;
               if (e.getAttribute('role') === 'button' || e.nodeName === 'rect') {
                 event.preventDefault(); // prevent scrolling for Space
-                e.click();
+                if (e.classList.contains('RCcontrolFmt')) {
+                  // For RC controls, we need to click the rect inside
+                  const rect = e.querySelector('rect');
+                  if (rect) rect.click();
+                } else {
+                  e.click();
+                }
               }
             }
           });

@@ -900,6 +900,12 @@
         width: calc(var(--buttonSize) * 6);
       }
 
+
+      /* Accessibility: Focus indicators */
+      button:focus-visible, select:focus-visible, input:focus-visible, .quick-nav:focus-visible, .iconSize:focus-visible, .pin-menu:focus-visible, .RCcontrolFmt:focus-visible {
+        outline: 2px solid var(--buttonActive);
+        outline-offset: 2px;
+      }
     </style>
   </head>
 
@@ -1483,7 +1489,7 @@
             <div class="iconSize" id="fullSize" title="Full screen" role="button" tabindex="0" aria-label="Full screen">&rect;</div>
             <div class="iconSize" id="saveImage" title="Download screenshot" role="button" tabindex="0" aria-label="Download screenshot">v</div>
             <div id="RCenable" class="hidden">
-              <div class="RCcontrolFmt RCbuttonFmt" title="Switch RC controls on / off">
+              <div class="RCcontrolFmt RCbuttonFmt" title="Switch RC controls on / off" tabindex="0" role="button" aria-labelledby="RCcontrols">
                 <svg class="svgIcon">
                   <rect class="RCoff"/>
                   <text class="RCbutton local" id="RCcontrols">🎮</text>
@@ -1491,7 +1497,7 @@
               </div>
             </div>
             <div id="RCdisplay" class="hidden touchDisabled">
-              <div class="RCcontrolFmt RClightsFmt" title="Switch RC lights on / off">
+              <div class="RCcontrolFmt RClightsFmt" title="Switch RC lights on / off" tabindex="0" role="button" aria-labelledby="RClights">
                 <svg class="svgIcon">
                   <rect class="RCoff"/>
                   <text class="RCcontrol local" id="RClights">💡</text>
