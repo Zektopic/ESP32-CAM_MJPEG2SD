@@ -321,7 +321,7 @@ bool handleWebDav(httpd_req_t* rreq) {
   // extract method to determine which WebDAV action to take
   //showHttpHeaders(rreq);
   req = rreq;
-  sprintf(pathName, "%s", req->uri + strlen(WEBDAV)); // strip out "/webdav"
+  snprintf(pathName, IN_FILE_NAME_LEN, "%s", req->uri + strlen(WEBDAV)); // strip out "/webdav"
   if (pathName[strlen(pathName) - 1] == '/') pathName[strlen(pathName) - 1] = 0; // remove final / if present
   if (!strlen(pathName)) strcpy(pathName, "/"); // if pathname empty, use single /
   urlDecode(pathName);
