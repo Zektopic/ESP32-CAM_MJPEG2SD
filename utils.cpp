@@ -790,16 +790,6 @@ size_t isSubArray(uint8_t* haystack, uint8_t* needle, size_t hSize, size_t nSize
   return 0; // not found
 }
 
-void removeChar(char* s, char c) {
-  // remove specified character from string
-  int writer = 0, reader = 0;
-  while (s[reader]) {
-    if (s[reader] != c) s[writer++] = s[reader];
-    reader++;       
-  }
-  s[writer] = 0;
-}
-
 void replaceChar(char* s, char c, char r) {
   // replace specified character in string
   int reader = 0;
