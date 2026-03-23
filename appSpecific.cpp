@@ -555,8 +555,6 @@ float readTemperature(bool isCelsius, bool onlyDS18) {
 
 void setInputPeripheral(uint8_t cmd, uint32_t controlVal) {
   // set data on client for data received from auxiliary input peripheral
-  // not used
-  //if ((char)cmd == 'I') memcpy(&pirVal, &controlVal, sizeof(pirVal));  // set PIR status
 }
 
 int getInputPeripheral(uint8_t cmd) {
