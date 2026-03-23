@@ -154,6 +154,12 @@ esp_err_t extractHeaderVal(httpd_req_t *req, const char* variable, char* value) 
 esp_err_t extractQueryKeyVal(httpd_req_t *req, char* variable, char* value) {
   // get variable and value pair from URL query
   size_t queryLen = httpd_req_get_url_query_len(req) + 1;
+  if (queryLen > FILE_NAME_LEN) {
+    LOG_ERR("URL query too long %d", queryLen);
+    httpd_resp_set_status(req, "400 Invalid query string");
+    httpd_resp_sendstr(req, NULL);
+    return ESP_FAIL;
+  }
   httpd_req_get_url_query_str(req, variable, queryLen);
   urlDecode(variable);
   // extract key
@@ -174,6 +180,12 @@ static esp_err_t webHandler(httpd_req_t* req) {
   if (!checkAuth(req)) return ESP_OK;
   // return required web page or component to browser using filename from query string
   size_t queryLen = httpd_req_get_url_query_len(req) + 1;
+  if (queryLen > FILE_NAME_LEN) {
+    LOG_ERR("URL query too long %d", queryLen);
+    httpd_resp_set_status(req, "400 Invalid query string");
+    httpd_resp_sendstr(req, NULL);
+    return ESP_FAIL;
+  }
   httpd_req_get_url_query_str(req, variable, queryLen);
   urlDecode(variable);
 
@@ -249,22 +261,28 @@ bool parseJson(int rxSize) {
   do {
     // get and process each key:value in turn
     char* endItem = strchr(ptr += itemLen, ':');
-    itemLen = endItem - ptr;
+    if (endItem == NULL) break;
+    itemLen = std::min((size_t)(endItem - ptr), sizeof(variable) - 1);
     memcpy(variable, ptr, itemLen);
     variable[itemLen] = 0;
     removeChar(variable, '"');
-    ptr++;
-    endItem = strchr(ptr += itemLen, ',');
-    itemLen = endItem - ptr;
+    ptr += (endItem - ptr) + 1;
+
+    endItem = strchr(ptr, ',');
+    if (endItem == NULL) endItem = jsonBuff + rxSize - 1; // Fallback to end of buffer
+    itemLen = std::min((size_t)(endItem - ptr), sizeof(value) - 1);
     memcpy(value, ptr, itemLen);
     value[itemLen] = 0;
     removeChar(value, '"');
-    ptr++;
+    ptr += (endItem - ptr) + 1;
+    itemLen = 0; // reset itemLen so ptr advances correctly in next loop
+
     if (!strcmp(variable, "action")) {
-      strcpy(retainAction, value);
+      strncpy(retainAction, value, sizeof(retainAction) - 1);
+      retainAction[sizeof(retainAction) - 1] = 0;
       retAction = true;
     } else updateStatus(variable, value);
-  } while (ptr + itemLen - jsonBuff < rxSize);
+  } while (ptr - jsonBuff < rxSize);
   return retAction;
 }
 
