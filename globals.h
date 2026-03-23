@@ -9,6 +9,7 @@
 #endif
 
 #pragma once
+#include "stringUtils.h"
 
 #if __has_include("./devUtilities.cpp") 
 #define DEV_ONLY 
@@ -207,8 +208,6 @@ char* trim(char* str);
 bool updateConfigVect(const char* variable, const char* value);
 void updateStatus(const char* variable, const char* _value, bool fromUser = true);
 esp_err_t uploadHandler(httpd_req_t *req);
-void urlDecode(char* inVal);
-bool urlEncode(const char* inVal, char* encoded, size_t maxSize);
 uint32_t usePeripheral(const byte pinNum, const uint32_t receivedData);
 esp_sleep_wakeup_cause_t wakeupResetReason();
 void wsAsyncSendBinary(uint8_t* data, size_t len);
