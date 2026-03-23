@@ -33,6 +33,8 @@
 #include <ESPmDNS.h> 
 #include "lwip/sockets.h"
 #include <vector>
+#include "stringUtils.h"
+
 #include "ping/ping_sock.h"
 #include <Preferences.h>
 #include <regex>
@@ -115,6 +117,7 @@ void appPanicHandler(arduino_panic_info_t *info, void *arg);
 void buildJsonString(uint8_t filter);
 bool calcProgress(int progressVal, int totalVal, int percentReport, uint8_t &pcProgress);
 bool changeExtension(char* fileName, const char* newExt);
+
 bool checkAlarm();
 bool checkAuth(httpd_req_t* req);
 bool checkDataFiles();
