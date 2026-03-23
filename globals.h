@@ -36,6 +36,7 @@
 #include "ping/ping_sock.h"
 #include <Preferences.h>
 #include <regex>
+#include "stringUtils.h"
 #if (!CONFIG_IDF_TARGET_ESP32C3 && !CONFIG_IDF_TARGET_ESP32S2)
 #include <SD_MMC.h>
 #endif
@@ -180,7 +181,6 @@ void remote_log_init();
 void remoteServerClose(NetworkClientSecure& sclient);
 bool remoteServerConnect(NetworkClientSecure& sclient, const char* serverName, uint16_t serverPort, const char* serverCert, uint8_t connIdx);
 void remoteServerReset();
-void removeChar(char* s, char c);
 void replaceChar(char* s, char c, char r);
 void reset_log();
 void resetWatchDog(int wdIndex, uint32_t wdTimeout = 1);
