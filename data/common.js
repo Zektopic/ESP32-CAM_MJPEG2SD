@@ -623,9 +623,12 @@
             }
             // trigger click for elements with role="button" or SVG rects when Enter or Space is pressed
             if (keyPress === 13 || keyPress === 32) {
-              const e = event.target;
+              let e = event.target;
               if (e.getAttribute('role') === 'button' || e.nodeName === 'rect') {
                 event.preventDefault(); // prevent scrolling for Space
+                if (e.nodeName !== 'rect' && e.querySelector('rect')) {
+                  e = e.querySelector('rect');
+                }
                 e.click();
               }
             }
@@ -801,7 +804,7 @@
                   let valCntr = 0;
                   switch (value.charAt(0)) {
                     case 'A': // action button
-                      inputHtml = '<svg class="svgCols nochange"><rect class="buttonRect" tabindex="0" role="button" aria-labelledby="' + saveKey + '"/><text id="' + saveKey + '" class="midText" text-anchor="middle" dominant-baseline="middle">' + saveVal + '</text></svg>';
+                      inputHtml = '<div tabindex="0" role="button" aria-labelledby="' + saveKey + '" style="display:inline-block; border-radius: var(--buttonQuart)"><svg class="svgCols nochange"><rect class="buttonRect"/><text id="' + saveKey + '" class="midText" text-anchor="middle" dominant-baseline="middle">' + saveVal + '</text></svg></div>';
                     break;
                     case 'B': // B:lab1:lab2:etc
                       // radio button group
