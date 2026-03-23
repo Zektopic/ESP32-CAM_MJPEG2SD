@@ -175,7 +175,8 @@ static void telemetryTask(void* pvParameters) {
         }
       }
       // wait for next collection interval
-      while (millis() - sampleInterval < startTime) delay(10);
+      uint32_t elapsed = millis() - startTime;
+      if (elapsed < sampleInterval) vTaskDelay(pdMS_TO_TICKS(sampleInterval - elapsed));
     }
     
     // capture finished, write remaining buff to storage 
