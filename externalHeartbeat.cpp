@@ -40,11 +40,9 @@ void sendExternalHeartbeat() {
       https.addHeader("Content-Type", "application/json");
       
       httpCode = https.POST(jsonBuff);
-      //httpCode = https.GET();
       if (httpCode == HTTP_CODE_OK) {
         LOG_INF("External Heartbeat sent to: %s%s", external_heartbeat_domain, uri);
       } else LOG_WRN("External Heartbeat request failed, error: %s", https.errorToString(httpCode).c_str());    
-      //if (httpCode != HTTP_CODE_OK) doGetExtIP = false;
       https.end();     
     }
     remoteServerClose(hclient);
