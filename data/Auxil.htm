@@ -167,9 +167,12 @@
         ry: 15%;
       }
 
-      .buttonRect:focus {
+      .buttonRect:focus, div[role="button"]:focus .buttonRect {
         fill: var(--buttonActive);
         outline: none; /* Remove focus outline if not needed */
+      }
+      div[role="button"]:focus {
+        outline: none;
       }
 
       rect:hover{
@@ -998,34 +1001,34 @@
           </div>
         </div>
         <br>
-        <div>
+        <div tabindex="0" role="button" aria-labelledby="showsys">
           <svg>
-            <rect class="buttonRect" tabindex="0" role="button" aria-labelledby="showsys"/>
+            <rect class="buttonRect"/>
             <text id="showsys" class="midText">System</text>
           </svg>
         </div>
         <div style="grid-column: span 4"><br></div>
-        <div>
+        <div tabindex="0" role="button" aria-labelledby="refreshLog">
           <svg>
-            <rect class="buttonRect" tabindex="0" role="button" aria-labelledby="refreshLog"/>
+            <rect class="buttonRect"/>
             <text class="local" id="refreshLog">Refresh Log</text>
           </svg>
         </div>
-        <div>
+        <div tabindex="0" role="button" aria-labelledby="clearLog">
           <svg>
-            <rect class="buttonRect" tabindex="0" role="button" aria-labelledby="clearLog"/>
+            <rect class="buttonRect"/>
             <text class="local" id="clearLog">Clear Log</text>
           </svg>
         </div>
-        <div>
+        <div tabindex="0" role="button" aria-labelledby="save">
           <svg>
-            <rect class="buttonRect" tabindex="0" role="button" aria-labelledby="save"/>
+            <rect class="buttonRect"/>
             <text id="save" class="midText">Save</text>
           </svg>
         </div>
-        <div>
+        <div tabindex="0" role="button" aria-labelledby="reset">
           <svg>
-            <rect class="buttonRect" tabindex="0" role="button" aria-labelledby="reset"/>
+            <rect class="buttonRect"/>
             <text id="reset" class="midText">Reboot ESP</text>
           </svg>
         </div>
@@ -1040,27 +1043,27 @@
       <div class="header">Control</div>
       <br>
       <div class="grid-cols4">
-        <div>
+        <div tabindex="0" role="button" aria-labelledby="save">
           <svg>
-            <rect class="buttonRect" tabindex="0" role="button" aria-labelledby="save"/>
+            <rect class="buttonRect"/>
             <text id="save" class="midText">Save</text>
           </svg>
         </div>
-        <div>
+        <div tabindex="0" role="button" aria-labelledby="reset">
           <svg>
-            <rect class="buttonRect" tabindex="0" role="button" aria-labelledby="reset"/>
+            <rect class="buttonRect"/>
             <text id="reset" class="midText">Reboot ESP</text>
           </svg>
         </div>
-        <div>
+        <div tabindex="0" role="button" aria-labelledby="deldata">
           <svg>
-            <rect class="buttonRect" tabindex="0" role="button" aria-labelledby="deldata"/>
+            <rect class="buttonRect"/>
             <text id="deldata" class="midText">Reload /data</text>
           </svg>
         </div>
-        <div>
+        <div tabindex="0" role="button" aria-labelledby="clear">
           <svg>
-            <rect class="buttonRect" tabindex="0" role="button" aria-labelledby="clear"/>
+            <rect class="buttonRect"/>
             <text id="clear" class="midText">Clear NVS</text>
           </svg>
         </div>
@@ -1071,33 +1074,33 @@
           <div class="subheader">Press Save button to make changes permanent</div>
           <br>
         </div>
-        <div>
+        <div tabindex="0" role="button" aria-labelledby="wifi">
           <svg>
-            <rect class="buttonRect" tabindex="0" role="button" aria-labelledby="wifi"/>
+            <rect class="buttonRect"/>
             <text class="local midText" id="wifi">Network</text>
           </svg>
         </div>
-        <div>
+        <div tabindex="0" role="button" aria-labelledby="peripherals">
           <svg>
-            <rect class="buttonRect" tabindex="0" role="button" aria-labelledby="peripherals"/>
+            <rect class="buttonRect"/>
             <text class="local midText" id="peripherals">Peripherals</text>
           </svg>
         </div>
-        <div id="RCconfigBtn" class="hidden">
+        <div id="RCconfigBtn" class="hidden" tabindex="0" role="button" aria-labelledby="RCconfig">
           <svg>
-            <rect class="buttonRect" tabindex="0" role="button" aria-labelledby="RCconfig"/>
+            <rect class="buttonRect"/>
             <text class="local midText" id="RCconfig">RC Config</text>
           </svg>
         </div>
-        <div id="SVconfigBtn" class="hidden">
+        <div id="SVconfigBtn" class="hidden" tabindex="0" role="button" aria-labelledby="SVconfig">
           <svg>
-            <rect class="buttonRect" tabindex="0" role="button" aria-labelledby="SVconfig"/>
+            <rect class="buttonRect"/>
             <text class="local midText" id="SVconfig">Servos</text>
           </svg>
         </div>
-        <div id="PGconfigBtn" class="hidden">
+        <div id="PGconfigBtn" class="hidden" tabindex="0" role="button" aria-labelledby="PGconfig">
           <svg>
-            <rect class="buttonRect" tabindex="0" role="button" aria-labelledby="PGconfig"/>
+            <rect class="buttonRect"/>
             <text class="local midText" id="PGconfig">PG Control</text>
           </svg>
         </div>
