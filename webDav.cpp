@@ -283,7 +283,7 @@ static bool checkSamePath(const char *source_path, const char *dest_path) {
 static bool handleMove() {
   // rename file or folder, or change file location
   bool res = false;
-  char dest[100];
+  char dest[IN_FILE_NAME_LEN];
   if (extractHeaderVal(req, "Destination", dest) == ESP_OK) {
     // obtain destination filename
     res = true;
@@ -321,7 +321,7 @@ bool handleWebDav(httpd_req_t* rreq) {
   // extract method to determine which WebDAV action to take
   //showHttpHeaders(rreq);
   req = rreq;
-  sprintf(pathName, "%s", req->uri + strlen(WEBDAV)); // strip out "/webdav"
+  snprintf(pathName, IN_FILE_NAME_LEN, "%s", req->uri + strlen(WEBDAV)); // strip out "/webdav"
   if (pathName[strlen(pathName) - 1] == '/') pathName[strlen(pathName) - 1] = 0; // remove final / if present
   if (!strlen(pathName)) strcpy(pathName, "/"); // if pathname empty, use single /
   urlDecode(pathName);
