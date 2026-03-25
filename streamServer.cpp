@@ -225,7 +225,9 @@ static void srtStream(httpd_req_t* req, uint8_t taskNum) {
 #endif
     if (res == ESP_OK) res = httpd_resp_sendstr_chunk(req, "\n\n");
     if (res != ESP_OK) isStreaming[taskNum] = false; // client connection closed
-    else while (isStreaming[taskNum] && millis() - sampleInterval < startTime) delay(50);
+    // Bolt: calculate elapsed time first to prevent unsigned integer underflow
+    // when millis() is less than sampleInterval, ensuring the task yields correctly.
+    else while (isStreaming[taskNum] && (millis() - startTime) < sampleInterval) delay(50);
   }
   if (res == ESP_OK) httpd_resp_sendstr_chunk(req, NULL);
   LOG_INF("SRT: sent %d subtitles", srtSeqNo);
