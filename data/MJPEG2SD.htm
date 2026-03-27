@@ -175,6 +175,10 @@
       div[role="button"]:focus {
         outline: none;
       }
+      div[role="button"]:focus-visible, nav[role="button"]:focus-visible {
+        outline: 2px solid var(--buttonActive);
+        outline-offset: 2px;
+      }
 
       rect:hover{
         fill: var(--buttonHover);
@@ -1491,7 +1495,7 @@
             <div class="iconSize" id="fullSize" title="Full screen" role="button" tabindex="0" aria-label="Full screen">&rect;</div>
             <div class="iconSize" id="saveImage" title="Download screenshot" role="button" tabindex="0" aria-label="Download screenshot">v</div>
             <div id="RCenable" class="hidden">
-              <div class="RCcontrolFmt RCbuttonFmt" title="Switch RC controls on / off">
+              <div class="RCcontrolFmt RCbuttonFmt" title="Switch RC controls on / off" role="button" tabindex="0" aria-label="Switch RC controls on / off">
                 <svg class="svgIcon">
                   <rect class="RCoff"/>
                   <text class="RCbutton local" id="RCcontrols">🎮</text>
@@ -1499,7 +1503,7 @@
               </div>
             </div>
             <div id="RCdisplay" class="hidden touchDisabled">
-              <div class="RCcontrolFmt RClightsFmt" title="Switch RC lights on / off">
+              <div class="RCcontrolFmt RClightsFmt" title="Switch RC lights on / off" role="button" tabindex="0" aria-label="Switch RC lights on / off">
                 <svg class="svgIcon">
                   <rect class="RCoff"/>
                   <text class="RCcontrol local" id="RClights">💡</text>
