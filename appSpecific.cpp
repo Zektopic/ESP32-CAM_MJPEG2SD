@@ -249,7 +249,9 @@ bool updateAppStatus(const char* variable, const char* value, bool fromUser) {
           // update default FPS for this frame size
           if (playbackHandle != NULL) {
             setFPSlookup(fsizePtr);
-            updateConfigVect("fps", String(FPS).c_str()); 
+            char fpsStr[10];
+            snprintf(fpsStr, sizeof(fpsStr), "%d", FPS);
+            updateConfigVect("fps", fpsStr);
           }
         }
       }
