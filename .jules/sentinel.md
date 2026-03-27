@@ -1,4 +1,4 @@
-## 2024-03-17 - [CRITICAL] WebDAV handleMove and checkSamePath Null Pointer Dereference and Buffer Overflow
-**Vulnerability:** A Denial of Service (DoS) vulnerability via Null Pointer Dereference in `handleMove` and a memory corruption/buffer overflow via invalid pointer arithmetic in `checkSamePath` existed when parsing the `Destination` header or path paths without slashes.
-**Learning:** Functions like `strstr` and `strrchr` can return `NULL` if the character/substring is not found. Without `NULL` checks, subsequent pointer arithmetic (`NULL - string`) or `memmove` operations on these pointers cause fatal crashes. Additionally, using `strlen(source_path)` for VLAs inside a function can be unsafe if it is dynamically sized or calculated from unsafe operations.
-**Prevention:** Always check pointers returned from string search functions like `strstr` and `strrchr` before dereferencing them. Avoid using Variable-Length Arrays (VLAs) in C++ when safe string manipulation techniques are available.
+## 2024-03-18 - [Auth Bypass in webServer.cpp]
+**Vulnerability:** Several endpoints like /status, /control, and WebDAV lacked authentication checks, even if HTTP Basic Auth was configured and enabled.
+**Learning:** Endpoints were added without explicitly calling the `checkAuth(req)` function that was present for the index endpoint, leading to an auth bypass vulnerability for the remaining endpoints.
+**Prevention:** Make sure `checkAuth(req)` is applied consistently across all endpoints or use middleware to enforce authentication rules for sensitive endpoints.

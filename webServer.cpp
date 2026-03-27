@@ -171,6 +171,7 @@ esp_err_t extractQueryKeyVal(httpd_req_t *req, char* variable, char* value) {
 }
 
 static esp_err_t webHandler(httpd_req_t* req) {
+  if (!checkAuth(req)) return ESP_OK;
   // return required web page or component to browser using filename from query string
   size_t queryLen = httpd_req_get_url_query_len(req) + 1;
   httpd_req_get_url_query_str(req, variable, queryLen);
@@ -206,6 +207,7 @@ static esp_err_t webHandler(httpd_req_t* req) {
 }
 
 static esp_err_t controlHandler(httpd_req_t *req) {
+  if (!checkAuth(req)) return ESP_OK;
   // process control query from browser 
   // obtain details from query string
   httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
@@ -229,6 +231,7 @@ static esp_err_t controlHandler(httpd_req_t *req) {
 }
 
 static esp_err_t statusHandler(httpd_req_t *req) {
+  if (!checkAuth(req)) return ESP_OK;
   uint8_t filter = (uint8_t)httpd_req_get_url_query_len(req); // filter number is length of query string
   buildJsonString(filter);
   httpd_resp_set_type(req, "application/json");
@@ -266,6 +269,7 @@ bool parseJson(int rxSize) {
 }
 
 static esp_err_t sseHandler(httpd_req_t *req) {
+  if (!checkAuth(req)) return ESP_OK;
   // enable Server Sent Events
   const char* sseHeader = "HTTP/1.1 200 OK\r\n"
                           "Cache-Control: no-store\r\n"
@@ -294,6 +298,7 @@ void sendSSE(const char* eventType, const char* eventData) {
 }
 
 static esp_err_t updateHandler(httpd_req_t *req) {
+  if (!checkAuth(req)) return ESP_OK;
   // bulk update of config, extract key pairs from received json string
   size_t rxSize = min(req->content_len, (size_t)JSON_BUFF_LEN);
   int ret = 0;
@@ -318,6 +323,7 @@ void progress(size_t prg, size_t sz) {
 }
 
 esp_err_t uploadHandler(httpd_req_t *req) {
+  if (!checkAuth(req)) return ESP_OK;
   // upload file for storage or firmware update
   esp_err_t res = ESP_OK;
   size_t fileSize = req->content_len;
@@ -388,6 +394,7 @@ esp_err_t uploadHandler(httpd_req_t *req) {
 }
 
 static esp_err_t setupHandler(httpd_req_t *req) {
+  if (!checkAuth(req)) return ESP_OK;
   // Scan for WiFi networks
   int w = (netMode == 0) ? WiFi.scanNetworks() : 0;
   // Start building the JSON string
@@ -484,6 +491,7 @@ void wsAsyncSendBinary(uint8_t* data, size_t len) {
 }
 
 static esp_err_t wsHandler(httpd_req_t *req) {
+  if (!checkAuth(req)) return ESP_OK;
   // receive websocket data and determine response
   // if a new connection is received, the old connection is closed, but the browser
   // page on the newer connection may need to be manually refreshed to take over the log
@@ -539,6 +547,7 @@ static void https_server_user_callback(esp_https_server_user_cb_arg_t *user_cb) 
 static esp_err_t customOrNotFoundHandler(httpd_req_t *req, httpd_err_code_t err) {
   // either handle WebDAV methods or report non existent URI
   if (req->method == HTTP_OPTIONS) sendCrossOriginHeader(req);
+  if (req->method != HTTP_OPTIONS && !checkAuth(req)) return ESP_OK;
 #if INCLUDE_WEBDAV
   if (strncmp(req->uri, WEBDAV, strlen(WEBDAV)) == 0) return handleWebDav(req) ? ESP_OK : ESP_FAIL;
 #endif
