@@ -1,0 +1,15 @@
+--- webServer.cpp
++++ webServer.cpp
+@@ -341,6 +341,12 @@
+   size_t rxSize = min(fileSize, (size_t)JSON_BUFF_LEN);
+   int bytesRead = -1;
+   LOG_INF("Upload file %s", inFileName);
++
++  if (strstr(inFileName, "../")) {
++    LOG_WRN("Path traversal attempt detected in upload: %s", inFileName);
++    httpd_resp_send_404(req);
++    return ESP_FAIL;
++  }
+
+   if (strstr(inFileName, ".bin") != NULL) {
+     // partition update - sketch or SPIFFS

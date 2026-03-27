@@ -343,12 +343,6 @@ esp_err_t uploadHandler(httpd_req_t *req) {
   int bytesRead = -1;
   LOG_INF("Upload file %s", inFileName);
 
-  if (strstr(inFileName, "../")) {
-    LOG_WRN("Path traversal attempt detected in upload: %s", inFileName);
-    httpd_resp_send_404(req);
-    return ESP_FAIL;
-  }
-
   if (strstr(inFileName, ".bin") != NULL) {
     // partition update - sketch or SPIFFS
     LOG_INF("Firmware update using file %s", inFileName);
