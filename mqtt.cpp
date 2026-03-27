@@ -347,7 +347,7 @@ void sendHasEntities (const char *name, const char *displayName, const char *uni
       p += sprintf(p, "\"sw\":\"%s\",", APP_VER);
       p += sprintf(p, "\"cns\":[[ \"mac\",\"%s\"]],", netMacAddress().c_str() );
       p += sprintf(p, "\"mdl\":\"%s-%i\",", ESP.getChipModel(), ESP.getChipRevision());
-      p += sprintf(p, "\"cu\":\"http://%s/\",", netLocalIP().toString().c_str());
+      p += sprintf(p, "\"cu\":\"http://%u.%u.%u.%u/\",", netLocalIP()[0], netLocalIP()[1], netLocalIP()[2], netLocalIP()[3]);
       p += sprintf(p, "\"mf\":\"%s\"", "esp32cam");
     *p++ = '}';
   *p++ = '}';
@@ -407,7 +407,7 @@ void sendMqttHasState(){
   }
   sprintf(p, "%i", netRSSI());
   mqttPublishPath("wifi_rssi", p);
-  sprintf(p, "%s", netLocalIP().toString().c_str());
+  sprintf(p, "%u.%u.%u.%u", netLocalIP()[0], netLocalIP()[1], netLocalIP()[2], netLocalIP()[3]);
   mqttPublishPath("wifi_ip", p);
   sprintf(p, "%s", fmtSize(ESP.getFreeHeap()) );
   mqttPublishPath("free_heap", p);

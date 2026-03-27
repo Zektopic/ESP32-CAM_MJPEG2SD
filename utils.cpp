@@ -136,7 +136,7 @@ static void onNetEvent(arduino_event_id_t event, arduino_event_info_t info) {
     case ARDUINO_EVENT_WIFI_STA_STOP: LOG_INF("Wifi Station stopped %s", ST_SSID); break;
     case ARDUINO_EVENT_WIFI_AP_START: {
       if (strlen(AP_SSID) && !strcmp(WiFi.AP.SSID().c_str(), AP_SSID)) {
-        LOG_INF("Wifi AP SSID: %s started, use 'http%s://%s' to connect", WiFi.AP.SSID().c_str(), useHttps ? "s" : "", WiFi.AP.localIP().toString().c_str());
+        LOG_INF("Wifi AP SSID: %s started, use 'http%s://%u.%u.%u.%u' to connect", WiFi.AP.SSID().c_str(), useHttps ? "s" : "", WiFi.AP.localIP()[0], WiFi.AP.localIP()[1], WiFi.AP.localIP()[2], WiFi.AP.localIP()[3]);
         APstarted = true;
       }
       break;
@@ -148,7 +148,7 @@ static void onNetEvent(arduino_event_id_t event, arduino_event_info_t info) {
       }
       break;
     }
-    case ARDUINO_EVENT_WIFI_STA_GOT_IP: LOG_INF("Wifi Station IP, use '%s://%s' to connect", useHttps ? "https" : "http", WiFi.STA.localIP().toString().c_str()); break;
+    case ARDUINO_EVENT_WIFI_STA_GOT_IP: LOG_INF("Wifi Station IP, use '%s://%u.%u.%u.%u' to connect", useHttps ? "https" : "http", WiFi.STA.localIP()[0], WiFi.STA.localIP()[1], WiFi.STA.localIP()[2], WiFi.STA.localIP()[3]); break;
     case ARDUINO_EVENT_WIFI_STA_LOST_IP: LOG_INF("Wifi Station lost IP"); break;
     case ARDUINO_EVENT_WIFI_AP_STAIPASSIGNED: break;
     case ARDUINO_EVENT_WIFI_STA_CONNECTED: LOG_INF("WiFi Station connection to %s, using hostname: %s", ST_SSID, hostName); break;
@@ -163,7 +163,7 @@ static void onNetEvent(arduino_event_id_t event, arduino_event_info_t info) {
     case ARDUINO_EVENT_ETH_CONNECTED: LOG_INF("Ethernet connected, MAC: %s", ETH.macAddress().c_str()); break;
     case ARDUINO_EVENT_ETH_STOP: LOG_INF("Ethernet Stopped"); break;
     case ARDUINO_EVENT_ETH_GOT_IP: {
-      LOG_INF("Ethernet IP, use '%s://%s' to connect", useHttps ? "https" : "http", ETH.localIP().toString().c_str()); 
+      LOG_INF("Ethernet IP, use '%s://%u.%u.%u.%u' to connect", useHttps ? "https" : "http", ETH.localIP()[0], ETH.localIP()[1], ETH.localIP()[2], ETH.localIP()[3]);
       if (netMode == 2) WiFi.AP.enableNAPT(true);
       break;
     }
