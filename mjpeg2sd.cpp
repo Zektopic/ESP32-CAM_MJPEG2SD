@@ -541,7 +541,7 @@ uint8_t setFPSlookup(uint8_t val) {
 
 static fnameStruct extractMeta(const char* fname) {
   // extract FPS, duration, and frame count from avi filename
-  fnameStruct fnameMeta;
+  fnameStruct fnameMeta = {0, 0, 0};
   char fnameStr[FILE_NAME_LEN];
   strcpy(fnameStr, fname);
   // replace all '_' with space for sscanf
@@ -595,7 +595,7 @@ void openSDfile(const char* streamFile) {
 
 mjpegStruct getNextFrame(bool firstCall) {
   // get next cluster on demand when ready for opened avi
-  mjpegStruct mjpegData;
+  mjpegStruct mjpegData = {0, 0, 0};
   static bool remainingBuff;
   static bool completedPlayback; // indicates that playback completed 
   static size_t buffOffset;
