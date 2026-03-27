@@ -564,6 +564,11 @@
             const e = event.target;
             // svg rect elements, use id of its following text node
             if (e.nodeName == 'rect') processStatus(ID, e.nextElementSibling.id, 1);
+            // alternatively if the div around it is clicked and has role=button
+            else if (e.getAttribute('role') === 'button' && e.querySelector('svg rect.buttonRect')) {
+              const svgText = e.querySelector('svg text');
+              if (svgText) processStatus(ID, svgText.id, 1);
+            }
             // tab buttons, use name as target id 
             else if (e.classList.contains('tablinks')) openTab(e);
             // other buttons
@@ -801,7 +806,7 @@
                   let valCntr = 0;
                   switch (value.charAt(0)) {
                     case 'A': // action button
-                      inputHtml = '<svg class="svgCols nochange"><rect class="buttonRect" tabindex="0" role="button" aria-labelledby="' + saveKey + '"/><text id="' + saveKey + '" class="midText" text-anchor="middle" dominant-baseline="middle">' + saveVal + '</text></svg>';
+                      inputHtml = '<div tabindex="0" role="button" aria-labelledby="' + saveKey + '"><svg class="svgCols nochange"><rect class="buttonRect"/><text id="' + saveKey + '" class="midText" text-anchor="middle" dominant-baseline="middle">' + saveVal + '</text></svg></div>';
                     break;
                     case 'B': // B:lab1:lab2:etc
                       // radio button group

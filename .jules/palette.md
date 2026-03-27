@@ -1,3 +1,7 @@
-## 2024-05-20 - Global Keyboard Event Handling for Custom Components
-**Learning:** This application makes heavy use of interactive SVG `<rect>` elements and icon-only `<div>` elements as custom buttons. While ARIA labels and `tabindex` make them focusable for screen readers, they do not inherently trigger `click` events upon receiving 'Enter' or 'Space' keystrokes like native `<button>` tags do.
-**Action:** Always ensure that a global or component-level `keydown` listener exists to translate 'Enter' (keyCode 13) and 'Space' (keyCode 32) presses into `click()` events for non-native interactive elements (like SVG rects or divs with `role="button"`), while also preventing default scrolling for the Space key.
+## 2024-03-24 - SVG Keyboard Accessibility
+**Learning:** Custom SVG buttons (shapes like `<rect>`) lack native keyboard event handling in browsers, even if given `tabindex="0"` and `role="button"`.
+**Action:** Always apply `tabindex` and ARIA roles to a parent HTML element (like a `<div>`) instead of the SVG graphic itself, and ensure global keydown handlers properly target this parent.
+
+## 2024-03-24 - SVG Keyboard Accessibility
+**Learning:** Custom SVG buttons (shapes like `<rect>`) lack native keyboard event handling in browsers, even if given `tabindex="0"` and `role="button"`.
+**Action:** Always apply `tabindex` and ARIA roles to a parent HTML element (like a `<div>`) instead of the SVG graphic itself, and ensure global keydown handlers properly target this parent.
