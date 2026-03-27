@@ -416,13 +416,17 @@ static esp_err_t setupHandler(httpd_req_t *req) {
   int w = (netMode == 0) ? WiFi.scanNetworks() : 0;
   // Start building the JSON string
   char* p = jsonBuff;
-  p += sprintf(p, "{\"networks\":[");
+  size_t rem = JSON_BUFF_LEN;
+  int n = snprintf(p, rem, "{\"networks\":[");
+  if (n > 0 && n < rem) { p += n; rem -= n; }
   // Populate the JSON string with scan results
   for (int i = 0; i < w; ++i) {
-    p += sprintf(p, "{\"ssid\":\"%s\",\"encryption\":\"%s\",\"strength\":\"%ld\"},", WiFi.SSID(i).c_str(), getEncType(i), WiFi.RSSI(i));
+    n = snprintf(p, rem, "{\"ssid\":\"%s\",\"encryption\":\"%s\",\"strength\":\"%ld\"},", WiFi.SSID(i).c_str(), getEncType(i), WiFi.RSSI(i));
+    if (n > 0 && n < rem) { p += n; rem -= n; }
   }
   // remove final comma and close the JSON array
-  p += sprintf(p-1, "]}");
+  if (w > 0 && p > jsonBuff) { p--; rem++; } // step back over comma
+  snprintf(p, rem, "]}");
   // Set the response type to JSON and send JSON
   httpd_resp_set_type(req, "application/json");
   httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");

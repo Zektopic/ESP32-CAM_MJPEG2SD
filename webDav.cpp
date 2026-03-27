@@ -322,7 +322,8 @@ bool handleWebDav(httpd_req_t* rreq) {
   //showHttpHeaders(rreq);
   req = rreq;
   snprintf(pathName, IN_FILE_NAME_LEN, "%s", req->uri + strlen(WEBDAV)); // strip out "/webdav"
-  if (pathName[strlen(pathName) - 1] == '/') pathName[strlen(pathName) - 1] = 0; // remove final / if present
+  size_t pathLen = strlen(pathName);
+  if (pathLen > 0 && pathName[pathLen - 1] == '/') pathName[pathLen - 1] = 0; // remove final / if present
   if (!strlen(pathName)) strcpy(pathName, "/"); // if pathname empty, use single /
   urlDecode(pathName);
   // common response header
