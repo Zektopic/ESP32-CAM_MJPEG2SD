@@ -152,7 +152,7 @@ static bool handleProp() {
   if (!haveResource()) return false;
   // get depth header
   bool depth = false;
-  char value[10];
+  char value[IN_FILE_NAME_LEN];
   if (extractHeaderVal(req, "Depth", value) == ESP_OK) depth = (!strcmp(value, "0")) ? false : true;
 
   // get request payload content if present
