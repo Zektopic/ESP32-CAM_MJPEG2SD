@@ -83,8 +83,14 @@ static void getPhoto() {
   setLamp(lampLevel); // turn on lamp led as flash if required
   if (timeForPhoto * 1000 > MAX_FRAME_WAIT) delay((timeForPhoto * 1000) - MAX_FRAME_WAIT); // allow time for turntable to stabilise
   uint32_t startTime = millis();
-  doKeepFrame = true;
-  while (doKeepFrame && (millis() - startTime < MAX_FRAME_WAIT)) delay(100);
+  if (keepFrameSemaphore) {
+    xSemaphoreTake(keepFrameSemaphore, 0); // clear any existing
+    doKeepFrame = true;
+    xSemaphoreTake(keepFrameSemaphore, pdMS_TO_TICKS(MAX_FRAME_WAIT));
+  } else {
+    doKeepFrame = true;
+    while (doKeepFrame && (millis() - startTime < MAX_FRAME_WAIT)) delay(100);
+  }
   if (!doKeepFrame && alertBufferSize) {
     // create file name 
     char pName[FILE_NAME_LEN];

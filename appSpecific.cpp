@@ -327,8 +327,14 @@ esp_err_t appSpecificWebHandler(httpd_req_t *req, const char* variable, const ch
   else if (!strcmp(variable, "still") || !strcmp(variable, "hub")) {
     // send single jpeg to browser (local or hub)
     uint32_t startTime = millis();
-    doKeepFrame = true;
-    while (doKeepFrame && millis() - startTime < MAX_FRAME_WAIT) delay(100);
+    if (keepFrameSemaphore) {
+      xSemaphoreTake(keepFrameSemaphore, 0); // clear any existing
+      doKeepFrame = true;
+      xSemaphoreTake(keepFrameSemaphore, pdMS_TO_TICKS(MAX_FRAME_WAIT));
+    } else {
+      doKeepFrame = true;
+      while (doKeepFrame && millis() - startTime < MAX_FRAME_WAIT) delay(100);
+    }
     if (!doKeepFrame && alertBufferSize) {
       httpd_resp_set_type(req, "image/jpeg");
       httpd_resp_set_hdr(req, "Content-Disposition", "inline; filename=capture.jpg");
@@ -757,8 +763,14 @@ void appSpecificTelegramTask(void* p) {
     // service requests from Telegram
     if (getTgramUpdate(userCmd)) {     
       if (!strcmp(userCmd, "/snap")) {
-        doKeepFrame = true;
-        delay(1000); // time to get frame
+        if (keepFrameSemaphore) {
+          xSemaphoreTake(keepFrameSemaphore, 0);
+          doKeepFrame = true;
+          xSemaphoreTake(keepFrameSemaphore, pdMS_TO_TICKS(1000));
+        } else {
+          doKeepFrame = true;
+          delay(1000); // time to get frame
+        }
         sprintf(userCmd, "/snap from %s", hostName);
         sendTgramPhoto(alertBuffer, alertBufferSize, userCmd);
       } else if (!strcmp(userCmd, "/log")) {

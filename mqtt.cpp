@@ -128,8 +128,14 @@ static void mqtt_error_handler(void *handler_args, esp_event_base_t base, int32_
 void sendMqttImage(){
   uint32_t startTime = millis();
   if (!strlen(mqtt_topic_prefix)) return;
-  doKeepFrame = true;
-  while (doKeepFrame && millis() - startTime < 4 * MAX_FRAME_WAIT) delay(100);
+  if (keepFrameSemaphore) {
+    xSemaphoreTake(keepFrameSemaphore, 0); // clear any existing
+    doKeepFrame = true;
+    xSemaphoreTake(keepFrameSemaphore, pdMS_TO_TICKS(4 * MAX_FRAME_WAIT));
+  } else {
+    doKeepFrame = true;
+    while (doKeepFrame && millis() - startTime < 4 * MAX_FRAME_WAIT) delay(100);
+  }
   if (!doKeepFrame && alertBufferSize) {
      const char* picBuff = (const char*)(alertBuffer);
      int id = esp_mqtt_client_publish(mqtt_client, image_topic, picBuff, alertBufferSize, MQTT_QOS, 0);
