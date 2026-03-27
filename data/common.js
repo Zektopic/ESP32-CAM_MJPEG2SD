@@ -41,18 +41,18 @@
             addRangeData();
             if (doCustomInit) customInit();
             setListeners();
-            doLoadStatus ? loadStatus("") : configStatus(false); 
+            doLoadStatus ? loadStatus("") : configStatus(false);
             startEventSource();
             initWebSocket(0);
             if (doRefreshTimer && refreshTimer == null) refreshStatus();
           } catch (error) {
             showLog("Initialise -  " + error.message);
             alert("Initialise - " + error.message);
-          } 
+          }
         }
 
         /*********** websocket and SSE functions ***********/
-        
+
         function applyMessageData(msgData) {
           if (msgData instanceof ArrayBuffer) processBuffer(msgData); // app specific
           else if (typeof msgData === 'string') {
@@ -116,7 +116,7 @@
                 // event.codes:
                 //   1006 if server not available, or another web page is already open
                 //   1005 if closed from app
-                if (pageVisible) setTimeout(initWebSocket(index), 100); 
+                if (pageVisible) setTimeout(initWebSocket(index), 100);
               }
             }
             return wsSkt[index] ? true : false;
@@ -145,7 +145,7 @@
             }, intervalTime);
           });
         };
-        
+
        function sendWsMsg(msg, index = 0) {
           if (wsSkt[index] == null) initWebSocket(index);
           if (wsSkt[index].readyState !== WebSocket.OPEN) {
@@ -168,7 +168,7 @@
             });
           }, heartbeatInterval);
         }
-        
+
         // handle Server Sent Events
         function startEventSource() {
           if (doInitSSE) {
@@ -190,7 +190,7 @@
               // update log
               applyMessageData(event.data);
             });
-            
+
             // unhandled events
             eventSource.onerror = (err) => {
               console.error("SSE error:", err);
@@ -203,7 +203,7 @@
         function openTab(e) {
           // control tab viewing
           $$('.tabcontent').forEach(el => { el.style.display = "none"; });
-          $('#' + e.name).style.display = "inherit";  
+          $('#' + e.name).style.display = "inherit";
           $$('.tablinks').forEach(el => {el.classList.remove("active");});
           e.classList.add("active");
           try {
@@ -220,7 +220,7 @@
         }
 
         function rangeSlider(el, isPos = true, statusVal = null) {
-          // update range slider marker position and value 
+          // update range slider marker position and value
           const rangeVal = el.parentElement.children.rangeVal;
           if (statusVal != null) rangeVal.innerHTML = statusVal;
           const currVal = isPos ? parseFloat(el.value) : parseFloat(rangeVal.innerHTML);
@@ -234,7 +234,7 @@
             const scale = (maxlog - minlog) / (maxval - minval);
             // if isPos then get value from slider positional change by user, else set slider position from initial value.
             if (isPos) rangeVal.innerHTML = Math.exp((currVal - minval) * scale + minlog).toFixed(decPlaces);
-            else el.value = minval + ((currVal == 0 ? 0 : Math.log(currVal)) - minlog) / scale; 
+            else el.value = minval + ((currVal == 0 ? 0 : Math.log(currVal)) - minlog) / scale;
           } else {
             el.value = parseFloat(currVal).toFixed(decPlaces);
             rangeVal.innerHTML = el.value;
@@ -244,12 +244,12 @@
           // position of range marker relative to slider thumb
           const rangeThumbSize = el.classList.contains('bigThumb') ? bigThumbSize : smallThumbSize;
           let markerRange = el.offsetWidth - rangeThumbSize;
-          let position = markerRange * (el.value - minval) / (maxval - minval); 
+          let position = markerRange * (el.value - minval) / (maxval - minval);
 
           // calculate absolute marker position for orientation of slider
           if (el.classList.contains('vertical')) {
             rangeVal.style.top = el.offsetTop + markerRange/2 - position + 'px';
-            rangeVal.style.left = el.offsetLeft + markerRange/2 - (rangeVal.offsetWidth - rangeThumbSize)/2 + 'px'; // 
+            rangeVal.style.left = el.offsetLeft + markerRange/2 - (rangeVal.offsetWidth - rangeThumbSize)/2 + 'px'; //
           } else if (el.classList.contains('vertInv')) {
             rangeVal.style.top = el.offsetTop + position - markerRange/2 + 'px';
             rangeVal.style.left = el.offsetLeft + markerRange/2 - (rangeVal.offsetWidth - rangeThumbSize)/2 + 'px';
@@ -266,7 +266,7 @@
         const logObserver = new IntersectionObserver (entries => {
           // refresh log when becomes visible
           entries.forEach(entry => { if (entry.isIntersecting === true) getLog(); });
-        }); 
+        });
         logObserver.observe($('#appLog'));
 
         function addButtons() {
@@ -282,16 +282,16 @@
         function addRangeData() {
           // add labelling for rangle sliders
           $$('input[type="range"]').forEach(el => {
-            if (el.classList.contains('vertical')) el.style.transform = 'rotate(270deg)'; 
+            if (el.classList.contains('vertical')) el.style.transform = 'rotate(270deg)';
             else if (el.classList.contains('vertInv')) el.style.transform = 'rotate(90deg)';
             if (!el.classList.contains('ignore')) {
-              if (!isDefined(el.parentElement.children.rangeMin)) el.insertAdjacentHTML("beforebegin", '<div name="rangeMin"/>'+el.min+'</div>'); 
+              if (!isDefined(el.parentElement.children.rangeMin)) el.insertAdjacentHTML("beforebegin", '<div name="rangeMin"/>'+el.min+'</div>');
               el.insertAdjacentHTML("afterend", '<div name="rangeVal">'+el.value+'</div>');
               if (!isDefined(el.parentElement.children.rangeMax)) el.insertAdjacentHTML("afterend", '<div name="rangeMax"/>'+el.max+'</div>');
             }
             rangeSlider(el, false);
           });
-        } 
+        }
 
         /*********** data processing functions ***********/
 
@@ -302,13 +302,13 @@
             updateData = await response.json();
             updateStatus();
             await sleep(1000);
-          } else alert("loadStatus - " + response.status + ": " + response.statusText);  
+          } else alert("loadStatus - " + response.status + ": " + response.statusText);
         }
 
         function refreshStatus() {
           // refresh status at required interval
           refreshTimer = setInterval(function() {
-            doLoadStatus ? loadStatus("?q") : configStatus(true); 
+            doLoadStatus ? loadStatus("?q") : configStatus(true);
           }, refreshInterval);
         }
 
@@ -318,16 +318,16 @@
             const elt = $('text#'+key); // svg button
             const eld = $('div#'+key); // display text
             const eli = $('#'+key); // input field
-            if (elt) elt.textContent = value; 
-            else if (eld && eld.classList.contains('displayonly')) eld.innerHTML = value; // display text 
-            else if (eli && !eli.classList.contains('nochange')) { 
+            if (elt) elt.textContent = value;
+            else if (eld && eld.classList.contains('displayonly')) eld.innerHTML = value; // display text
+            else if (eli && !eli.classList.contains('nochange')) {
               // input fields;
               if (eli.type === 'checkbox') eli.checked = !!Number(value);
               else if (eli.type === 'range') eli.setAttribute('value', value);
               else if (eli.type === 'option') eli.selected = true;
-              else eli.value = value; 
-            } 
-            const elth = $('td#'+key); 
+              else eli.value = value;
+            }
+            const elth = $('td#'+key);
             if (elth) elth.innerHTML = value; // table data
             $$('input[name="' + key + '"]').forEach(el => {if (el.value == value) el.checked = true;}); // radio button group
             statusData[key] = value;
@@ -346,16 +346,16 @@
               showAlert('Invalid AP password - ' + errorMessage);
               return;
             }
-          } 
-          // send bulk updates to app as json 
+          }
+          // send bulk updates to app as json
           statusData['action'] = doAction;
           const response = await fetch(webServer + '/update', {
-            method: 'POST', 
+            method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(statusData),
           });
-          if (!response.ok) alert("sendUpdates - " + response.status + ": " + response.statusText); 
-        } 
+          if (!response.ok) alert("sendUpdates - " + response.status + ": " + response.statusText);
+        }
 
         /*********** utility functions ***********/
 
@@ -510,7 +510,7 @@
         }
 
         function clearLog() {
-          if (window.confirm('This will delete all log entries. Are you sure ?')) { 
+          if (window.confirm('This will delete all log entries. Are you sure ?')) {
             $('#appLog').innerHTML = "";
             sendControl("resetLog", "1");
           }
@@ -535,19 +535,19 @@
                 const pos = Math.abs(log.scrollHeight - log.clientHeight - log.scrollTop);
                 if (pos < bottom) log.scrollTop = log.scrollHeight;
                 // stop browser hanging while log is loaded
-                setTimeout(loadNextLine, 1); 
-              } 
+                setTimeout(loadNextLine, 1);
+              }
             };
-            loadNextLine(); 
-          } else showAlert("getLog - " + response.status + ": " + response.statusText); 
+            loadNextLine();
+          } else showAlert("getLog - " + response.status + ": " + response.statusText);
         }
 
         function checkTime(value) {
           // sync browser time with app
           const now = new Date();
           let nowUTC = Math.floor(now.getTime() / 1000);
-          let timeDiff = Math.abs(nowUTC - value);  
-          if (timeDiff > 5) sendControl("clockUTC", nowUTC); // 5 secs 
+          let timeDiff = Math.abs(nowUTC - value);
+          if (timeDiff > 5) sendControl("clockUTC", nowUTC); // 5 secs
         }
 
         function setTz(value) {
@@ -564,7 +564,7 @@
             const e = event.target;
             // svg rect elements, use id of its following text node
             if (e.nodeName == 'rect') processStatus(ID, e.nextElementSibling.id, 1);
-            // tab buttons, use name as target id 
+            // tab buttons, use name as target id
             else if (e.classList.contains('tablinks')) openTab(e);
             // other buttons
             else if (e.tagName == 'BUTTON') processStatus(ID, e.id, e.value);
@@ -582,7 +582,7 @@
             const e = event.target;
             const value = e.value.trim();
             const et = event.target.type;
-            // input fields of given class 
+            // input fields of given class
             if (e.nodeName == 'INPUT') {
               if (e.id === 'AP_Pass') {
                 // Validate AP password
@@ -595,8 +595,8 @@
               }
               else if (e.type === 'checkbox') processStatus(ID, e.id, e.checked ? 1 : 0);
               else if (et === 'button' || et === 'file') processStatus(ID, e.id, 1);
-              else if (et === 'radio') { if (e.checked) processStatus(ID, e.name, value); } 
-              else if (et === 'range') processStatus(ID, e.id, e.parentElement.children.rangeVal.innerHTML); 
+              else if (et === 'radio') { if (e.checked) processStatus(ID, e.name, value); }
+              else if (et === 'range') processStatus(ID, e.id, e.parentElement.children.rangeVal.innerHTML);
               else if (e.hasAttribute('id')) processStatus(ID, e.id, value);
             }
             else if (e.tagName == 'SELECT') processStatus(ID, e.id, value);
@@ -615,11 +615,14 @@
             }
           });
 
-          // user command entered on Log tab
+          // user command entered on Log tab and keyboard accessibility for buttons
           document.addEventListener("keydown", function (event) {
+            let keyPress = event.keyCode || event.which;
             if (event.target.id == 'txtCmd') {
-              let keyPress = event.keyCode || event.which;
               if (keyPress == 13) sendWsCmd();
+            } else if ((keyPress === 13 || keyPress === 32) && event.target.getAttribute('role') === 'button') {
+              event.preventDefault();
+              event.target.click();
             }
           });
 
@@ -627,8 +630,8 @@
           document.addEventListener('visibilitychange', () => {
             if (document.hidden) closedTab(false); // app specific
           });
-          
-          // recalc range marker positions 
+
+          // recalc range marker positions
           window.addEventListener('resize', function (event) {
             $$('input[type=range]').forEach(el => { rangeSlider(el); });
           });
@@ -676,7 +679,7 @@
           // add timestamp to received text if generated by browser
           let logText = fromUser ? "[" + date.toLocaleTimeString() + " Web] " : "";
           logText += reqStr;
-          // append to log display 
+          // append to log display
           const log = $('#appLog');
           log.innerHTML += colorise(logText) + '<br>';
           // auto scroll new entry unless scroll bar is not at bottom
@@ -698,8 +701,8 @@
           } else return line;
         }
 
-        function sendWsUpdates(doAction) {    
-          // get each required update element and obtain id/name and value into array to send as json 
+        function sendWsUpdates(doAction) {
+          // get each required update element and obtain id/name and value into array to send as json
           let jarray = {};
           jarray["action"] = doAction;
           $$('.update-action').forEach(el => {
@@ -709,16 +712,16 @@
         }
 
         async function sendControl(key, value) {
-          // send only  
+          // send only
           if (value != null) {
             const encodedValue = encodeURIComponent(value).replace(/#/g, '%23');
             const response = await fetch(encodeURI("/control?" + key + "=") + encodedValue);
             if (!response.ok) alert("sendControl - " + response.status + ": " + response.statusText);
           }
         }
-        
+
         async function sendControlSave(key, value, resetMsg) {
-          // send and save 
+          // send and save
           sendControl(key, value);
           saveChanges(resetMsg);
         }
@@ -730,7 +733,7 @@
           if (response.ok) {
             updateData = await response.json();
             updateStatus();
-          } else alert("sendControlResp - " + response.status + ": " + response.statusText);  
+          } else alert("sendControlResp - " + response.status + ": " + response.statusText);
         }
 
         /*********** config functions ***********/
@@ -743,10 +746,10 @@
             if (isDefined($('.config-group#Main'+cfgGroup)) && isBuilt) {
               // apply to existing Main tab table
               updateData = configData;
-              updateStatus(); 
+              updateStatus();
             }
             else buildTable(configData, cfgGroup); // format received json into html table with data
-          } else alert("getConfig - " + response.status + ": " + response.statusText); 
+          } else alert("getConfig - " + response.status + ": " + response.statusText);
         }
 
         function buildTable(configData, cfgGroup) {
@@ -755,13 +758,13 @@
           const divShowData = isDefined($('.config-group#Main'+cfgGroup)) ? $('.config-group#Main'+cfgGroup) : $('.config-group#Cfg');
           divShowData.innerHTML = "";
           if (cfgGroupNow == cfgGroup) cfgGroupNow = -1; // toggle off existing config table
-          else { 
+          else {
             // setup different config table
             cfgGroupNow = cfgGroup;
-            const table = document.createElement("table"); 
+            const table = document.createElement("table");
             // Create table header row from heading names
-            const colHeaders = ['Setting Name', 'Setting Value']; 
-            let tr = table.insertRow(-1); 
+            const colHeaders = ['Setting Name', 'Setting Value'];
+            let tr = table.insertRow(-1);
             for (let i = 0; i < colHeaders.length; i++) {
               let th = document.createElement("th");
               th.innerHTML = colHeaders[i];
@@ -772,7 +775,7 @@
             let nextPair = 3;
             let saveKey, saveVal;
             Object.entries(configData).forEach(([key, value]) => {
-              if (key != "cfgGroup") { // skip over this entry 
+              if (key != "cfgGroup") { // skip over this entry
                 if (nextPair == 3) {
                   // new row
                   tr = table.insertRow(-1);
@@ -785,7 +788,7 @@
                   nextPair = 1;
                 } else if (nextPair == 1) {
                   // insert label for setting
-                  tr.insertCell(-1).innerHTML = value; 
+                  tr.insertCell(-1).innerHTML = value;
                   nextPair = 2;
                 } else {
                   // get input field type and build html
@@ -821,13 +824,13 @@
                       inputHtml = '<input type="number" class="configItem" id="' + saveKey + '" value="'+ saveVal +'" >';
                     break;
                     case 'R': // R:min:max:step
-                      // format number as range slider 
+                      // format number as range slider
                       const range = value.substring(2).split(":");
                       inputHtml = '<div class="input-group">';
                       inputHtml += '<input type="range" class="configItem" id="' + saveKey + '" min="' + range[0] + '" max="' + range[1];
                       inputHtml += '" step="' + range[2] + '" value="' + saveVal + '"><div name="rangeVal">' + saveVal + '</div></div>';
                     break;
-                    case 'S': 
+                    case 'S':
                       // drop down select
                       valCntr = 0;
                       inputHtml = '<select id="' + saveKey + '" class="selectField">';
@@ -975,7 +978,7 @@
           const ipAddresses = savedIPs ? JSON.parse(savedIPs) : [];
           createImageElements(ipAddresses);
         }});
-      }); 
+      });
       const deviceHubEl = document.getElementById('DeviceHub');
       if (deviceHubEl) hubObserver.observe(deviceHubEl);
 
@@ -1013,7 +1016,7 @@
               this.sampleRateRatio = ${sampleRateRatio};
               this.port.onmessage = this.handleMessage.bind(this);
             }
-            
+
             handleMessage(event) {
               if (event.data.type === 'stop') {
                 this.port.close(); // Close the worklet port for future messages
@@ -1042,7 +1045,7 @@
             process(inputs, outputs, parameters) {
               const inputChannel = inputs[0][0];
               if (!inputChannel || !inputChannel.length) return true; // empty data
-              
+
               const resampledData = this.resampleAudio(inputChannel);
               this.port.postMessage(resampledData);
               return true;
@@ -1096,7 +1099,7 @@
         function draw() {
           const fillWidth = fraction * canvas.width;
           ctx.clearRect(0, 0, canvas.width, canvas.height);  // Clear
-          ctx.fillRect(0, 0, fillWidth, canvas.height); 
+          ctx.fillRect(0, 0, fillWidth, canvas.height);
           requestAnimationFrame(draw);
         }
         draw();
@@ -1118,7 +1121,7 @@
         await sleep(500);
         showMicLevel(0);
       }
-      
+
       function createSpkrAudioWorkletScript() {
         return `
           class PCMProcessor extends AudioWorkletProcessor {
@@ -1156,7 +1159,7 @@
           registerProcessor('pcmProcessor', PCMProcessor);
         `;
       }
-      
+
       async function runSpkr(index) {
         // start browser speaker output
         if (!audioContextSpkr || audioContextSpkr.state === 'closed') audioContextSpkr = new AudioContext({ sampleRate: outSampleRate });
