@@ -1,0 +1,28 @@
+--- webServer.cpp
++++ webServer.cpp
+@@ -161,6 +161,12 @@
+   if (endPtr != NULL) {
+     *endPtr = 0; // split variable into 2 strings, first is key name
+     strcpy(value, variable + strlen(variable) + 1); // value is now second part of string
++    if (strstr(variable, "../") || strstr(value, "../")) {
++      LOG_WRN("Path traversal attempt detected in query string");
++      httpd_resp_set_status(req, "400 Bad Request");
++      httpd_resp_sendstr(req, "Path traversal not allowed");
++      return ESP_FAIL;
++    }
+   } else {
+     LOG_ERR("Invalid query string %s", variable);
+     httpd_resp_set_status(req, "400 Invalid query string");
+@@ -176,6 +182,12 @@
+   size_t queryLen = httpd_req_get_url_query_len(req) + 1;
+   httpd_req_get_url_query_str(req, variable, queryLen);
+   urlDecode(variable);
++
++  if (strstr(variable, "../")) {
++    LOG_WRN("Path traversal attempt detected in URL query: %s", variable);
++    httpd_resp_send_404(req);
++    return ESP_FAIL;
++  }
+
+   // check file extension to determine required processing before response sent to browser
+   if (!strcmp(variable, "OTA.htm")) {
