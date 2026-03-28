@@ -19,3 +19,8 @@
 **Vulnerability:** A local stack buffer `char value[10]` in `webDav.cpp` `handleProp` was used to store the parsed value of the `Depth` HTTP header using `extractHeaderVal`. However, `extractHeaderVal` expects a destination buffer of size `IN_FILE_NAME_LEN` (128 bytes) and extracts up to `IN_FILE_NAME_LEN - 1` bytes without checking the actual destination buffer size, leading to a stack-based buffer overflow if an oversized `Depth` header is provided by a malicious client.
 **Learning:** `extractHeaderVal` is inherently unsafe because it does not accept the destination buffer size as an argument. All buffers passed to `extractHeaderVal` must be sized to at least `IN_FILE_NAME_LEN` to prevent overflows.
 **Prevention:** Always ensure that local buffers passed to HTTP extraction functions are correctly sized (in this case, `IN_FILE_NAME_LEN`). Avoid hardcoding small buffer sizes like `10` for dynamically extracted HTTP headers.
+
+## 2024-05-24 - Prevent WebDAV Path Traversal
+**Vulnerability:** A path traversal vulnerability was found in `webDav.cpp`. Both the requested path (`pathName`) and move destination (`dest`) were URL-decoded but not validated to prevent `../` sequences, allowing arbitrary file system access outside the designated WebDAV folder via HTTP methods like GET, PUT, MOVE, etc.
+**Learning:** Path strings coming from HTTP requests (including headers like "Destination" or URIs) must be sanitized *after* URL decoding to catch URL-encoded directory traversal payloads like `%2e%2e%2f`.
+**Prevention:** Always validate user-provided paths for `../` sequences immediately after URL-decoding and before passing them to file system APIs like `STORAGE.open()` or `STORAGE.rename()`.
