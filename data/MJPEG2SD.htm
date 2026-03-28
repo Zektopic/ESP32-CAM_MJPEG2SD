@@ -175,6 +175,9 @@
       div[role="button"]:focus {
         outline: none;
       }
+      div[role="button"] {
+        cursor: pointer;
+      }
       div[role="button"]:focus-visible, nav[role="button"]:focus-visible {
         outline: 2px solid var(--buttonActive);
         outline-offset: 2px;
@@ -401,6 +404,7 @@
       input[type=range] {
         -webkit-appearance: none;
         background: transparent;
+        cursor: pointer;
       }
 
       input[type=range]::-webkit-slider-runnable-track {
@@ -466,6 +470,7 @@
 
       /* static part */
       .switch .slider {
+        cursor: pointer;
         width: calc(var(--buttonSize) * 3);
         height: var(--buttonSize);
         top: calc(var(--buttonQuart) / 2);
@@ -557,6 +562,7 @@
       }
 
       .nav-toggle {
+        cursor: pointer;
         margin: 0 0 var(--buttonQuart) var(--buttonQuart);
         font-size:var(--headingSize);
         display: block;
