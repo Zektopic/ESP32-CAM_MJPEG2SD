@@ -152,7 +152,7 @@ static bool handleProp() {
   if (!haveResource()) return false;
   // get depth header
   bool depth = false;
-  char value[10];
+  char value[IN_FILE_NAME_LEN];
   if (extractHeaderVal(req, "Depth", value) == ESP_OK) depth = (!strcmp(value, "0")) ? false : true;
 
   // get request payload content if present
@@ -283,11 +283,16 @@ static bool checkSamePath(const char *source_path, const char *dest_path) {
 static bool handleMove() {
   // rename file or folder, or change file location
   bool res = false;
-  char dest[100];
+  char dest[IN_FILE_NAME_LEN];
   if (extractHeaderVal(req, "Destination", dest) == ESP_OK) {
     // obtain destination filename
     res = true;
     urlDecode(dest);
+    if (strstr(dest, "../") || strstr(dest, "/..") || !strcmp(dest, "..")) {
+      LOG_WRN("Path traversal attempt detected in WebDAV move destination: %s", dest);
+      httpd_resp_send_404(req);
+      return false;
+    }
     char* pos = strstr(dest, WEBDAV);
     if (!pos) {
       httpd_resp_send_404(req);
@@ -321,10 +326,16 @@ bool handleWebDav(httpd_req_t* rreq) {
   // extract method to determine which WebDAV action to take
   //showHttpHeaders(rreq);
   req = rreq;
-  sprintf(pathName, "%s", req->uri + strlen(WEBDAV)); // strip out "/webdav"
-  if (pathName[strlen(pathName) - 1] == '/') pathName[strlen(pathName) - 1] = 0; // remove final / if present
+  snprintf(pathName, IN_FILE_NAME_LEN, "%s", req->uri + strlen(WEBDAV)); // strip out "/webdav"
+  size_t pathLen = strlen(pathName);
+  if (pathLen > 0 && pathName[pathLen - 1] == '/') pathName[pathLen - 1] = 0; // remove final / if present
   if (!strlen(pathName)) strcpy(pathName, "/"); // if pathname empty, use single /
   urlDecode(pathName);
+  if (strstr(pathName, "../") || strstr(pathName, "/..") || !strcmp(pathName, "..")) {
+    LOG_WRN("Path traversal attempt detected in WebDAV path: %s", pathName);
+    httpd_resp_send_404(req);
+    return false;
+  }
   // common response header
   httpd_resp_set_hdr(req, "DAV", "1");
   httpd_resp_set_hdr(req, "Allow", ALLOW);

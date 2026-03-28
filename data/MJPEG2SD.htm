@@ -168,9 +168,19 @@
         ry: 15%;
       }
 
-      .buttonRect:focus {
+      .buttonRect:focus, div[role="button"]:focus .buttonRect {
         fill: var(--buttonActive);
         outline: none; /* Remove focus outline if not needed */
+      }
+      div[role="button"]:focus {
+        outline: none;
+      }
+      div[role="button"] {
+        cursor: pointer;
+      }
+      div[role="button"]:focus-visible, nav[role="button"]:focus-visible {
+        outline: 2px solid var(--buttonActive);
+        outline-offset: 2px;
       }
 
       rect:hover{
@@ -208,6 +218,11 @@
       button:active {
        box-shadow: 0 0 0 var(--buttonQuart) var(--buttonActive);
        background: var(--buttonActive);
+      }
+
+      button:focus-visible, div[role="button"]:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+        outline: 2px solid var(--buttonActive);
+        outline-offset: 2px;
       }
 
       button:hover {
@@ -389,6 +404,7 @@
       input[type=range] {
         -webkit-appearance: none;
         background: transparent;
+        cursor: pointer;
       }
 
       input[type=range]::-webkit-slider-runnable-track {
@@ -454,6 +470,7 @@
 
       /* static part */
       .switch .slider {
+        cursor: pointer;
         width: calc(var(--buttonSize) * 3);
         height: var(--buttonSize);
         top: calc(var(--buttonQuart) / 2);
@@ -545,6 +562,7 @@
       }
 
       .nav-toggle {
+        cursor: pointer;
         margin: 0 0 var(--buttonQuart) var(--buttonQuart);
         font-size:var(--headingSize);
         display: block;
@@ -1483,7 +1501,7 @@
             <div class="iconSize" id="fullSize" title="Full screen" role="button" tabindex="0" aria-label="Full screen">&rect;</div>
             <div class="iconSize" id="saveImage" title="Download screenshot" role="button" tabindex="0" aria-label="Download screenshot">v</div>
             <div id="RCenable" class="hidden">
-              <div class="RCcontrolFmt RCbuttonFmt" title="Switch RC controls on / off">
+              <div class="RCcontrolFmt RCbuttonFmt" title="Switch RC controls on / off" role="button" tabindex="0" aria-label="Switch RC controls on / off">
                 <svg class="svgIcon">
                   <rect class="RCoff"/>
                   <text class="RCbutton local" id="RCcontrols">🎮</text>
@@ -1491,7 +1509,7 @@
               </div>
             </div>
             <div id="RCdisplay" class="hidden touchDisabled">
-              <div class="RCcontrolFmt RClightsFmt" title="Switch RC lights on / off">
+              <div class="RCcontrolFmt RClightsFmt" title="Switch RC lights on / off" role="button" tabindex="0" aria-label="Switch RC lights on / off">
                 <svg class="svgIcon">
                   <rect class="RCoff"/>
                   <text class="RCcontrol local" id="RClights">💡</text>
@@ -1546,34 +1564,34 @@
             <label title="Outputs log to SD card" class="slider" for="sdLog"></label>
           </div>
         </div>
-        <div>
+        <div tabindex="0" role="button" aria-labelledby="showsys">
           <svg>
-            <rect class="buttonRect" tabindex="0" role="button" aria-labelledby="showsys"/>
+            <rect class="buttonRect"/>
             <text id="showsys" class="midText">System</text>
           </svg>
         </div>
         <div style="grid-column: span 4"><br></div>
-        <div>
+        <div tabindex="0" role="button" aria-labelledby="refreshLog">
           <svg>
-            <rect class="buttonRect" tabindex="0" role="button" aria-labelledby="refreshLog"/>
+            <rect class="buttonRect"/>
             <text class="local" id="refreshLog">Refresh Log</text>
           </svg>
         </div>
-        <div>
+        <div tabindex="0" role="button" aria-labelledby="clearLog">
           <svg>
-            <rect class="buttonRect" tabindex="0" role="button" aria-labelledby="clearLog"/>
+            <rect class="buttonRect"/>
             <text class="local" id="clearLog">Clear Log</text>
           </svg>
         </div>
-        <div>
+        <div tabindex="0" role="button" aria-labelledby="save">
           <svg>
-            <rect class="buttonRect" tabindex="0" role="button" aria-labelledby="save"/>
+            <rect class="buttonRect"/>
             <text id="save" class="midText">Save</text>
           </svg>
         </div>
-        <div>
+        <div tabindex="0" role="button" aria-labelledby="reset">
           <svg>
-            <rect class="buttonRect" tabindex="0" role="button" aria-labelledby="reset"/>
+            <rect class="buttonRect"/>
             <text id="reset" class="midText">Reboot ESP</text>
           </svg>
         </div>
@@ -1588,27 +1606,27 @@
       <div class="header">Control</div>
       <br>
       <div class="grid-cols4">
-        <div>
+        <div tabindex="0" role="button" aria-labelledby="save">
           <svg>
-            <rect class="buttonRect" tabindex="0" role="button" aria-labelledby="save"/>
+            <rect class="buttonRect"/>
             <text id="save" class="midText">Save</text>
           </svg>
         </div>
-        <div>
+        <div tabindex="0" role="button" aria-labelledby="reset">
           <svg>
-            <rect class="buttonRect" tabindex="0" role="button" aria-labelledby="reset"/>
+            <rect class="buttonRect"/>
             <text id="reset" class="midText">Reboot ESP</text>
           </svg>
         </div>
-        <div>
+        <div tabindex="0" role="button" aria-labelledby="deldata">
           <svg>
-            <rect class="buttonRect" tabindex="0" role="button" aria-labelledby="deldata"/>
+            <rect class="buttonRect"/>
             <text id="deldata" class="midText">Reload /data</text>
           </svg>
         </div>
-        <div>
+        <div tabindex="0" role="button" aria-labelledby="clear">
           <svg>
-            <rect class="buttonRect" tabindex="0" role="button" aria-labelledby="clear"/>
+            <rect class="buttonRect"/>
             <text id="clear" class="midText">Clear NVS</text>
           </svg>
         </div>
@@ -1619,63 +1637,63 @@
           <div class="subheader">Press Save button to make changes permanent</div>
           <br>
         </div>
-        <div>
+        <div tabindex="0" role="button" aria-labelledby="wifi">
           <svg>
-            <rect class="buttonRect" tabindex="0" role="button" aria-labelledby="wifi"/>
+            <rect class="buttonRect"/>
             <text class="local midText" id="wifi">Network</text>
           </svg>
         </div>
-        <div>
+        <div tabindex="0" role="button" aria-labelledby="streaming">
           <svg>
-            <rect class="buttonRect" tabindex="0" role="button" aria-labelledby="streaming"/>
+            <rect class="buttonRect"/>
             <text class="local midText" id="streaming">Streaming</text>
           </svg>
         </div>
-        <div>
+        <div tabindex="0" role="button" aria-labelledby="motion">
           <svg>
-            <rect class="buttonRect" tabindex="0" role="button" aria-labelledby="motion"/>
+            <rect class="buttonRect"/>
             <text class="local midText" id="motion">Motion</text>
           </svg>
         </div>
-        <div>
+        <div tabindex="0" role="button" aria-labelledby="peripherals">
           <svg>
-            <rect class="buttonRect" tabindex="0" role="button" aria-labelledby="peripherals"/>
+            <rect class="buttonRect"/>
             <text class="local midText" id="peripherals">Peripherals</text>
           </svg>
         </div>
-        <div>
+        <div tabindex="0" role="button" aria-labelledby="other">
           <svg>
-            <rect class="buttonRect" tabindex="0" role="button" aria-labelledby="other"/>
+            <rect class="buttonRect"/>
             <text class="local midText" id="other">Other</text>
           </svg>
         </div>
-        <div id="AudconfigBtn" class="hidden">
+        <div id="AudconfigBtn" class="hidden" tabindex="0" role="button" aria-labelledby="Audconfig">
           <svg>
-            <rect class="buttonRect" tabindex="0" role="button" aria-labelledby="Audconfig"/>
+            <rect class="buttonRect"/>
             <text class="local midText" id="Audconfig">Audio</text>
           </svg>
         </div>
-        <div id="EthconfigBtn" class="hidden">
+        <div id="EthconfigBtn" class="hidden" tabindex="0" role="button" aria-labelledby="Ethconfig">
           <svg>
-            <rect class="buttonRect" tabindex="0" role="button" aria-labelledby="Ethconfig"/>
+            <rect class="buttonRect"/>
             <text class="local midText" id="Ethconfig">Ethernet</text>
           </svg>
         </div>
-        <div id="RCconfigBtn" class="hidden">
+        <div id="RCconfigBtn" class="hidden" tabindex="0" role="button" aria-labelledby="RCconfig">
           <svg>
-            <rect class="buttonRect" tabindex="0" role="button" aria-labelledby="RCconfig"/>
+            <rect class="buttonRect"/>
             <text class="local midText" id="RCconfig">RC Config</text>
           </svg>
         </div>
-        <div id="SVconfigBtn" class="hidden">
+        <div id="SVconfigBtn" class="hidden" tabindex="0" role="button" aria-labelledby="SVconfig">
           <svg>
-            <rect class="buttonRect" tabindex="0" role="button" aria-labelledby="SVconfig"/>
+            <rect class="buttonRect"/>
             <text class="local midText" id="SVconfig">Servos</text>
           </svg>
         </div>
-        <div id="PGconfigBtn" class="hidden">
+        <div id="PGconfigBtn" class="hidden" tabindex="0" role="button" aria-labelledby="PGconfig">
           <svg>
-            <rect class="buttonRect" tabindex="0" role="button" aria-labelledby="PGconfig"/>
+            <rect class="buttonRect"/>
             <text class="local midText" id="PGconfig">PG Control</text>
           </svg>
         </div>

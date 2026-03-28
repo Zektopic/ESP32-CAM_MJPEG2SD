@@ -154,12 +154,6 @@ esp_err_t extractHeaderVal(httpd_req_t *req, const char* variable, char* value) 
 esp_err_t extractQueryKeyVal(httpd_req_t *req, char* variable, char* value) {
   // get variable and value pair from URL query
   size_t queryLen = httpd_req_get_url_query_len(req) + 1;
-  if (queryLen > FILE_NAME_LEN) {
-    LOG_ERR("Query string too long");
-    httpd_resp_set_status(req, "400 Invalid query string");
-    httpd_resp_sendstr(req, NULL);
-    return ESP_FAIL;
-  }
   httpd_req_get_url_query_str(req, variable, queryLen);
   urlDecode(variable);
   // extract key
@@ -186,12 +180,6 @@ static esp_err_t webHandler(httpd_req_t* req) {
   if (!checkAuth(req)) return ESP_OK;
   // return required web page or component to browser using filename from query string
   size_t queryLen = httpd_req_get_url_query_len(req) + 1;
-  if (queryLen > FILE_NAME_LEN) {
-    LOG_ERR("Query string too long");
-    httpd_resp_set_status(req, "400 Invalid query string");
-    httpd_resp_sendstr(req, NULL);
-    return ESP_FAIL;
-  }
   httpd_req_get_url_query_str(req, variable, queryLen);
   urlDecode(variable);
 
@@ -273,24 +261,19 @@ bool parseJson(int rxSize) {
   do {
     // get and process each key:value in turn
     char* endItem = strchr(ptr += itemLen, ':');
-    if (!endItem) break;
     itemLen = endItem - ptr;
-    size_t copyLen = std::min(itemLen, (size_t)(FILE_NAME_LEN - 1));
-    memcpy(variable, ptr, copyLen);
-    variable[copyLen] = 0;
+    memcpy(variable, ptr, itemLen);
+    variable[itemLen] = 0;
     removeChar(variable, '"');
     ptr++;
     endItem = strchr(ptr += itemLen, ',');
-    if (!endItem) break;
     itemLen = endItem - ptr;
-    copyLen = std::min(itemLen, (size_t)(IN_FILE_NAME_LEN - 1));
-    memcpy(value, ptr, copyLen);
-    value[copyLen] = 0;
+    memcpy(value, ptr, itemLen);
+    value[itemLen] = 0;
     removeChar(value, '"');
     ptr++;
     if (!strcmp(variable, "action")) {
-      strncpy(retainAction, value, sizeof(retainAction) - 1);
-      retainAction[sizeof(retainAction) - 1] = 0;
+      strcpy(retainAction, value);
       retAction = true;
     } else updateStatus(variable, value);
   } while (ptr + itemLen - jsonBuff < rxSize);
@@ -360,12 +343,6 @@ esp_err_t uploadHandler(httpd_req_t *req) {
   int bytesRead = -1;
   LOG_INF("Upload file %s", inFileName);
 
-  if (strstr(inFileName, "../")) {
-    LOG_WRN("Path traversal attempt detected in upload: %s", inFileName);
-    httpd_resp_send_404(req);
-    return ESP_FAIL;
-  }
-
   if (strstr(inFileName, ".bin") != NULL) {
     // partition update - sketch or SPIFFS
     LOG_INF("Firmware update using file %s", inFileName);
@@ -434,17 +411,13 @@ static esp_err_t setupHandler(httpd_req_t *req) {
   int w = (netMode == 0) ? WiFi.scanNetworks() : 0;
   // Start building the JSON string
   char* p = jsonBuff;
-  size_t rem = JSON_BUFF_LEN;
-  int n = snprintf(p, rem, "{\"networks\":[");
-  if (n > 0 && n < rem) { p += n; rem -= n; }
+  p += sprintf(p, "{\"networks\":[");
   // Populate the JSON string with scan results
   for (int i = 0; i < w; ++i) {
-    n = snprintf(p, rem, "{\"ssid\":\"%s\",\"encryption\":\"%s\",\"strength\":\"%ld\"},", WiFi.SSID(i).c_str(), getEncType(i), WiFi.RSSI(i));
-    if (n > 0 && n < rem) { p += n; rem -= n; }
+    p += sprintf(p, "{\"ssid\":\"%s\",\"encryption\":\"%s\",\"strength\":\"%ld\"},", WiFi.SSID(i).c_str(), getEncType(i), WiFi.RSSI(i));
   }
   // remove final comma and close the JSON array
-  if (w > 0 && p > jsonBuff) { p--; rem++; } // step back over comma
-  snprintf(p, rem, "]}");
+  p += sprintf(p-1, "]}");
   // Set the response type to JSON and send JSON
   httpd_resp_set_type(req, "application/json");
   httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
