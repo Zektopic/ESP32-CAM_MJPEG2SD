@@ -81,6 +81,7 @@ static SemaphoreHandle_t readSemaphore;
 static SemaphoreHandle_t playbackSemaphore;
 SemaphoreHandle_t frameSemaphore[MAX_STREAMS] = {NULL};
 SemaphoreHandle_t motionSemaphore = NULL;
+SemaphoreHandle_t keepFrameSemaphore = NULL;
 SemaphoreHandle_t aviMutex = NULL;
 static volatile bool isPlaying = false; // controls playback on app
 bool isCapturing = false;
@@ -426,6 +427,7 @@ static boolean processFrame() {
   if (doKeepFrame) {
     keepFrame(fb);
     doKeepFrame = false;
+    if (keepFrameSemaphore) xSemaphoreGive(keepFrameSemaphore);
   }
 
   // determine if time to check for motion change
@@ -758,6 +760,7 @@ bool prepRecording() {
   playbackSemaphore = xSemaphoreCreateBinary();
   aviMutex = xSemaphoreCreateMutex();
   motionSemaphore = xSemaphoreCreateBinary();
+  keepFrameSemaphore = xSemaphoreCreateBinary();
   for (int i = 0; i < vidStreams; i++) frameSemaphore[i] = xSemaphoreCreateBinary();
   reloadConfigs(); // apply camera config
   if (!startSDtasks()) return false;

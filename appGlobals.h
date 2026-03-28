@@ -542,6 +542,7 @@ extern TaskHandle_t uartRxHandle;
 extern TaskHandle_t audioHandle;
 extern SemaphoreHandle_t frameSemaphore[];
 extern SemaphoreHandle_t motionSemaphore;
+extern SemaphoreHandle_t keepFrameSemaphore;
 
 
 /************************** structures ********************************/
