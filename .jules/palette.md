@@ -12,3 +12,7 @@
 ## 2024-05-20 - Global Focus Visible Styles for Interactive Elements
 **Learning:** Default browser outlines for interactive elements are often removed globally (`outline: 0;`). When explicit `:focus-visible` styles are implemented, they should cover all keyboard-navigable interactive elements, not just standard `<button>` tags. This includes custom elements like `div[role="button"]`, as well as standard form inputs (`input`, `select`, `textarea`).
 **Action:** When adding `:focus-visible` styles to improve keyboard accessibility, use a broad selector (e.g., `button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select:focus-visible`) to ensure all interactive elements receive a clear, consistent focus ring.
+
+## 2024-05-20 - Accessible Checkbox Toggles
+**Learning:** Using `display: none;` on state-controlling checkboxes (like those controlling accordion menus or switch sliders) breaks keyboard accessibility by completely removing the checkboxes from the document's tab order, making it impossible to focus or toggle them via keyboard.
+**Action:** Replace `display: none;` with visually hidden techniques (e.g., `opacity: 0; position: absolute;`) so the input remains focusable. Crucially, accompany this with CSS rules using `:focus-visible` on the checkbox coupled with sibling combinators (`+ label` or `~ label`) to project a visible focus ring onto the adjacent visible element (the custom slider or accordion header).
