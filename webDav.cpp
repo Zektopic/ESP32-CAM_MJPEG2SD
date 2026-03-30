@@ -288,7 +288,7 @@ static bool handleMove() {
     // obtain destination filename
     res = true;
     urlDecode(dest);
-    if (strstr(dest, "../") || strstr(dest, "/..") || !strcmp(dest, "..")) {
+    if (isPathTraversal(dest)) {
       LOG_WRN("Path traversal attempt detected in WebDAV move destination: %s", dest);
       httpd_resp_send_404(req);
       return false;
@@ -331,7 +331,7 @@ bool handleWebDav(httpd_req_t* rreq) {
   if (pathLen > 0 && pathName[pathLen - 1] == '/') pathName[pathLen - 1] = 0; // remove final / if present
   if (!strlen(pathName)) strcpy(pathName, "/"); // if pathname empty, use single /
   urlDecode(pathName);
-  if (strstr(pathName, "../") || strstr(pathName, "/..") || !strcmp(pathName, "..")) {
+  if (isPathTraversal(pathName)) {
     LOG_WRN("Path traversal attempt detected in WebDAV path: %s", pathName);
     httpd_resp_send_404(req);
     return false;

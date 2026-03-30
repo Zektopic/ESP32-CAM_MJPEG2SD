@@ -167,7 +167,7 @@ esp_err_t extractQueryKeyVal(httpd_req_t *req, char* variable, char* value) {
   if (endPtr != NULL) {
     *endPtr = 0; // split variable into 2 strings, first is key name
     strcpy(value, variable + strlen(variable) + 1); // value is now second part of string
-    if (strstr(variable, "../") || strstr(value, "../")) {
+    if (isPathTraversal(variable) || isPathTraversal(value)) {
       LOG_WRN("Path traversal attempt detected in query string");
       httpd_resp_set_status(req, "400 Bad Request");
       httpd_resp_sendstr(req, "Path traversal not allowed");
@@ -195,7 +195,7 @@ static esp_err_t webHandler(httpd_req_t* req) {
   httpd_req_get_url_query_str(req, variable, queryLen);
   urlDecode(variable);
 
-  if (strstr(variable, "../")) {
+  if (isPathTraversal(variable)) {
     LOG_WRN("Path traversal attempt detected in URL query: %s", variable);
     httpd_resp_send_404(req);
     return ESP_FAIL;
@@ -360,7 +360,7 @@ esp_err_t uploadHandler(httpd_req_t *req) {
   int bytesRead = -1;
   LOG_INF("Upload file %s", inFileName);
 
-  if (strstr(inFileName, "../")) {
+  if (isPathTraversal(inFileName)) {
     LOG_WRN("Path traversal attempt detected in upload: %s", inFileName);
     httpd_resp_send_404(req);
     return ESP_FAIL;
