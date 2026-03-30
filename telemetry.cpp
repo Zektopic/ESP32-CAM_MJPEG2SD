@@ -177,6 +177,8 @@ static void telemetryTask(void* pvParameters) {
       // wait for next collection interval
       uint32_t elapsedTime = millis() - startTime;
       if (elapsedTime < sampleInterval) vTaskDelay(pdMS_TO_TICKS(sampleInterval - elapsedTime));
+      // Bolt: Add a minimum safety yield to prevent CPU hogging when the task execution exceeds the interval
+      else vTaskDelay(1);
     }
     
     // capture finished, write remaining buff to storage 
