@@ -1,4 +1,12 @@
 #include "stringUtils.h"
+#include <string.h>
+
+bool isPathTraversal(const char* path) {
+  if (!path) return false;
+  return strstr(path, "../") || strstr(path, "..\\") ||
+         strstr(path, "/..") || strstr(path, "\\..") ||
+         !strcmp(path, "..");
+}
 
 void removeChar(char* s, char c) {
   // remove specified character from string
