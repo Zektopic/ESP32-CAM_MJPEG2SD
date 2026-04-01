@@ -455,7 +455,13 @@
 
       /* Hide the default checkbox */
       .switch input[type="checkbox"] {
-        display: none;
+        opacity: 0;
+        position: absolute;
+      }
+
+      .switch input[type="checkbox"]:focus-visible + .slider {
+        outline: 2px solid var(--buttonActive);
+        outline-offset: 2px;
       }
 
       /* static part */
@@ -812,7 +818,7 @@
           <div id="sidebar">
             <div id="menu-container" class="menu-pinned">
               <nav id="menu-selector" class="menu-pinned menu-closed">
-                <nav class="quick-nav" id="accSettings" name="access-settings">🔧</nav>
+                <nav class="quick-nav" id="accSettings" name="access-settings" title="Access Settings" aria-label="Access Settings" role="button" tabindex="0">🔧</nav>
               </nav>
               <nav class="menu panel" id="access-settings">
                 <input type="checkbox" id="other-cb" class="menu-action">
