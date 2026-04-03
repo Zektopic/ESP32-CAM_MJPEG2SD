@@ -315,21 +315,22 @@
         function updateStatus() {
           // replace each existing value with new received value, using key name to match html tag id
           Object.entries(updateData).forEach(([key, value]) => {
-            const elt = $('text#'+key); // svg button
-            const eld = $('div#'+key); // display text
-            const eli = $('#'+key); // input field
-            if (elt) elt.textContent = value; 
-            else if (eld && eld.classList.contains('displayonly')) eld.innerHTML = value; // display text 
-            else if (eli && !eli.classList.contains('nochange')) { 
-              // input fields;
-              if (eli.type === 'checkbox') eli.checked = !!Number(value);
-              else if (eli.type === 'range') eli.setAttribute('value', value);
-              else if (eli.type === 'option') eli.selected = true;
-              else eli.value = value; 
-            } 
-            const elth = $('td#'+key); 
-            if (elth) elth.innerHTML = value; // table data
-            $$('input[name="' + key + '"]').forEach(el => {if (el.value == value) el.checked = true;}); // radio button group
+            const el = document.getElementById(key);
+            if (el) {
+              const nodeName = el.nodeName.toLowerCase();
+              if (nodeName === 'text') el.textContent = value;
+              else if (nodeName === 'div' && el.classList.contains('displayonly')) el.innerHTML = value;
+              else if (nodeName === 'td') el.innerHTML = value;
+              else if (!el.classList.contains('nochange')) {
+                if (el.type === 'checkbox') el.checked = !!Number(value);
+                else if (el.type === 'range') el.setAttribute('value', value);
+                else if (el.type === 'option') el.selected = true;
+                else el.value = value;
+              }
+            }
+            document.getElementsByName(key).forEach(el => {
+              if (el.nodeName.toLowerCase() === 'input' && el.value == value) el.checked = true;
+            }); // radio button group
             statusData[key] = value;
             processStatus(ID, key, value, false);
           });
