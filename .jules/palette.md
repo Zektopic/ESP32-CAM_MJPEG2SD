@@ -16,3 +16,7 @@
 ## 2024-05-20 - Custom Checkbox/Toggle Accessibility
 **Learning:** Hiding native checkboxes using `display: none;` removes them from the accessibility tree, breaking keyboard navigation entirely for custom toggle switches.
 **Action:** When styling custom toggle switches, always hide the native `<input type="checkbox">` using `opacity: 0; position: absolute;` instead of `display: none;`. Ensure a sibling element (like a `.slider`) has a `:focus-visible` CSS rule applied when the hidden checkbox is focused, providing vital visual feedback to keyboard users.
+
+## 2024-05-20 - Avoid Nesting Interactive Elements
+**Learning:** Nesting interactive elements (like placing a `<button>` inside an `<a>` tag) violates WCAG 4.1.2 and can cause screen readers to read the element incorrectly or inconsistently, confusing users who rely on assistive technologies.
+**Action:** Always refactor HTML to ensure there are no nested interactive elements. If a button needs to act as a link, use a single `<button>` element with an `onclick="window.location.href='...'"` attribute or a styled `<a>` tag with `role="button"`.
