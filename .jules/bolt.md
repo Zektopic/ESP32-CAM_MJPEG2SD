@@ -11,3 +11,6 @@
 ## 2024-05-24 - Cache `strlen()` Result to Avoid Repeated O(N) Calculation in Loop Condition
 **Learning:** Found a performance bottleneck in `periphsI2C.cpp` inside a `for` loop, where `strlen(str)` was called in the loop termination condition (`for (int i=0; i<strlen(str); i++)`). This recalculates the length of the string on every iteration, leading to an O(N^2) time complexity.
 **Action:** Extract the length calculation outside the loop into a variable (`int len = strlen(str);`) and use the variable in the loop condition (`for (int i=0; i<len; i++)`). This optimization reduces the loop execution time complexity from O(N^2) back to O(N).
+## 2024-05-24 - Avoid O(N) overhead with C-string conversions for String comparisons
+**Learning:** In C++ (ESP32/Arduino), converting `std::string` or `String` objects to C-strings via `.c_str()` and using `strlen()` or `strcmp()` loses the object's cached length, turning O(1) length lookups into O(N) operations and introducing pointer extraction overhead.
+**Action:** Replace `strlen(str.c_str())` with `str.length()` and `strcmp(str.c_str(), other)` with `str == other` using native operators, which use the cached length and are more efficient.
