@@ -11,3 +11,6 @@
 ## 2024-05-24 - Cache `strlen()` Result to Avoid Repeated O(N) Calculation in Loop Condition
 **Learning:** Found a performance bottleneck in `periphsI2C.cpp` inside a `for` loop, where `strlen(str)` was called in the loop termination condition (`for (int i=0; i<strlen(str); i++)`). This recalculates the length of the string on every iteration, leading to an O(N^2) time complexity.
 **Action:** Extract the length calculation outside the loop into a variable (`int len = strlen(str);`) and use the variable in the loop condition (`for (int i=0; i<len; i++)`). This optimization reduces the loop execution time complexity from O(N^2) back to O(N).
+## 2024-05-24 - Avoid O(N) length recalculations and pointer extraction overhead in String comparisons
+**Learning:** Comparing `String` or `std::string` objects using `.c_str()` with `strcmp()`, `strlen()`, or `strstr()` bypasses the string object's cached length, introducing unnecessary O(N) length recalculations and pointer extraction overhead.
+**Action:** Use native string methods and operators (e.g. `==`, `.length()`, `.find()`, `.compare()`) instead of converting to C-strings for string operations and comparisons.
