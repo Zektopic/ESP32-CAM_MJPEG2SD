@@ -139,9 +139,9 @@ static void saveConfigVect() {
     configs.erase(unique(configs.begin(), configs.end()), configs.end()); // remove any dups
     for (const auto& row: configs) {
       // recreate config file with updated content
-      if (!strcmp(row[0].c_str() + strlen(row[0].c_str()) - 5, "_Pass")) 
+      if ((row[0].length() >= 5 && row[0].compare(row[0].length() - 5, 5, "_Pass") == 0))
         // replace passwords with asterisks
-        snprintf(configLine, FILE_NAME_LEN + 100, "%s%c%.*s%c%s%c%s%c%s\n", row[0].c_str(), DELIM, strlen(row[1].c_str()), FILLSTAR, DELIM, row[2].c_str(), DELIM, row[3].c_str(), DELIM, row[4].c_str());
+        snprintf(configLine, FILE_NAME_LEN + 100, "%s%c%.*s%c%s%c%s%c%s\n", row[0].c_str(), DELIM, (int)row[1].length(), FILLSTAR, DELIM, row[2].c_str(), DELIM, row[3].c_str(), DELIM, row[4].c_str());
       else snprintf(configLine, FILE_NAME_LEN + 100, "%s%c%s%c%s%c%s%c%s\n", row[0].c_str(), DELIM, row[1].c_str(), DELIM, row[2].c_str(), DELIM, row[3].c_str(), DELIM, row[4].c_str());
       file.write((uint8_t*)configLine, strlen(configLine));
       cfgCnt++;
@@ -457,14 +457,14 @@ void buildJsonString(uint8_t filter) {
     char pwdHide[MAX_PWD_LEN] = {0};  // used to replace password value with asterisks
     for (const auto& row : configs) {
       if (atoi(row[2].c_str()) == cfgGroup) {
-        int valSize = strlen(row[1].c_str());
+        int valSize = (int)row[1].length();
         if (valSize < sizeof(pwdHide)) {
           strncpy(pwdHide, FILLSTAR, valSize); 
           pwdHide[valSize] = 0;
         }
         // for each config item, list - key:value, key:label text, key:type identifier
         p += sprintf(p, "\"%s\":\"%s\",\"lab%s\":\"%s\",\"typ%s\":\"%s\",", row[0].c_str(),
-          strstr(row[0].c_str(), "_Pass") == NULL ? row[1].c_str() : pwdHide, row[0].c_str(), row[4].c_str(), row[0].c_str(), row[3].c_str()); 
+          row[0].find("_Pass") == std::string::npos ? row[1].c_str() : pwdHide, row[0].c_str(), row[4].c_str(), row[0].c_str(), row[3].c_str());
       }
     }
   }
