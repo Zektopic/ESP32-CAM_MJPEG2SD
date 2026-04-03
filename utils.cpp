@@ -135,7 +135,7 @@ static void onNetEvent(arduino_event_id_t event, arduino_event_info_t info) {
     case ARDUINO_EVENT_WIFI_STA_START: LOG_INF("Wifi Station started, connecting to: %s", ST_SSID); break;
     case ARDUINO_EVENT_WIFI_STA_STOP: LOG_INF("Wifi Station stopped %s", ST_SSID); break;
     case ARDUINO_EVENT_WIFI_AP_START: {
-      if (strlen(AP_SSID) && !strcmp(WiFi.AP.SSID().c_str(), AP_SSID)) {
+      if (strlen(AP_SSID) && WiFi.AP.SSID() == AP_SSID) {
         IPAddress ipAP = WiFi.AP.localIP();
         LOG_INF("Wifi AP SSID: %s started, use 'http%s://%u.%u.%u.%u' to connect", WiFi.AP.SSID().c_str(), useHttps ? "s" : "", ipAP[0], ipAP[1], ipAP[2], ipAP[3]);
         APstarted = true;
@@ -143,7 +143,7 @@ static void onNetEvent(arduino_event_id_t event, arduino_event_info_t info) {
       break;
     }
     case ARDUINO_EVENT_WIFI_AP_STOP: {
-      if (!strcmp(WiFi.AP.SSID().c_str(), AP_SSID)) {
+      if (WiFi.AP.SSID() == AP_SSID) {
         LOG_INF("Wifi AP stopped: %s", AP_SSID);
         APstarted = false;
       }
@@ -338,7 +338,7 @@ static bool startWifi(bool firstcall = true) {
     // show stats of requested SSID
     int numNetworks = WiFi.scanNetworks();
     for (int i=0; i < numNetworks; i++) {
-      if (!strcmp(WiFi.SSID(i).c_str(), ST_SSID))
+      if (WiFi.SSID(i) == ST_SSID)
         LOG_INF("Wifi stats for %s - signal strength: %d dBm; Encryption: %s; channel: %u",  ST_SSID, WiFi.RSSI(i), getEncType(i), WiFi.channel(i));
     }
     if (wlStat != WL_CONNECTED) LOG_WRN("SSID %s not connected %s", ST_SSID, wifiStatusStr(wlStat));
