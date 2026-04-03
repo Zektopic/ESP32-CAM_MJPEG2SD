@@ -15,3 +15,9 @@
 ## 2024-05-24 - Avoid O(N) length recalculations when comparing String objects
 **Learning:** Comparing `String` or `std::string` objects (like `WiFi.SSID()`) to C-strings using `strcmp(str.c_str(), "val")` bypasses the object's native O(1) length tracking, forcing `strcmp` to recalculate the length character-by-character, leading to unnecessary O(N) overhead.
 **Action:** Use native comparison operators like `str == "val"` instead to leverage the string class's internal length tracking and optimized comparison logic.
+## 2024-05-24 - Avoid std::string and std::regex for Basic String Parsing
+**Learning:** Found an extremely inefficient `urlDecode` function in `utils.cpp` that used `std::string`, `std::regex_search`, and `std::regex_replace` to parse and decode strings. On memory-constrained devices like the ESP32, this causes significant performance overhead due to multiple dynamic heap allocations, regex compilation, and O(N*M) time complexity.
+**Action:** Replaced the regex and `std::string` implementation with an in-place C-string parsing loop (`char* readPtr`, `char* writePtr`) to process the string in O(N) time with no dynamic allocations or heap fragmentation.
+## 2024-05-15 - Optimize String Operations
+**Learning:** Found several places where `strlen()` was being called on `String.c_str()` or `std::string.c_str()` which converts an O(1) length operation into an O(N) operation since the string's length is already cached in the class but `strlen()` must iterate to find the null byte. Also `strcmp(String.c_str(), "val")` does the same.
+**Action:** Replace `strlen(String.c_str())` with `String.length()` and `strcmp` with native `.compare()` or `==` operators.

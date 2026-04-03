@@ -928,7 +928,7 @@
         <button class="tablinks" name="ShowLog">Show Log</button>
         <button class="tablinks" name="EditConfig">Edit Config</button>
         <button class="tablinks" name="DeviceHub" style="display: none;">Camera Hub</button>
-        <a href="/web?OTA.htm"><button class="tablinks">OTA Upload</button></a>
+        <button class="tablinks" onclick="window.location.href='/web?OTA.htm'">OTA Upload</button>
       </ul>
       <section id="main">
         <nav id="maintoolbar">
@@ -958,11 +958,11 @@
                 <nav class="quick-nav" id="accSettings" name="access-settings" title="Access Settings" aria-label="Access Settings" role="button" tabindex="0">🔧</nav>
                 <div class="micContainer">
                   <button class="quick-nav audButtons disabled" id="micRem" title="Microphone Control" aria-label="Microphone Control">🎤</button>
-                  <canvas id="micLevel"></canvas>
+                  <canvas id="micLevel" role="meter" aria-label="Microphone volume level"></canvas>
                 </div>
                 <div class="spkrContainer">
                   <button class="quick-nav audButtons disabled" id="spkrRem" title="Speaker Control" aria-label="Speaker Control">🔈</button>
-                  <canvas id="spkrLevel"></canvas>
+                  <canvas id="spkrLevel" role="meter" aria-label="Speaker volume level"></canvas>
                 </div>
               </nav>
               <div id="menu-top" class="menu-pinned">
@@ -1276,7 +1276,7 @@
                     </select>
                   </div>
                   <div>
-                    <progress id="progressBar" value='0' max='100' class="info"></progress>%
+                    <progress id="progressBar" value='0' max='100' class="info" aria-label="File transfer progress"></progress>%
                   </div>
                   <br>
                   <section id="buttons">
