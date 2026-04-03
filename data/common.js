@@ -315,21 +315,30 @@
         function updateStatus() {
           // replace each existing value with new received value, using key name to match html tag id
           Object.entries(updateData).forEach(([key, value]) => {
-            const elt = $('text#'+key); // svg button
-            const eld = $('div#'+key); // display text
-            const eli = $('#'+key); // input field
-            if (elt) elt.textContent = value; 
-            else if (eld && eld.classList.contains('displayonly')) eld.innerHTML = value; // display text 
-            else if (eli && !eli.classList.contains('nochange')) { 
-              // input fields;
-              if (eli.type === 'checkbox') eli.checked = !!Number(value);
-              else if (eli.type === 'range') eli.setAttribute('value', value);
-              else if (eli.type === 'option') eli.selected = true;
-              else eli.value = value; 
-            } 
-            const elth = $('td#'+key); 
-            if (elth) elth.innerHTML = value; // table data
-            $$('input[name="' + key + '"]').forEach(el => {if (el.value == value) el.checked = true;}); // radio button group
+            // Bolt: Replaced multiple slow querySelectors per loop iteration
+            // with a single getElementById lookup and nodeName checking to drastically
+            // reduce DOM query overhead during frequent UI updates.
+            const el = document.getElementById(key);
+            if (el) {
+              const nodeName = el.nodeName;
+              if (nodeName === 'text') el.textContent = value; // svg button
+              else if (nodeName === 'DIV' && el.classList.contains('displayonly')) el.innerHTML = value; // display text
+              else if (nodeName === 'INPUT' && !el.classList.contains('nochange')) {
+                // input fields;
+                if (el.type === 'checkbox') el.checked = !!Number(value);
+                else if (el.type === 'range') el.setAttribute('value', value);
+                else if (el.type === 'option') el.selected = true;
+                else el.value = value;
+              }
+              else if (nodeName === 'TD') el.innerHTML = value; // table data
+              else if (nodeName === 'SELECT' && !el.classList.contains('nochange')) el.value = value;
+            } else {
+               // Fallback for radio buttons which don't use id, but use name
+               const radios = document.getElementsByName(key);
+               if (radios.length > 0) {
+                 radios.forEach(r => { if (r.value == value) r.checked = true; });
+               }
+            }
             statusData[key] = value;
             processStatus(ID, key, value, false);
           });
