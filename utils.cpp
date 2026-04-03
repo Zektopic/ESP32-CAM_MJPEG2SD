@@ -747,15 +747,18 @@ bool urlEncode(const char* inVal, char* encoded, size_t maxSize) {
 
 void urlDecode(char* inVal) {
   // replace url encoded characters
-  std::string decodeVal(inVal); 
-  std::string replaceVal = decodeVal;
-  std::smatch match; 
-  while (regex_search(decodeVal, match, std::regex("(%)([0-9A-Fa-f]{2})"))) {
-    std::string s(1, static_cast<char>(std::strtoul(match.str(2).c_str(),nullptr,16))); // hex to ascii 
-    replaceVal = std::regex_replace(replaceVal, std::regex(match.str(0)), s);
-    decodeVal = match.suffix().str();
+  char* readPtr = inVal;
+  char* writePtr = inVal;
+  while (*readPtr) {
+    if (*readPtr == '%' && isxdigit((unsigned char)readPtr[1]) && isxdigit((unsigned char)readPtr[2])) {
+      char hex[3] = { readPtr[1], readPtr[2], 0 };
+      *writePtr++ = (char)strtoul(hex, nullptr, 16);
+      readPtr += 3;
+    } else {
+      *writePtr++ = *readPtr++;
+    }
   }
-  strcpy(inVal, replaceVal.c_str());
+  *writePtr = '\0';
 }
 
 void listBuff (const uint8_t* b, size_t len) {
