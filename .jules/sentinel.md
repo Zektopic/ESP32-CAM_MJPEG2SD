@@ -28,3 +28,7 @@
 **Vulnerability:** A path traversal vulnerability was found in `webServer.cpp` and `webDav.cpp`. While some checks existed for `../`, they were not comprehensive and failed to account for variations like `\..`, `/..`, or exact matches `..`, and the checks were duplicated manually in various areas making it prone to errors.
 **Learning:** Security checks that are duplicated and not comprehensive can easily be bypassed and are difficult to maintain. By creating a centralized utility function (`isPathTraversal`), all variations of a traversal attempt can be validated in one location.
 **Prevention:** Use the centralized `isPathTraversal` utility (declared in `stringUtils.h`, defined in `stringUtils.cpp`) to validate file paths and query parameters against directory traversal attacks. This function must be called *after* URL decoding to catch traversal sequences like `..`, `../`, `..\`, `/..`, and `\..` in all web handlers (e.g., `webServer.cpp`, `webDav.cpp`).
+## 2024-05-24 - Path Traversal Vulnerability in Upload Handler
+**Vulnerability:** In `webServer.cpp`, the `uploadHandler` function checked for path traversal using `isPathTraversal(inFileName)` BEFORE calling `urlDecode` on the path.
+**Learning:** URL decoding must occur before checking for path traversal sequences, as encoded payloads (e.g., `%2e%2e%2f`) can easily bypass checks performed on the encoded string.
+**Prevention:** Always apply `urlDecode()` to user-provided paths and filenames before validating them against path traversal or other malicious patterns.

@@ -360,6 +360,7 @@ esp_err_t uploadHandler(httpd_req_t *req) {
   int bytesRead = -1;
   LOG_INF("Upload file %s", inFileName);
 
+  urlDecode(inFileName);
   if (isPathTraversal(inFileName)) {
     LOG_WRN("Path traversal attempt detected in upload: %s", inFileName);
     httpd_resp_send_404(req);
