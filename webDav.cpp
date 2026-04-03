@@ -29,6 +29,7 @@
 */
 
 #include "appGlobals.h"
+#include "stringUtils.h"
 
 #if INCLUDE_WEBDAV
 #define ALLOW "PROPPATCH,PROPFIND,OPTIONS,DELETE,MOVE,COPY,HEAD,POST,PUT,GET"

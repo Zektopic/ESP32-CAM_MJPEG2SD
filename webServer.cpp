@@ -3,6 +3,7 @@
 // s60sc 2022 - 2023
 
 #include "appGlobals.h"
+#include "stringUtils.h"
 
 #define MAX_HANDLERS 12
 
