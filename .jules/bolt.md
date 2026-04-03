@@ -11,3 +11,6 @@
 ## 2024-05-24 - Cache `strlen()` Result to Avoid Repeated O(N) Calculation in Loop Condition
 **Learning:** Found a performance bottleneck in `periphsI2C.cpp` inside a `for` loop, where `strlen(str)` was called in the loop termination condition (`for (int i=0; i<strlen(str); i++)`). This recalculates the length of the string on every iteration, leading to an O(N^2) time complexity.
 **Action:** Extract the length calculation outside the loop into a variable (`int len = strlen(str);`) and use the variable in the loop condition (`for (int i=0; i<len; i++)`). This optimization reduces the loop execution time complexity from O(N^2) back to O(N).
+## 2024-05-24 - Avoid std::string and std::regex for Basic String Parsing
+**Learning:** Found an extremely inefficient `urlDecode` function in `utils.cpp` that used `std::string`, `std::regex_search`, and `std::regex_replace` to parse and decode strings. On memory-constrained devices like the ESP32, this causes significant performance overhead due to multiple dynamic heap allocations, regex compilation, and O(N*M) time complexity.
+**Action:** Replaced the regex and `std::string` implementation with an in-place C-string parsing loop (`char* readPtr`, `char* writePtr`) to process the string in O(N) time with no dynamic allocations or heap fragmentation.
