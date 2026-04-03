@@ -202,8 +202,10 @@
 
         function openTab(e) {
           // control tab viewing
+          if (!e.name) return;
           $$('.tabcontent').forEach(el => { el.style.display = "none"; });
-          $('#' + e.name).style.display = "inherit";  
+          const targetPanel = $('#' + e.name);
+          if (targetPanel) targetPanel.style.display = "inherit";
           $$('.tablinks').forEach(el => {el.classList.remove("active");});
           e.classList.add("active");
           try {
