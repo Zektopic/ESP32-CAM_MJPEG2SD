@@ -23,3 +23,7 @@
 ## 2025-04-05 - Correct client-side string limits on text inputs
 **Learning:** Using 'length' instead of 'maxlength' on HTML inputs is invalid and will be silently ignored by browsers, which can lead to backend buffer overflows if not handled correctly.
 **Action:** Always use the valid 'maxlength' attribute on HTML input elements to enforce client-side character limits.
+
+## 2024-05-20 - Use Valid HTML Attributes for Input Limitations
+**Learning:** Native HTML `<input>` fields use `maxlength`, not `length`, to enforce character limits on the client side. Using `length=` is an invalid HTML attribute and is silently ignored by the browser, meaning users can type beyond the intended character limit (e.g., for SSIDs or Hostnames) which might cause unexpected truncation or buffer overflows on the backend.
+**Action:** Always use `maxlength="[number]"` and `minlength="[number]"` for text-based `<input>` fields.
