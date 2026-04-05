@@ -20,3 +20,7 @@
 ## 2024-05-20 - Avoid Nesting Interactive Elements
 **Learning:** Nesting interactive elements (like placing a `<button>` inside an `<a>` tag) violates WCAG 4.1.2 and can cause screen readers to read the element incorrectly or inconsistently, confusing users who rely on assistive technologies.
 **Action:** Always refactor HTML to ensure there are no nested interactive elements. If a button needs to act as a link, use a single `<button>` element with an `onclick="window.location.href='...'"` attribute or a styled `<a>` tag with `role="button"`.
+
+## 2024-05-20 - Use Valid HTML Attributes for Input Limitations
+**Learning:** Native HTML `<input>` fields use `maxlength`, not `length`, to enforce character limits on the client side. Using `length=` is an invalid HTML attribute and is silently ignored by the browser, meaning users can type beyond the intended character limit (e.g., for SSIDs or Hostnames) which might cause unexpected truncation or buffer overflows on the backend.
+**Action:** Always use `maxlength="[number]"` and `minlength="[number]"` for text-based `<input>` fields.
