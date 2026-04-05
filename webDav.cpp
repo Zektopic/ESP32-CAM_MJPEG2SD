@@ -298,7 +298,7 @@ static bool handleMove() {
       httpd_resp_send_404(req);
       return false;
     }
-    memmove(dest, pos + strlen(WEBDAV), strlen(dest));
+    memmove(dest, pos + strlen(WEBDAV), strlen(pos + strlen(WEBDAV)) + 1);
 
     // only allow renaming if a folder
     if (isFolder()) res = checkSamePath(pathName, dest);

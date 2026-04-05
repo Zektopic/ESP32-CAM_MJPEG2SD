@@ -32,3 +32,7 @@
 **Vulnerability:** In `webServer.cpp`, the `uploadHandler` function checked for path traversal using `isPathTraversal(inFileName)` BEFORE calling `urlDecode` on the path.
 **Learning:** URL decoding must occur before checking for path traversal sequences, as encoded payloads (e.g., `%2e%2e%2f`) can easily bypass checks performed on the encoded string.
 **Prevention:** Always apply `urlDecode()` to user-provided paths and filenames before validating them against path traversal or other malicious patterns.
+## 2024-05-30 - [CRITICAL] Buffer Copy Over-Read/Write in WebDAV handleMove via `strlen(dest)`
+**Vulnerability:** In `webDav.cpp:handleMove`, when removing the `/webdav` prefix from the destination path, `memmove(dest, pos + strlen(WEBDAV), strlen(dest))` was used. Using `strlen(dest)` as the size parameter for a `memmove` operation where `pos + strlen(WEBDAV)` is the source copies `strlen(dest)` bytes from a location further down the string, resulting in an over-read past the null terminator of the source string, and overwriting `dest` with garbage data.
+**Learning:** In C/C++, when using `memmove`, `memcpy`, or similar functions to copy strings, never use `strlen(dest)` (the length of the destination buffer or the original unshifted string) as the size argument when copying a suffix of the string. This leads to undefined behavior, incomplete copies, or out-of-bounds reads/writes.
+**Prevention:** Always base the size argument on the source string length (e.g., `strlen(pos + strlen(WEBDAV)) + 1` to include the null terminator).
