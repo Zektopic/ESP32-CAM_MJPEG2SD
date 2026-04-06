@@ -21,3 +21,7 @@
 ## 2024-05-15 - Optimize String Operations
 **Learning:** Found several places where `strlen()` was being called on `String.c_str()` or `std::string.c_str()` which converts an O(1) length operation into an O(N) operation since the string's length is already cached in the class but `strlen()` must iterate to find the null byte. Also `strcmp(String.c_str(), "val")` does the same.
 **Action:** Replace `strlen(String.c_str())` with `String.length()` and `strcmp` with native `.compare()` or `==` operators.
+
+## 2024-05-25 - Redundant O(N) Traversal in if/else Blocks and Potential Pointer Underflow
+**Learning:** Found an `if/else if` chain in `webServer.cpp` checking URL extensions using `!strcmp(EXT, variable + (strlen(variable) - strlen(EXT)))`. This recalculated `strlen(variable)` up to 7 times. More critically, if `strlen(variable)` was shorter than `strlen(EXT)`, the subtraction would wrap around into a massive positive value, causing `variable + ...` to point to invalid memory (segmentation fault/out-of-bounds read).
+**Action:** Extract `strlen(variable)` into a local variable (`size_t varLen = strlen(variable);`) *before* the `if/else if` block, and add a bounds check (`if (varLen >= strlen(EXT) && !strcmp(...))`) to both fix the performance issue and prevent the pointer underflow bug.
