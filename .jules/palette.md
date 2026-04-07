@@ -27,3 +27,6 @@
 ## 2024-05-20 - Use Valid HTML Attributes for Input Limitations
 **Learning:** Native HTML `<input>` fields use `maxlength`, not `length`, to enforce character limits on the client side. Using `length=` is an invalid HTML attribute and is silently ignored by the browser, meaning users can type beyond the intended character limit (e.g., for SSIDs or Hostnames) which might cause unexpected truncation or buffer overflows on the backend.
 **Action:** Always use `maxlength="[number]"` and `minlength="[number]"` for text-based `<input>` fields.
+## 2024-04-07 - Icon-only buttons with text characters need ARIA labels
+**Learning:** Legacy UI components in this application (like `MJPEG2SD.htm`) use unicode characters (e.g., `➤`) for iconography within buttons instead of semantic SVG/img icons. This means screen readers will literally read out "Black right-pointing arrowhead" before the text.
+**Action:** When auditing legacy UI buttons that mix symbols and text, always add explicit `aria-label` attributes to override the symbol vocalization and provide a clean accessible name.
