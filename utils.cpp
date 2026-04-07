@@ -728,16 +728,21 @@ bool calcProgress(int progressVal, int totalVal, int percentReport, uint8_t &pcP
 }
 
 bool urlEncode(const char* inVal, char* encoded, size_t maxSize) {
-  int encodedLen = 0;
+  if (maxSize == 0) return false;
+  size_t encodedLen = 0;
   char hexTable[] = "0123456789ABCDEF";
   while (*inVal) {
-    if (isalnum(*inVal) || strchr("$-_.+!*'(),:@~#", *inVal)) *encoded++ = *inVal;
-    else {
-      encodedLen += 3; 
-      if (encodedLen >= maxSize) return false;  // Buffer overflow
+    unsigned char c = (unsigned char)*inVal;
+    if (isalnum(c) || strchr("$-_.+!*'(),:@~#", c)) {
+      if (encodedLen + 1 >= maxSize) return false;
+      *encoded++ = c;
+      encodedLen++;
+    } else {
+      if (encodedLen + 3 >= maxSize) return false;  // Buffer overflow
       *encoded++ = '%';
-      *encoded++ = hexTable[(*inVal) >> 4];
-      *encoded++ = hexTable[*inVal & 0xf];
+      *encoded++ = hexTable[c >> 4];
+      *encoded++ = hexTable[c & 0xf];
+      encodedLen += 3;
     }
     inVal++;
   }
