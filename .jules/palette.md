@@ -30,3 +30,6 @@
 ## 2024-04-07 - Icon-only buttons with text characters need ARIA labels
 **Learning:** Legacy UI components in this application (like `MJPEG2SD.htm`) use unicode characters (e.g., `➤`) for iconography within buttons instead of semantic SVG/img icons. This means screen readers will literally read out "Black right-pointing arrowhead" before the text.
 **Action:** When auditing legacy UI buttons that mix symbols and text, always add explicit `aria-label` attributes to override the symbol vocalization and provide a clean accessible name.
+## 2024-04-08 - [Hide Password Inputs]
+**Learning:** Found that multiple sensitive configuration fields (WiFi, FTP, SMTP, and Web passwords) in `Auxil.htm` and `MJPEG2SD.htm` were using the default `text` type, leaving them visible on screen and potentially vulnerable to shoulder-surfing.
+**Action:** Always verify that newly added or existing sensitive input fields explicitly use `type="password"`.
