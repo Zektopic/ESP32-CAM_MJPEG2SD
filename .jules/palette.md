@@ -27,6 +27,10 @@
 ## 2024-05-20 - Use Valid HTML Attributes for Input Limitations
 **Learning:** Native HTML `<input>` fields use `maxlength`, not `length`, to enforce character limits on the client side. Using `length=` is an invalid HTML attribute and is silently ignored by the browser, meaning users can type beyond the intended character limit (e.g., for SSIDs or Hostnames) which might cause unexpected truncation or buffer overflows on the backend.
 **Action:** Always use `maxlength="[number]"` and `minlength="[number]"` for text-based `<input>` fields.
+
+## 2023-10-27 - Dynamically Generated Form Input Labels
+**Learning:** When building configuration forms dynamically via JavaScript (such as `buildTable` in `data/common.js`), it is crucial to ensure that settings' text labels are properly wrapped in `<label for="...">` tags. Without this, inputs lack accessible names, breaking screen reader compatibility and preventing users from focusing the input by clicking its label text.
+**Action:** Always wrap setting names in `<label>` tags with the `for` attribute matching the `id` of the dynamically generated form input element.
 ## 2024-04-08 - [Hide Password Inputs]
 **Learning:** Found that multiple sensitive configuration fields (WiFi, FTP, SMTP, and Web passwords) in `Auxil.htm` and `MJPEG2SD.htm` were using the default `text` type, leaving them visible on screen and potentially vulnerable to shoulder-surfing.
 **Action:** Always verify that newly added or existing sensitive input fields explicitly use `type="password"`.
