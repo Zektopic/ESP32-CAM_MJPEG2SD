@@ -264,6 +264,7 @@ static esp_err_t statusHandler(httpd_req_t *req) {
 }
 
 bool parseJson(int rxSize) {
+  if (rxSize <= 0) return false;
   // process json in jsonBuff to extract properly formatted flat key:value pairs
   jsonBuff[rxSize - 1] = ','; // replace final '}'
   jsonBuff[rxSize] = 0; // terminator
