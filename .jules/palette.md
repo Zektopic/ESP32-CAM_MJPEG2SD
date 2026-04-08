@@ -31,3 +31,6 @@
 ## 2023-10-27 - Dynamically Generated Form Input Labels
 **Learning:** When building configuration forms dynamically via JavaScript (such as `buildTable` in `data/common.js`), it is crucial to ensure that settings' text labels are properly wrapped in `<label for="...">` tags. Without this, inputs lack accessible names, breaking screen reader compatibility and preventing users from focusing the input by clicking its label text.
 **Action:** Always wrap setting names in `<label>` tags with the `for` attribute matching the `id` of the dynamically generated form input element.
+## 2024-04-08 - [Hide Password Inputs]
+**Learning:** Found that multiple sensitive configuration fields (WiFi, FTP, SMTP, and Web passwords) in `Auxil.htm` and `MJPEG2SD.htm` were using the default `text` type, leaving them visible on screen and potentially vulnerable to shoulder-surfing.
+**Action:** Always verify that newly added or existing sensitive input fields explicitly use `type="password"`.
