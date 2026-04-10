@@ -21,3 +21,6 @@
 ## 2024-05-15 - Optimize String Operations
 **Learning:** Found several places where `strlen()` was being called on `String.c_str()` or `std::string.c_str()` which converts an O(1) length operation into an O(N) operation since the string's length is already cached in the class but `strlen()` must iterate to find the null byte. Also `strcmp(String.c_str(), "val")` does the same.
 **Action:** Replace `strlen(String.c_str())` with `String.length()` and `strcmp` with native `.compare()` or `==` operators.
+## 2024-04-10 - O(N) string traversals in routing chains
+**Learning:** Calling `strlen()` on the requested URL inside a series of `else if` conditions (used to determine content type based on extension) leads to redundant O(N) calculations. Furthermore, calculating suffix pointer with `variable+(strlen(variable)-strlen(EXT))` without first verifying `strlen(variable) >= strlen(EXT)` is unsafe and can lead to underflow issues.
+**Action:** Always cache the length of the string requested before evaluating file extensions in a routing chain, and explicitly check if the length is long enough before performing pointer arithmetic for suffix comparison.

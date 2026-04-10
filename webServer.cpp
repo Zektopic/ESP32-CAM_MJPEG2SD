@@ -202,26 +202,27 @@ static esp_err_t webHandler(httpd_req_t* req) {
   }
 
   // check file extension to determine required processing before response sent to browser
+  size_t varLen = strlen(variable); // Bolt: Cache length to prevent O(N^2) behavior in if/else chain
   if (!strcmp(variable, "OTA.htm")) {
     // request for built in OTA page, if index html defective
     httpd_resp_set_type(req, "text/html");
     return httpd_resp_sendstr(req, otaPage_html);
-  } else if (!strcmp(HTML_EXT, variable+(strlen(variable)-strlen(HTML_EXT)))) {
+  } else if (varLen >= strlen(HTML_EXT) && !strcmp(HTML_EXT, variable+(varLen-strlen(HTML_EXT)))) {
     // any other html file
     httpd_resp_set_type(req, "text/html");
-  } else if (!strcmp(JS_EXT, variable+(strlen(variable)-strlen(JS_EXT)))) {
+  } else if (varLen >= strlen(JS_EXT) && !strcmp(JS_EXT, variable+(varLen-strlen(JS_EXT)))) {
     // any js file
     httpd_resp_set_type(req, "text/javascript");
-  } else if (!strcmp(CSS_EXT, variable+(strlen(variable)-strlen(CSS_EXT)))) {
+  } else if (varLen >= strlen(CSS_EXT) && !strcmp(CSS_EXT, variable+(varLen-strlen(CSS_EXT)))) {
     // any css file
     httpd_resp_set_type(req, "text/css");
-  } else if (!strcmp(TEXT_EXT, variable+(strlen(variable)-strlen(TEXT_EXT)))) {
+  } else if (varLen >= strlen(TEXT_EXT) && !strcmp(TEXT_EXT, variable+(varLen-strlen(TEXT_EXT)))) {
     // any text file
     httpd_resp_set_type(req, "text/plain");
-  } else if (!strcmp(ICO_EXT, variable+(strlen(variable)-strlen(ICO_EXT)))) {
+  } else if (varLen >= strlen(ICO_EXT) && !strcmp(ICO_EXT, variable+(varLen-strlen(ICO_EXT)))) {
     // any icon file
     httpd_resp_set_type(req, "image/x-icon");
-  } else if (!strcmp(SVG_EXT, variable+(strlen(variable)-strlen(SVG_EXT)))) {
+  } else if (varLen >= strlen(SVG_EXT) && !strcmp(SVG_EXT, variable+(varLen-strlen(SVG_EXT)))) {
     // any svg file
     httpd_resp_set_type(req, "image/svg+xml");
   } else LOG_WRN("Unknown file type %s", variable);
