@@ -103,7 +103,10 @@ bool checkAuth(httpd_req_t* req) {
       // check credentials supplied are valid
       char auth[authLen];
       httpd_req_get_hdr_value_str(req, "Authorization", auth, authLen);
-      if (!strstr(auth, encode64(credentials))) authLen = 0; // credentials not valid
+      const char* expected_encoded = encode64(credentials);
+      char expected_auth[strlen(expected_encoded) + 7];
+      snprintf(expected_auth, sizeof(expected_auth), "Basic %s", expected_encoded);
+      if (strcmp(auth, expected_auth) != 0) authLen = 0; // credentials not valid
     }
     if (!authLen) {
       // not authenticated
