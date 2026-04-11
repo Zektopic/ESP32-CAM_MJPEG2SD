@@ -941,12 +941,12 @@
         <nav id="maintoolbar">
           <ul class="navtop">
             <li><span id="recording-indicator" class="hidden" style="float: right; display: none;"></span></li>
-            <li><button id="forceRecord" style="float:right;">➤&nbsp;Start Recording</button></li>
+            <li><button id="forceRecord" aria-label="Start Recording" style="float:right;">➤&nbsp;Start Recording</button></li>
             <li><div class="sep"></div></li>
-            <li><button id="forceStream" class="local" style="float:right;">➤&nbsp;Start Stream</button></li>
+            <li><button id="forceStream" aria-label="Start Stream" class="local" style="float:right;">➤&nbsp;Start Stream</button></li>
             <li><button id="get-still" class="local" style="float:right;">Get Still</button></li>
             <li><div class="sep"></div></li>
-            <li><button id="forcePlayback" class="local disabled" style="float:right;" title="Select a video in 'Playback & File Transfers' to activate playback.">➤&nbsp;Start Playback</button></li>
+            <li><button id="forcePlayback" aria-label="Start Playback" class="local disabled" style="float:right;" title="Select a video in 'Playback & File Transfers' to activate playback.">➤&nbsp;Start Playback</button></li>
           </ul>
         </nav>
       </section>
@@ -1287,9 +1287,9 @@
                   </div>
                   <br>
                   <section id="buttons">
-                    <button class="local" title="Download selected file from SD card" id="download" style="float:right" value="1">Download</button>
-                    <button class="local" title="Upload selected file/folder to Fileserver" id="upload" style="float:left" value="1">File Upload</button>
-                    <button class="local" title="Delete selected file/folder from SD card" id="delete" style="float:right" value="1">Delete</button>
+                    <button class="local" title="Download selected file from SD card" id="download" aria-label="Download selected file" style="float:right" value="1">Download</button>
+                    <button class="local" title="Upload selected file/folder to Fileserver" id="upload" aria-label="Upload selected file" style="float:left" value="1">File Upload</button>
+                    <button class="local" title="Delete selected file/folder from SD card" id="delete" aria-label="Delete selected file" style="float:right" value="1">Delete</button>
                   </section>
   <!--
                   <div class="input-group" id="auth-group">
