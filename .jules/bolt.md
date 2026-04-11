@@ -24,3 +24,6 @@
 ## 2024-04-10 - O(N) string traversals in routing chains
 **Learning:** Calling `strlen()` on the requested URL inside a series of `else if` conditions (used to determine content type based on extension) leads to redundant O(N) calculations. Furthermore, calculating suffix pointer with `variable+(strlen(variable)-strlen(EXT))` without first verifying `strlen(variable) >= strlen(EXT)` is unsafe and can lead to underflow issues.
 **Action:** Always cache the length of the string requested before evaluating file extensions in a routing chain, and explicitly check if the length is long enough before performing pointer arithmetic for suffix comparison.
+## 2024-05-30 - O(N) strlen overhead when building large JSON objects
+**Learning:** When building a large string incrementally across multiple functions (e.g. `buildJsonString` calling `buildAppJsonString`), having the child function return `void` and then using `p += strlen(buffer)` in the parent function forces an O(N) recalculation of the string length just to find the new end of the buffer.
+**Action:** Modify the child function to return a pointer to the new end of the string (`char*`) instead of `void`. The parent function can then directly update its pointer without calling `strlen`, eliminating the overhead.

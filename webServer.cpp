@@ -98,14 +98,23 @@ bool checkAuth(httpd_req_t* req) {
     size_t credLen = strlen(Auth_Name) + strlen(Auth_Pass) + 2; // +2 for colon & terminator
     char credentials[credLen];
     snprintf(credentials, credLen, "%s:%s", Auth_Name, Auth_Pass);
-    size_t authLen = httpd_req_get_hdr_value_len(req, "Authorization") + 1;
-    if (authLen) {
+    const char* encodedCreds = encode64(credentials);
+    size_t expectedLen = strlen("Basic ") + strlen(encodedCreds) + 1;
+    char expectedAuth[expectedLen];
+    snprintf(expectedAuth, expectedLen, "Basic %s", encodedCreds);
+
+    size_t authHdrLen = httpd_req_get_hdr_value_len(req, "Authorization");
+    bool authenticated = false;
+
+    if (authHdrLen) {
       // check credentials supplied are valid
+      size_t authLen = authHdrLen + 1;
       char auth[authLen];
-      httpd_req_get_hdr_value_str(req, "Authorization", auth, authLen);
-      if (!strstr(auth, encode64(credentials))) authLen = 0; // credentials not valid
+      if (httpd_req_get_hdr_value_str(req, "Authorization", auth, authLen) == ESP_OK) {
+        if (strcmp(auth, expectedAuth) == 0) authenticated = true;
+      }
     }
-    if (!authLen) {
+    if (!authenticated) {
       // not authenticated
       httpd_resp_set_hdr(req, "WWW-Authenticate", "Basic");
       httpd_resp_set_status(req, "401 Unauthorised");

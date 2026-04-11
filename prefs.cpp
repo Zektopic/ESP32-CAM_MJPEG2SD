@@ -1,18 +1,18 @@
 
-/* 
+/*
   Management and storage of application configuration state.
   Configuration file stored on flash or SD, except passwords which are stored in NVS
-   
+
   Workflow:
   loadConfig:
-    file -> loadConfigVect+loadKeyVal -> vector -> getNextKeyVal+updatestatus+updateAppStatus -> vars 
+    file -> loadConfigVect+loadKeyVal -> vector -> getNextKeyVal+updatestatus+updateAppStatus -> vars
                                                    retrieveConfigVal (as required)
   statusHandler:
-    vector -> buildJsonString+buildAppJsonString -> browser 
-  controlHandler: 
-    browser -> updateStatus+updateAppStatus -> updateConfigVect -> vector -> saveConfigVect -> file 
+    vector -> buildJsonString+buildAppJsonString -> browser
+  controlHandler:
+    browser -> updateStatus+updateAppStatus -> updateConfigVect -> vector -> saveConfigVect -> file
                                             -> vars
-                                            
+
   config field types:
   - T : Text
   - N : Number
@@ -28,7 +28,7 @@
 #include "appGlobals.h"
 
 static std::vector<std::vector<std::string>> configs;
-static Preferences prefs; 
+static Preferences prefs;
 static char appId[16];
 static char variable[FILE_NAME_LEN] = {0};
 static char value[IN_FILE_NAME_LEN] = {0};
@@ -41,7 +41,7 @@ static bool getNextKeyVal() {
   static int row = 0;
   if (row++ < configs.size()) {
     strncpy(variable, configs[row - 1][0].c_str(), sizeof(variable) - 1);
-    strncpy(value, configs[row - 1][1].c_str(), sizeof(value) - 1); 
+    strncpy(value, configs[row - 1][1].c_str(), sizeof(value) - 1);
     return true;
   }
   // end of vector reached, reset
@@ -72,12 +72,12 @@ static int getKeyPos(const std::string& thisKey) {
   // get location of given key to retrieve other elements
   if (configs.empty()) return -1;
   auto lower = std::lower_bound(configs.begin(), configs.end(), thisKey, [](
-    const std::vector<std::string> &a, const std::string &b) { 
+    const std::vector<std::string> &a, const std::string &b) {
     return a[0] < b;}
   );
-  int keyPos = std::distance(configs.begin(), lower); 
+  int keyPos = std::distance(configs.begin(), lower);
   if (keyPos < configs.size() && thisKey == configs[keyPos][0]) return keyPos;
-//  else LOG_VRB("Key %s not found", thisKey.c_str()); 
+//  else LOG_VRB("Key %s not found", thisKey.c_str());
   return -1; // not found
 }
 
@@ -88,26 +88,26 @@ bool updateConfigVect(const char* variable, const char* value) {
   if (keyPos >= 0) {
     // update value unless read only, eg button
     if (configs[keyPos][3] != "A") {
-      if (psramFound()) heap_caps_malloc_extmem_enable(MIN_RAM); 
+      if (psramFound()) heap_caps_malloc_extmem_enable(MIN_RAM);
       configs[keyPos][1] = thisVal;
       if (psramFound()) heap_caps_malloc_extmem_enable(MAX_RAM);
     }
-    return true;    
+    return true;
   }
-  return false; 
+  return false;
 }
 
 bool retrieveConfigVal(const char* variable, char* value) {
   std::string thisKey(variable);
   int keyPos = getKeyPos(thisKey);
   if (keyPos >= 0) {
-    strcpy(value, configs[keyPos][1].c_str()); 
-    return true;  
+    strcpy(value, configs[keyPos][1].c_str());
+    return true;
   } else {
     value[0] = 0; // empty string
     LOG_WRN("Key %s not set", variable);
   }
-  return false; 
+  return false;
 }
 
 static void loadVectItem(const std::string& keyValGrpLabel) {
@@ -153,20 +153,20 @@ static void saveConfigVect() {
 
 static bool loadConfigVect() {
   // force config vector into psram if available
-  if (psramFound()) heap_caps_malloc_extmem_enable(MIN_RAM); 
+  if (psramFound()) heap_caps_malloc_extmem_enable(MIN_RAM);
   configs.reserve(MAX_CONFIGS);
   // extract each config line from file
   File file = STORAGE.open(CONFIG_FILE_PATH, FILE_READ);
   while (file.available()) {
     String configLineStr = file.readStringUntil('\n');
     if (configLineStr.length()) loadVectItem(configLineStr.c_str());
-  } 
+  }
   // sort vector by key (element 0 in row)
   std::sort(configs.begin(), configs.end(), [] (
     const std::vector<std::string> &a, const std::vector<std::string> &b) {
     return a[0] < b[0];}
   );
-  // return malloc to default 
+  // return malloc to default
   if (psramFound()) heap_caps_malloc_extmem_enable(MAX_RAM);
   file.close();
   return true;
@@ -174,19 +174,19 @@ static bool loadConfigVect() {
 
 static bool savePrefs(bool retain = true) {
   // use preferences for passwords
-  if (!prefs.begin(APP_NAME, false)) {  
+  if (!prefs.begin(APP_NAME, false)) {
     LOG_WRN("Failed to save preferences");
     return false;
   }
-  if (!retain) { 
-    prefs.clear(); 
+  if (!retain) {
+    prefs.clear();
     LOG_INF("Cleared preferences");
     return true;
   }
   prefs.putString("ST_SSID", ST_SSID);
   prefs.putString("ST_Pass", ST_Pass);
-  prefs.putString("AP_Pass", AP_Pass); 
-  prefs.putString("Auth_Pass", Auth_Pass); 
+  prefs.putString("AP_Pass", AP_Pass);
+  prefs.putString("Auth_Pass", Auth_Pass);
 #if INCLUDE_FTP_HFS
   prefs.putString("FS_Pass", FS_Pass);
 #endif
@@ -206,7 +206,7 @@ static bool savePrefs(bool retain = true) {
 
 static bool loadPrefs() {
   // use preferences for passwords
-  if (!prefs.begin(APP_NAME, false)) {  
+  if (!prefs.begin(APP_NAME, false)) {
     savePrefs(); // if prefs do not yet exist
     return false;
   }
@@ -214,12 +214,12 @@ static bool loadPrefs() {
      // first call only after instal
     prefs.getString("ST_SSID", ST_SSID, MAX_PWD_LEN); // max 15 chars
     updateConfigVect("ST_SSID", ST_SSID);
-  } 
+  }
 
   prefs.getString("ST_Pass", ST_Pass, MAX_PWD_LEN);
   updateConfigVect("ST_Pass", ST_Pass);
   prefs.getString("AP_Pass", AP_Pass, MAX_PWD_LEN);
-  prefs.getString("Auth_Pass", Auth_Pass, MAX_PWD_LEN); 
+  prefs.getString("Auth_Pass", Auth_Pass, MAX_PWD_LEN);
 #if INCLUDE_FTP_HFS
   prefs.getString("FS_Pass", FS_Pass, MAX_PWD_LEN);
 #endif
@@ -241,7 +241,7 @@ void updateStatus(const char* variable, const char* _value, bool fromUser) {
   // or from loadConfig() to update app status from stored preferences
   bool res = true;
   char value[IN_FILE_NAME_LEN];
-  strncpy(value, _value, sizeof(value));  
+  strncpy(value, _value, sizeof(value));
 #if INCLUDE_MQTT
   if (mqtt_active) {
     char buff[(IN_FILE_NAME_LEN * 2)];
@@ -250,7 +250,7 @@ void updateStatus(const char* variable, const char* _value, bool fromUser) {
   }
 #endif
 
-  int intVal = atoi(value); 
+  int intVal = atoi(value);
   if (!strcmp(variable, "hostName")) strncpy(hostName, value, MAX_HOST_LEN-1);
   else if (!strcmp(variable, "ST_SSID")) strncpy(ST_SSID, value, MAX_HOST_LEN-1);
   else if (!strcmp(variable, "ST_Pass") && value[0] != '*') strncpy(ST_Pass, value, MAX_PWD_LEN-1);
@@ -266,11 +266,11 @@ void updateStatus(const char* variable, const char* _value, bool fromUser) {
   else if (!strcmp(variable, "AP_gw")) strncpy(AP_gw, value, MAX_IP_LEN-1);
   else if (!strcmp(variable, "AP_sn")) strncpy(AP_sn, value, MAX_IP_LEN-1);
   else if (!strcmp(variable, "AP_SSID")) strncpy(AP_SSID, value, MAX_HOST_LEN-1);
-  else if (!strcmp(variable, "AP_Pass") && value[0] != '*') strncpy(AP_Pass, value, MAX_PWD_LEN-1); 
+  else if (!strcmp(variable, "AP_Pass") && value[0] != '*') strncpy(AP_Pass, value, MAX_PWD_LEN-1);
   else if (!strcmp(variable, "allowAP")) allowAP = (bool)intVal;
   else if (!strcmp(variable, "useHttps")) useHttps = (bool)intVal;
   else if (!strcmp(variable, "useSecure")) useSecure = (bool)intVal;
-  else if (!strcmp(variable, "doGetExtIP")) doGetExtIP = (bool)intVal;  
+  else if (!strcmp(variable, "doGetExtIP")) doGetExtIP = (bool)intVal;
   else if (!strcmp(variable, "netMode")) netMode = intVal;
   else if (!strcmp(variable, "ethCS")) ethCS = intVal;
   else if (!strcmp(variable, "ethInt")) ethInt = intVal;
@@ -324,7 +324,7 @@ void updateStatus(const char* variable, const char* _value, bool fromUser) {
   else if (!strcmp(variable, "mqtt_active")) {
     mqtt_active = (bool)intVal;
     if (!mqtt_active) stopMqttClient();
-  } 
+  }
   else if (!strcmp(variable, "mqtt_broker")) strncpy(mqtt_broker, value, MAX_HOST_LEN-1);
   else if (!strcmp(variable, "mqtt_port")) strncpy(mqtt_port, value, 4);
   else if (!strcmp(variable, "mqtt_user")) strncpy(mqtt_user, value, MAX_HOST_LEN-1);
@@ -346,7 +346,7 @@ void updateStatus(const char* variable, const char* _value, bool fromUser) {
   else if (!strcmp(variable, "rtsp09TTL")) rtpTTL = intVal;
 #endif
   // Other settings
-  else if (!strcmp(variable, "clockUTC")) syncToBrowser((uint32_t)intVal);      
+  else if (!strcmp(variable, "clockUTC")) syncToBrowser((uint32_t)intVal);
   else if (!strcmp(variable, "timezone")) strncpy(timezone, value, FILE_NAME_LEN-1);
   else if (!strcmp(variable, "ntpServer")) strncpy(ntpServer, value, FILE_NAME_LEN-1);
   else if (!strcmp(variable, "alarmHour")) alarmHour = (uint8_t)intVal;
@@ -358,20 +358,20 @@ void updateStatus(const char* variable, const char* _value, bool fromUser) {
   else if (!strcmp(variable, "dbgVerbose")) {
     dbgVerbose = (intVal) ? true : false;
     Serial.setDebugOutput(dbgVerbose);
-  } 
+  }
   else if (!strcmp(variable, "logType")) {
     logType = intVal;
     remote_log_init();
-  } 
+  }
   else if (!strcmp(variable, "sdLog")) {
-    sdLog = (bool)intVal; 
+    sdLog = (bool)intVal;
     remote_log_init();
-  } 
-  else if (!strcmp(variable, "refreshVal")) refreshVal = intVal; 
+  }
+  else if (!strcmp(variable, "refreshVal")) refreshVal = intVal;
   else if (!strcmp(variable, "formatIfMountFailed")) formatIfMountFailed = (bool)intVal;
-  else if (!strcmp(variable, "resetLog")) reset_log(); 
+  else if (!strcmp(variable, "resetLog")) reset_log();
   else if (!strcmp(variable, "clear")) savePrefs(false); // /control?clear=1
-  else if (!strcmp(variable, "deldata")) {  
+  else if (!strcmp(variable, "deldata")) {
     if (intVal) deleteFolderOrFile(DATA_DIR); // entire folder
     else {
       // manually specified file, eg control?deldata=favicon.ico
@@ -380,7 +380,7 @@ void updateStatus(const char* variable, const char* _value, bool fromUser) {
       if (dlen > FILE_NAME_LEN) LOG_WRN("File name %s too long", value);
       else deleteFolderOrFile(delFile);
     }
-    doRestart("user requested restart after data deletion"); 
+    doRestart("user requested restart after data deletion");
   }
   else if (!strcmp(variable, "showsys")) showSys();
   else if (!strcmp(variable, "save")) {
@@ -400,30 +400,29 @@ void updateStatus(const char* variable, const char* _value, bool fromUser) {
 }
 
 void buildJsonString(uint8_t filter) {
-  // called from statusHandler() to build json string with current status to return to browser 
+  // called from statusHandler() to build json string with current status to return to browser
   char* p = jsonBuff;
   *p++ = '{';
   if (filter < 2) {
     // build json string for main page refresh
-    buildAppJsonString((bool)filter);
-    p += strlen(jsonBuff) - 1;
+    p = buildAppJsonString((bool)filter);
     p += sprintf(p, "\"cfgGroup\":\"-1\",");
     // generic footer
-    currEpoch = getEpoch(); 
-    p += sprintf(p, "\"clockUTC\":\"%lu\",", (uint32_t)currEpoch); 
+    currEpoch = getEpoch();
+    p += sprintf(p, "\"clockUTC\":\"%lu\",", (uint32_t)currEpoch);
     char timeBuff[20];
     strftime(timeBuff, 20, "%Y-%m-%d %H:%M:%S", localtime(&currEpoch));
     p += sprintf(p, "\"clock\":\"%s\",", timeBuff);
     formatElapsedTime(timeBuff, millis()); // rolls over after 49.7 days due to max uint32
-    p += sprintf(p, "\"up_time\":\"%s\",", timeBuff);   
-    p += sprintf(p, "\"free_heap\":\"%s\",", fmtSize(ESP.getFreeHeap()));    
-    p += sprintf(p, "\"wifi_rssi\":\"%i dBm\",", netRSSI() );  
+    p += sprintf(p, "\"up_time\":\"%s\",", timeBuff);
+    p += sprintf(p, "\"free_heap\":\"%s\",", fmtSize(ESP.getFreeHeap()));
+    p += sprintf(p, "\"wifi_rssi\":\"%i dBm\",", netRSSI() );
     if (!filter) {
       // populate first part of json string from config vect
-      for (const auto& row : configs) 
+      for (const auto& row : configs)
         p += sprintf(p, "\"%s\":\"%s\",", row[0].c_str(), row[1].c_str());
       p += sprintf(p, "\"logType\":\"%d\",", logType);
-      // passwords stored in prefs on NVS 
+      // passwords stored in prefs on NVS
       p += sprintf(p, "\"ST_Pass\":\"%.*s\",", strlen(ST_Pass), FILLSTAR);
       p += sprintf(p, "\"AP_Pass\":\"%.*s\",", strlen(AP_Pass), FILLSTAR);
       p += sprintf(p, "\"Auth_Pass\":\"%.*s\",", strlen(Auth_Pass), FILLSTAR);
@@ -440,12 +439,12 @@ void buildJsonString(uint8_t filter) {
       p += sprintf(p, "\"RTSP_Pass\":\"%.*s\",", strlen(RTSP_Pass), FILLSTAR);
 #endif
       // session constants
-      p += sprintf(p, "\"fw_version\":\"%s\",", APP_VER); 
-      p += sprintf(p, "\"macAddressEfuse\":\"%012llX\",", ESP.getEfuseMac() ); 
-      p += sprintf(p, "\"macAddressWiFi\":\"%s\",", netMacAddress().c_str() ); 
-      p += sprintf(p, "\"extIP\":\"%s\",", extIP); 
-      p += sprintf(p, "\"httpPort\":\"%u\",", HTTP_PORT); 
-      p += sprintf(p, "\"httpsPort\":\"%u\",", HTTPS_PORT); 
+      p += sprintf(p, "\"fw_version\":\"%s\",", APP_VER);
+      p += sprintf(p, "\"macAddressEfuse\":\"%012llX\",", ESP.getEfuseMac() );
+      p += sprintf(p, "\"macAddressWiFi\":\"%s\",", netMacAddress().c_str() );
+      p += sprintf(p, "\"extIP\":\"%s\",", extIP);
+      p += sprintf(p, "\"httpPort\":\"%u\",", HTTP_PORT);
+      p += sprintf(p, "\"httpsPort\":\"%u\",", HTTPS_PORT);
       IPAddress ipLocal = netLocalIP();
       p += sprintf(p, "\"ip\":\"%u.%u.%u.%u\",", ipLocal[0], ipLocal[1], ipLocal[2], ipLocal[3]);
     }
@@ -459,12 +458,12 @@ void buildJsonString(uint8_t filter) {
       if (atoi(row[2].c_str()) == cfgGroup) {
         int valSize = row[1].length();
         if (valSize < sizeof(pwdHide)) {
-          strncpy(pwdHide, FILLSTAR, valSize); 
+          strncpy(pwdHide, FILLSTAR, valSize);
           pwdHide[valSize] = 0;
         }
         // for each config item, list - key:value, key:label text, key:type identifier
         p += sprintf(p, "\"%s\":\"%s\",\"lab%s\":\"%s\",\"typ%s\":\"%s\",", row[0].c_str(),
-          strstr(row[0].c_str(), "_Pass") == NULL ? row[1].c_str() : pwdHide, row[0].c_str(), row[4].c_str(), row[0].c_str(), row[3].c_str()); 
+          strstr(row[0].c_str(), "_Pass") == NULL ? row[1].c_str() : pwdHide, row[0].c_str(), row[4].c_str(), row[0].c_str(), row[3].c_str());
       }
     }
   }
