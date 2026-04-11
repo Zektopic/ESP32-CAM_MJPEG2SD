@@ -34,3 +34,7 @@
 ## 2024-04-08 - [Hide Password Inputs]
 **Learning:** Found that multiple sensitive configuration fields (WiFi, FTP, SMTP, and Web passwords) in `Auxil.htm` and `MJPEG2SD.htm` were using the default `text` type, leaving them visible on screen and potentially vulnerable to shoulder-surfing.
 **Action:** Always verify that newly added or existing sensitive input fields explicitly use `type="password"`.
+
+## 2024-05-20 - Explicit Adjacent Sibling Selectors for Toggles
+**Learning:** In `data/MJPEG2SD.htm` and `data/Auxil.htm`, `.menu-action` checkboxes are separated from their `.nav-toggle` labels by a `.pin-menu` div. While CSS rules linking checkbox focus state to the label should use `~` (e.g., `.menu-action:focus-visible ~ .nav-toggle`), rules targeting the content div for visibility toggling must use the explicit adjacent chain (e.g., `.menu-action + .pin-menu + label + div`) rather than `~ label + div` to avoid inadvertently hiding subsequent unrelated menu sections.
+**Action:** When updating CSS selectors where the HTML structure has changed (like the addition of `.pin-menu`), strictly map the `+` adjacent selectors to the new structure rather than converting them to `~` general sibling selectors for structure-dependent display logic.
