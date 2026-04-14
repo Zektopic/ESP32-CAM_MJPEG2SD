@@ -27,3 +27,6 @@
 ## 2024-05-30 - O(N) strlen overhead when building large JSON objects
 **Learning:** When building a large string incrementally across multiple functions (e.g. `buildJsonString` calling `buildAppJsonString`), having the child function return `void` and then using `p += strlen(buffer)` in the parent function forces an O(N) recalculation of the string length just to find the new end of the buffer.
 **Action:** Modify the child function to return a pointer to the new end of the string (`char*`) instead of `void`. The parent function can then directly update its pointer without calling `strlen`, eliminating the overhead.
+## 2024-05-24 - O(N^2) complexity in Base64 Encoding
+**Learning:** Found an O(N^2) complexity issue inside `utils.cpp` during base64 encoding where `strncat(encoded, ...)` was used inside a loop across the input string. `strncat` repeatedly scans for the null terminator, creating quadratic behavior.
+**Action:** Replaced `strncat` with an offset-tracked `memcpy(encoded + offset, ...)` and manual null-termination, dropping the complexity to O(N). Added an inline comment explaining the optimization.
