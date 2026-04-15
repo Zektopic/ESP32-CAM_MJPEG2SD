@@ -27,3 +27,7 @@
 ## 2024-05-30 - O(N) strlen overhead when building large JSON objects
 **Learning:** When building a large string incrementally across multiple functions (e.g. `buildJsonString` calling `buildAppJsonString`), having the child function return `void` and then using `p += strlen(buffer)` in the parent function forces an O(N) recalculation of the string length just to find the new end of the buffer.
 **Action:** Modify the child function to return a pointer to the new end of the string (`char*`) instead of `void`. The parent function can then directly update its pointer without calling `strlen`, eliminating the overhead.
+
+## 2024-04-15 - Fixed-Point Math over Floating Point for Bilinear Interpolation
+**Learning:** For ESP32-based devices, floating-point math (e.g. `floor`, `ceil`, float-multiplications) inside tight loops for pixel processing (like `rescaleImage` bilinear interpolation) is incredibly expensive compared to integer math, introducing severe performance bottlenecks.
+**Action:** When working on tight processing loops, especially image manipulation scaling, rely on bitshifting and integer division using `uint32_t`. Represent ratios using fixed-point (e.g., scaled by `1 << 16`) to maintain precision without the cost of floating-point units.
