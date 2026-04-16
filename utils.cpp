@@ -1128,21 +1128,19 @@ const uint8_t* encode64chunk(const uint8_t* inp, int rem) {
 
 const char* encode64(const char* inp) {
   // helper to base64 encode strings up to 90 chars long
+  // Bolt: Use memcpy with outLen offset to prevent O(N^2) Schlemiel the Painter's algorithm from strncat
   static char encoded[121]; // space for 4/3 expansion + terminator
-  encoded[0] = 0;
   int len = strlen(inp);
   if (len > 90) {
     LOG_WRN("Input string too long: %u chars", len);
     len = 90;
   }
-  // Optimization: use offset tracking with memcpy instead of strncat
-  // to avoid O(N^2) complexity caused by repeatedly scanning for null terminator
-  int offset = 0;
+  int outLen = 0;
   for (int i = 0; i < len; i += 3) {
-    memcpy(encoded + offset, (char*)encode64chunk((uint8_t*)inp + i, min(len - i, 3)), 4);
-    offset += 4;
+    memcpy(encoded + outLen, encode64chunk((uint8_t*)inp + i, min(len - i, 3)), 4);
+    outLen += 4;
   }
-  encoded[offset] = 0;
+  encoded[outLen] = 0;
   return encoded;
 }
 
