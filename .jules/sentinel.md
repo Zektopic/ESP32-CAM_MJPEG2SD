@@ -56,3 +56,8 @@
 **Vulnerability:** In `webDav.cpp:handleWebDav`, `checkAuth()` was called before handling `HTTP_OPTIONS` requests. Because CORS preflight `OPTIONS` requests do not include an `Authorization` header, the authentication check failed, sending a `401 Unauthorized` and breaking cross-origin resource sharing (CORS) intended by the developer. Furthermore, handling `HTTP_OPTIONS` in `webServer.cpp:customOrNotFoundHandler` but not returning early caused a double-response send.
 **Learning:** In ESP-IDF `httpd` handlers (e.g., `handleWebDav`), always handle `HTTP_OPTIONS` requests for CORS preflights *before* calling `checkAuth()`. Preflight requests are unauthenticated by design. Also, ensure early returns when sending HTTP headers for `OPTIONS` to prevent double-sends in subsequent routing.
 **Prevention:** Intercept `HTTP_OPTIONS` at the very beginning of the endpoint handler (or before invoking authentication logic), apply the required CORS headers, and return early.
+
+## 2024-04-14 - Fix Buffer Overflow Risk in HTTP Query Parsing
+**Vulnerability:** A classic buffer overflow risk existed in `webServer.cpp` where `strcpy(value, variable + strlen(variable) + 1)` was used to extract query parameter values into a statically sized `value` buffer (`IN_FILE_NAME_LEN`).
+**Learning:** In resource-constrained C/C++ environments, developers sometimes use unsafe string functions like `strcpy` for convenience or perceived performance, overlooking the risk of untrusted HTTP input exceeding buffer limits.
+**Prevention:** Always use bounded string copy functions like `strncpy(dest, src, max_size)` and immediately followed by `dest[max_size - 1] = '\0'` to guarantee null-termination, or better yet, use robust string classes or `snprintf` if applicable.
