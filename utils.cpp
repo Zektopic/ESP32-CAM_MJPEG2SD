@@ -135,7 +135,7 @@ static void onNetEvent(arduino_event_id_t event, arduino_event_info_t info) {
     case ARDUINO_EVENT_WIFI_STA_START: LOG_INF("Wifi Station started, connecting to: %s", ST_SSID); break;
     case ARDUINO_EVENT_WIFI_STA_STOP: LOG_INF("Wifi Station stopped %s", ST_SSID); break;
     case ARDUINO_EVENT_WIFI_AP_START: {
-      if (strlen(AP_SSID) && !strcmp(WiFi.AP.SSID().c_str(), AP_SSID)) {
+      if (strlen(AP_SSID) && WiFi.AP.SSID() == AP_SSID) {
         IPAddress ipAP = WiFi.AP.localIP();
         LOG_INF("Wifi AP SSID: %s started, use 'http%s://%u.%u.%u.%u' to connect", WiFi.AP.SSID().c_str(), useHttps ? "s" : "", ipAP[0], ipAP[1], ipAP[2], ipAP[3]);
         APstarted = true;
@@ -143,7 +143,7 @@ static void onNetEvent(arduino_event_id_t event, arduino_event_info_t info) {
       break;
     }
     case ARDUINO_EVENT_WIFI_AP_STOP: {
-      if (!strcmp(WiFi.AP.SSID().c_str(), AP_SSID)) {
+      if (WiFi.AP.SSID() == AP_SSID) {
         LOG_INF("Wifi AP stopped: %s", AP_SSID);
         APstarted = false;
       }
@@ -338,7 +338,7 @@ static bool startWifi(bool firstcall = true) {
     // show stats of requested SSID
     int numNetworks = WiFi.scanNetworks();
     for (int i=0; i < numNetworks; i++) {
-      if (!strcmp(WiFi.SSID(i).c_str(), ST_SSID))
+      if (WiFi.SSID(i) == ST_SSID)
         LOG_INF("Wifi stats for %s - signal strength: %d dBm; Encryption: %s; channel: %u",  ST_SSID, WiFi.RSSI(i), getEncType(i), WiFi.channel(i));
     }
     if (wlStat != WL_CONNECTED) LOG_WRN("SSID %s not connected %s", ST_SSID, wifiStatusStr(wlStat));
@@ -727,17 +727,22 @@ bool calcProgress(int progressVal, int totalVal, int percentReport, uint8_t &pcP
   } else return false;
 }
 
+// Security enhancement: Fix URL encode buffer overflow
 bool urlEncode(const char* inVal, char* encoded, size_t maxSize) {
   int encodedLen = 0;
   char hexTable[] = "0123456789ABCDEF";
   while (*inVal) {
-    if (isalnum(*inVal) || strchr("$-_.+!*'(),:@~#", *inVal)) *encoded++ = *inVal;
-    else {
+    if (isalnum((unsigned char)*inVal) || strchr("$-_.+!*'(),:@~#", *inVal)) {
+      encodedLen++;
+      // Check considering null terminator
+      if (encodedLen + 1 > maxSize) return false;
+      *encoded++ = *inVal;
+    } else {
       encodedLen += 3;
-      if (encodedLen >= maxSize) return false;  // Buffer overflow
+      if (encodedLen + 1 > maxSize) return false;  // Buffer overflow
       *encoded++ = '%';
-      *encoded++ = hexTable[(*inVal) >> 4];
-      *encoded++ = hexTable[*inVal & 0xf];
+      *encoded++ = hexTable[((unsigned char)*inVal) >> 4];
+      *encoded++ = hexTable[((unsigned char)*inVal) & 0xf];
     }
     inVal++;
   }
@@ -747,18 +752,18 @@ bool urlEncode(const char* inVal, char* encoded, size_t maxSize) {
 
 void urlDecode(char* inVal) {
   // replace url encoded characters in-place
-  char* reader = inVal;
-  char* writer = inVal;
-  while (*reader) {
-    if (*reader == '%' && isxdigit((unsigned char)*(reader + 1)) && isxdigit((unsigned char)*(reader + 2))) {
-      char hex[3] = { *(reader + 1), *(reader + 2), 0 };
-      *writer++ = (char)strtoul(hex, nullptr, 16);
-      reader += 3;
+  char* readPtr = inVal;
+  char* writePtr = inVal;
+  while (*readPtr) {
+    if (*readPtr == '%' && isxdigit((unsigned char)readPtr[1]) && isxdigit((unsigned char)readPtr[2])) {
+      char hexStr[3] = { readPtr[1], readPtr[2], 0 };
+      *writePtr++ = (char)strtoul(hexStr, NULL, 16);
+      readPtr += 3;
     } else {
-      *writer++ = *reader++;
+      *writePtr++ = *readPtr++;
     }
   }
-  *writer = ' ';
+  *writePtr = '\0';
 }
 
 void listBuff (const uint8_t* b, size_t len) {
@@ -1123,15 +1128,19 @@ const uint8_t* encode64chunk(const uint8_t* inp, int rem) {
 
 const char* encode64(const char* inp) {
   // helper to base64 encode strings up to 90 chars long
+  // Bolt: Use memcpy with outLen offset to prevent O(N^2) Schlemiel the Painter's algorithm from strncat
   static char encoded[121]; // space for 4/3 expansion + terminator
-  encoded[0] = 0;
   int len = strlen(inp);
   if (len > 90) {
     LOG_WRN("Input string too long: %u chars", len);
     len = 90;
   }
-  for (int i = 0; i < len; i += 3)
-    strncat(encoded, (char*)encode64chunk((uint8_t*)inp + i, min(len - i, 3)), 4);
+  int outLen = 0;
+  for (int i = 0; i < len; i += 3) {
+    memcpy(encoded + outLen, encode64chunk((uint8_t*)inp + i, min(len - i, 3)), 4);
+    outLen += 4;
+  }
+  encoded[outLen] = 0;
   return encoded;
 }
 

@@ -108,7 +108,7 @@ esp_err_t appSpecificWebHandler(httpd_req_t *req, const char* variable, const ch
 void appSpecificWsBinHandler(uint8_t* wsMsg, size_t wsMsgLen);
 void appSpecificWsHandler(const char* wsMsg);
 void appSpecificTelegramTask(void* p);
-void buildAppJsonString(bool filter);
+char* buildAppJsonString(bool filter);
 bool updateAppStatus(const char* variable, const char* value, bool fromUser = true);
 
 // global general utility functions in utils.cpp / utilsFS.cpp / peripherals.cpp etc

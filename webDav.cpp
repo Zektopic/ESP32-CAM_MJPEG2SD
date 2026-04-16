@@ -182,11 +182,6 @@ static bool handleProp() {
   return true;
 }
 
-static bool handleOptions() {
-  httpd_resp_sendstr(req, NULL);
-  return true;
-}
-
 static bool handleGet() {
   // transfer file to PC
   if (!haveResource()) return false;
@@ -298,7 +293,7 @@ static bool handleMove() {
       httpd_resp_send_404(req);
       return false;
     }
-    memmove(dest, pos + strlen(WEBDAV), strlen(dest));
+    memmove(dest, pos + strlen(WEBDAV), strlen(pos + strlen(WEBDAV)) + 1);
 
     // only allow renaming if a folder
     if (isFolder()) res = checkSamePath(pathName, dest);
@@ -322,10 +317,20 @@ static bool handleCopy() {
 }
 
 bool handleWebDav(httpd_req_t* rreq) {
+  req = rreq;
+  if (req->method == HTTP_OPTIONS) {
+    httpd_resp_set_hdr(req, "DAV", "1");
+    httpd_resp_set_hdr(req, "Allow", ALLOW);
+    httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+    httpd_resp_set_hdr(req, "Access-Control-Max-Age", "600");
+    httpd_resp_set_hdr(req, "Access-Control-Allow-Methods", "POST,GET,HEAD,OPTIONS,PUT,DELETE,MKCOL,COPY,MOVE,PROPFIND,PROPPATCH,LOCK,UNLOCK");
+    httpd_resp_set_hdr(req, "Access-Control-Allow-Headers", "*");
+    httpd_resp_sendstr(req, NULL);
+    return true;
+  }
   if (!checkAuth(rreq)) return true;
   // extract method to determine which WebDAV action to take
   //showHttpHeaders(rreq);
-  req = rreq;
   snprintf(pathName, IN_FILE_NAME_LEN, "%s", req->uri + strlen(WEBDAV)); // strip out "/webdav"
   size_t pathLen = strlen(pathName);
   if (pathLen > 0 && pathName[pathLen - 1] == '/') pathName[pathLen - 1] = 0; // remove final / if present
@@ -346,7 +351,6 @@ bool handleWebDav(httpd_req_t* rreq) {
     case HTTP_PROPPATCH: return handleProp(); // set file or directory properties
     case HTTP_GET: return handleGet(); // file downloads
     case HTTP_HEAD: return handleHead(); // file properties
-    case HTTP_OPTIONS: return handleOptions(); // supported options
     case HTTP_LOCK: return handleLock(); // open file lock
     case HTTP_UNLOCK: return handleUnlock(); // close file lock
     case HTTP_MKCOL: return handleMkdir(); // folder creation
