@@ -52,3 +52,8 @@
 **Vulnerability:** The `checkAuth` method in `webServer.cpp` blindly added +1 to the `Authorization` header length (even when absent, causing uninitialized read) and validated basic credentials using a loose `strstr(auth, encode64(credentials))`, allowing potential authentication bypasses if the encoded string were embedded in another structure.
 **Learning:** Adding 1 to a 0 length creates a 1 byte array that then fails to be populated but is read by a string function. Furthermore, loose authentication checks like `strstr` are inherently flawed for security tokens since they don't ensure the token matches exactly and fully, only that it is contained.
 **Prevention:** Always verify header length > 0 before allocating stack memory and reading into it. Always validate security tokens using exact strict matches (e.g. `strcmp`) against the full expected value format, including prefixes (like "Basic ").
+
+## 2024-04-14 - Fix Buffer Overflow Risk in HTTP Query Parsing
+**Vulnerability:** A classic buffer overflow risk existed in `webServer.cpp` where `strcpy(value, variable + strlen(variable) + 1)` was used to extract query parameter values into a statically sized `value` buffer (`IN_FILE_NAME_LEN`).
+**Learning:** In resource-constrained C/C++ environments, developers sometimes use unsafe string functions like `strcpy` for convenience or perceived performance, overlooking the risk of untrusted HTTP input exceeding buffer limits.
+**Prevention:** Always use bounded string copy functions like `strncpy(dest, src, max_size)` and immediately followed by `dest[max_size - 1] = '\0'` to guarantee null-termination, or better yet, use robust string classes or `snprintf` if applicable.

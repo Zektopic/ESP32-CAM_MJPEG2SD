@@ -175,7 +175,8 @@ esp_err_t extractQueryKeyVal(httpd_req_t *req, char* variable, char* value) {
   char* endPtr = strchr(variable, '=');
   if (endPtr != NULL) {
     *endPtr = 0; // split variable into 2 strings, first is key name
-    strcpy(value, variable + strlen(variable) + 1); // value is now second part of string
+    strncpy(value, variable + strlen(variable) + 1, IN_FILE_NAME_LEN - 1); // value is now second part of string
+    value[IN_FILE_NAME_LEN - 1] = 0; // ensure null termination
     if (isPathTraversal(variable) || isPathTraversal(value)) {
       LOG_WRN("Path traversal attempt detected in query string");
       httpd_resp_set_status(req, "400 Bad Request");
@@ -248,7 +249,8 @@ static esp_err_t controlHandler(httpd_req_t *req) {
   if (extractQueryKeyVal(req, variable, value) != ESP_OK) return ESP_FAIL;
   if (!strcmp(variable, "displayLog")) displayLog(req);
   else {
-    strcpy(value, variable + strlen(variable) + 1); // value points to second part of string
+    strncpy(value, variable + strlen(variable) + 1, IN_FILE_NAME_LEN - 1); // value points to second part of string
+    value[IN_FILE_NAME_LEN - 1] = 0; // ensure null termination
     if (!strcmp(variable, "reset")) {
       httpd_resp_sendstr(req, NULL); // stop browser resending reset
       doRestart(value);
