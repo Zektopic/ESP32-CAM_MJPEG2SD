@@ -16,3 +16,28 @@
 ## 2024-05-20 - Custom Checkbox/Toggle Accessibility
 **Learning:** Hiding native checkboxes using `display: none;` removes them from the accessibility tree, breaking keyboard navigation entirely for custom toggle switches.
 **Action:** When styling custom toggle switches, always hide the native `<input type="checkbox">` using `opacity: 0; position: absolute;` instead of `display: none;`. Ensure a sibling element (like a `.slider`) has a `:focus-visible` CSS rule applied when the hidden checkbox is focused, providing vital visual feedback to keyboard users.
+
+## 2024-05-20 - Avoid Nesting Interactive Elements
+**Learning:** Nesting interactive elements (like placing a `<button>` inside an `<a>` tag) violates WCAG 4.1.2 and can cause screen readers to read the element incorrectly or inconsistently, confusing users who rely on assistive technologies.
+**Action:** Always refactor HTML to ensure there are no nested interactive elements. If a button needs to act as a link, use a single `<button>` element with an `onclick="window.location.href='...'"` attribute or a styled `<a>` tag with `role="button"`.
+## 2025-04-05 - Correct client-side string limits on text inputs
+**Learning:** Using 'length' instead of 'maxlength' on HTML inputs is invalid and will be silently ignored by browsers, which can lead to backend buffer overflows if not handled correctly.
+**Action:** Always use the valid 'maxlength' attribute on HTML input elements to enforce client-side character limits.
+
+## 2024-05-20 - Use Valid HTML Attributes for Input Limitations
+**Learning:** Native HTML `<input>` fields use `maxlength`, not `length`, to enforce character limits on the client side. Using `length=` is an invalid HTML attribute and is silently ignored by the browser, meaning users can type beyond the intended character limit (e.g., for SSIDs or Hostnames) which might cause unexpected truncation or buffer overflows on the backend.
+**Action:** Always use `maxlength="[number]"` and `minlength="[number]"` for text-based `<input>` fields.
+## 2024-04-07 - Icon-only buttons with text characters need ARIA labels
+**Learning:** Legacy UI components in this application (like `MJPEG2SD.htm`) use unicode characters (e.g., `➤`) for iconography within buttons instead of semantic SVG/img icons. This means screen readers will literally read out "Black right-pointing arrowhead" before the text.
+**Action:** When auditing legacy UI buttons that mix symbols and text, always add explicit `aria-label` attributes to override the symbol vocalization and provide a clean accessible name.
+
+## 2023-10-27 - Dynamically Generated Form Input Labels
+**Learning:** When building configuration forms dynamically via JavaScript (such as `buildTable` in `data/common.js`), it is crucial to ensure that settings' text labels are properly wrapped in `<label for="...">` tags. Without this, inputs lack accessible names, breaking screen reader compatibility and preventing users from focusing the input by clicking its label text.
+**Action:** Always wrap setting names in `<label>` tags with the `for` attribute matching the `id` of the dynamically generated form input element.
+## 2024-04-08 - [Hide Password Inputs]
+**Learning:** Found that multiple sensitive configuration fields (WiFi, FTP, SMTP, and Web passwords) in `Auxil.htm` and `MJPEG2SD.htm` were using the default `text` type, leaving them visible on screen and potentially vulnerable to shoulder-surfing.
+**Action:** Always verify that newly added or existing sensitive input fields explicitly use `type="password"`.
+
+## 2024-05-20 - Explicit Adjacent Sibling Selectors for Toggles
+**Learning:** In `data/MJPEG2SD.htm` and `data/Auxil.htm`, `.menu-action` checkboxes are separated from their `.nav-toggle` labels by a `.pin-menu` div. While CSS rules linking checkbox focus state to the label should use `~` (e.g., `.menu-action:focus-visible ~ .nav-toggle`), rules targeting the content div for visibility toggling must use the explicit adjacent chain (e.g., `.menu-action + .pin-menu + label + div`) rather than `~ label + div` to avoid inadvertently hiding subsequent unrelated menu sections.
+**Action:** When updating CSS selectors where the HTML structure has changed (like the addition of `.pin-menu`), strictly map the `+` adjacent selectors to the new structure rather than converting them to `~` general sibling selectors for structure-dependent display logic.
