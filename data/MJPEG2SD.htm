@@ -635,9 +635,10 @@
         position: absolute;
       }
 
-      .menu-action:focus-visible ~ label.nav-toggle {
+      .menu-action:focus-visible ~ .nav-toggle {
         outline: 2px solid var(--buttonActive);
         outline-offset: 2px;
+        border-radius: 4px;
       }
 
       .menu-action + label + div {
@@ -934,18 +935,18 @@
         <button class="tablinks" name="ShowLog">Show Log</button>
         <button class="tablinks" name="EditConfig">Edit Config</button>
         <button class="tablinks" name="DeviceHub" style="display: none;">Camera Hub</button>
-        <a href="/web?OTA.htm"><button class="tablinks">OTA Upload</button></a>
+        <button class="tablinks" onclick="window.location.href='/web?OTA.htm'">OTA Upload</button>
       </ul>
       <section id="main">
         <nav id="maintoolbar">
           <ul class="navtop">
             <li><span id="recording-indicator" class="hidden" style="float: right; display: none;"></span></li>
-            <li><button id="forceRecord" style="float:right;">➤&nbsp;Start Recording</button></li>
+            <li><button id="forceRecord" aria-label="Start Recording" style="float:right;">➤&nbsp;Start Recording</button></li>
             <li><div class="sep"></div></li>
-            <li><button id="forceStream" class="local" style="float:right;">➤&nbsp;Start Stream</button></li>
+            <li><button id="forceStream" aria-label="Start Stream" class="local" style="float:right;">➤&nbsp;Start Stream</button></li>
             <li><button id="get-still" class="local" style="float:right;">Get Still</button></li>
             <li><div class="sep"></div></li>
-            <li><button id="forcePlayback" class="local disabled" style="float:right;" title="Select a video in 'Playback & File Transfers' to activate playback.">➤&nbsp;Start Playback</button></li>
+            <li><button id="forcePlayback" aria-label="Start Playback" class="local disabled" style="float:right;" title="Select a video in 'Playback & File Transfers' to activate playback.">➤&nbsp;Start Playback</button></li>
           </ul>
         </nav>
       </section>
@@ -964,11 +965,11 @@
                 <nav class="quick-nav" id="accSettings" name="access-settings" title="Access Settings" aria-label="Access Settings" role="button" tabindex="0">🔧</nav>
                 <div class="micContainer">
                   <button class="quick-nav audButtons disabled" id="micRem" title="Microphone Control" aria-label="Microphone Control">🎤</button>
-                  <canvas id="micLevel"></canvas>
+                  <canvas id="micLevel" role="meter" aria-label="Microphone volume level"></canvas>
                 </div>
                 <div class="spkrContainer">
                   <button class="quick-nav audButtons disabled" id="spkrRem" title="Speaker Control" aria-label="Speaker Control">🔈</button>
-                  <canvas id="spkrLevel"></canvas>
+                  <canvas id="spkrLevel" role="meter" aria-label="Speaker volume level"></canvas>
                 </div>
               </nav>
               <div id="menu-top" class="menu-pinned">
@@ -1226,7 +1227,7 @@
                     </div>
                   </div>
                   <div class="input-group" id="motion-group">
-                    <label for="motion">Motion Sensitivity</label>
+                    <label for="motionVal">Motion Sensitivity</label>
                     <input title="Set motion detection sensitivity" type="range" id="motionVal" min="1" max="10" value="7">
                   </div>
                   <div class="input-group" id="minf-group">
@@ -1282,13 +1283,13 @@
                     </select>
                   </div>
                   <div>
-                    <progress id="progressBar" value='0' max='100' class="info"></progress>%
+                    <progress id="progressBar" value='0' max='100' class="info" aria-label="File transfer progress"></progress>%
                   </div>
                   <br>
                   <section id="buttons">
-                    <button class="local" title="Download selected file from SD card" id="download" style="float:right" value="1">Download</button>
-                    <button class="local" title="Upload selected file/folder to Fileserver" id="upload" style="float:left" value="1">File Upload</button>
-                    <button class="local" title="Delete selected file/folder from SD card" id="delete" style="float:right" value="1">Delete</button>
+                    <button class="local" title="Download selected file from SD card" id="download" aria-label="Download selected file" style="float:right" value="1">Download</button>
+                    <button class="local" title="Upload selected file/folder to Fileserver" id="upload" aria-label="Upload selected file" style="float:left" value="1">File Upload</button>
+                    <button class="local" title="Delete selected file/folder from SD card" id="delete" aria-label="Delete selected file" style="float:right" value="1">Delete</button>
                   </section>
   <!--
                   <div class="input-group" id="auth-group">
@@ -1333,15 +1334,15 @@
                   </div>
                   <div class="input-group" id="wifi-group">
                     <label for="hostName">Host Name</label>
-                    <input id="hostName" name="hostName" length=32 placeholder="Host name">
+                    <input id="hostName" name="hostName" maxlength=32 placeholder="Host name">
                   </div>
                   <div class="input-group wifi-only" id="wifi-group">
                     <label for="ST_SSID">SSID</label>
-                    <input id="ST_SSID" name="ST_SSID" length=32 placeholder="Router SSID">
+                    <input id="ST_SSID" name="ST_SSID" maxlength=32 placeholder="Router SSID">
                   </div>
                   <div class="input-group wifi-only" id="wifi-group">
                     <label for="ST_Pass">Password</label>
-                    <input id="ST_Pass" name="ST_Pass" length=64 placeholder="Router password">
+                    <input type="password" id="ST_Pass" name="ST_Pass" maxlength=64 placeholder="Router password">
                   </div>
                   <div class="input-group">
                       <label for="extIP">External&nbsp;IP</label>
@@ -1351,7 +1352,7 @@
                   <div class="subheader">Clock settings</div>
                   <div class="input-group" id="time-group">
                     <label for="timezone">Time Zone</label>
-                    <input id="timezone" name="timezone" length=64 placeholder="Time zone string">
+                    <input id="timezone" name="timezone" maxlength=64 placeholder="Time zone string">
                   </div>
                   <div class="input-group" id="time-group">
                     <label for="regionSel">Select Region</label>
@@ -1369,23 +1370,23 @@
                   <div class="subheader">FTP / HTTPS settings</div>
                   <div class="input-group" id="ftp-group">
                     <label for="fsServer">File Server</label>
-                    <input id="fsServer" name="fsServer" length=32 placeholder="File server name">
+                    <input id="fsServer" name="fsServer" maxlength=32 placeholder="File server name">
                   </div>
                   <div class="input-group" id="ftp-group">
                     <label for="fsPort">FS port</label>
-                    <input id="fsPort" name="fsPport" length=6 placeholder="File server port">
+                    <input id="fsPort" name="fsPport" maxlength=6 placeholder="File server port">
                   </div>
                   <div class="input-group" id="ftp-group">
                     <label for="ftpUser">FTP user name</label>
-                    <input id="ftpUser" name="ftpUser" length=32 placeholder="FTP user name">
+                    <input id="ftpUser" name="ftpUser" maxlength=32 placeholder="FTP user name">
                   </div>
                   <div class="input-group" id="ftp-group">
                     <label for="FS_Pass">FS password</label>
-                    <input id="FS_Pass" name="FS_Pass" length=32 placeholder="File server password">
+                    <input type="password" id="FS_Pass" name="FS_Pass" maxlength=32 placeholder="File server password">
                   </div>
                   <div class="input-group" id="ftp-group">
                     <label for="fsWd">FS root dir</label>
-                    <input id="fsWd" name="fsWd" length=64 placeholder="Working directory path">
+                    <input id="fsWd" name="fsWd" maxlength=64 placeholder="Working directory path">
                   </div>
                   <div class="input-group" id="ftp-group">
                     <label for="fsUse">Upload method:</label>FTP&nbsp;
@@ -1398,33 +1399,33 @@
                   <div class="subheader">SMTP settings</div>
                   <div class="input-group" id="smtp-group">
                     <label for="smtp_server">SMTP server</label>
-                    <input id="smtp_server" name="smtp_server" length=32 placeholder="smtp server name">
+                    <input id="smtp_server" name="smtp_server" maxlength=32 placeholder="smtp server name">
                   </div>
                   <div class="input-group" id="smtp-group">
                     <label for="smtp_port">SMTP port</label>
-                    <input id="smtp_port" name="smtp_port" length=6 placeholder="smtp port">
+                    <input id="smtp_port" name="smtp_port" maxlength=6 placeholder="smtp port">
                   </div>
                   <div class="input-group" id="smtp-group">
                     <label for="smtp_login">SMTP login</label>
-                    <input id="smtp_login" name="smtp_login" length=32 placeholder="smtp login email">
+                    <input id="smtp_login" name="smtp_login" maxlength=32 placeholder="smtp login email">
                   </div>
                   <div class="input-group" id="smtp-group">
                     <label for="SMTP_Pass">SMTP password</label>
-                    <input id="SMTP_Pass" name="SMTP_Pass" length=32 placeholder="smtp password">
+                    <input type="password" id="SMTP_Pass" name="SMTP_Pass" maxlength=32 placeholder="smtp password">
                   </div>
                   <div class="input-group" id="ftp-group">
                     <label for="smtp_email">SMTP email</label>
-                    <input id="smtp_email" name="smtp_email" length=64 placeholder="smtp email to">
+                    <input id="smtp_email" name="smtp_email" maxlength=64 placeholder="smtp email to">
                   </div>
                   <br>
                   <div class="subheader">Authentication settings</div>
                   <div class="input-group" id="auth-group">
                       <label for="Auth_Name">Web login</label>
-                      <input id="Auth_Name" name="Auth_Name" length=32 placeholder="Authentication user name">
+                      <input id="Auth_Name" name="Auth_Name" maxlength=32 placeholder="Authentication user name">
                   </div>
                   <div class="input-group" id="auth-group">
                       <label for="Auth_Pass">Web password</label>
-                      <input id="Auth_Pass" name="Auth_Pass" length=32 placeholder="Authentication password">
+                      <input type="password" id="Auth_Pass" name="Auth_Pass" maxlength=32 placeholder="Authentication password">
                   </div>
                   <div class="input-group" id="auth-group">
                     <label for="useHttps">Use HTTPS</label>
@@ -1522,11 +1523,11 @@
                 </svg>
               </div>
               <div class="RCcontrolFmt RCsteerFmt">
-                <input title="Control RC steering" type="range" id="steerDirection" class="RCcontrol immed bigThumb ignore" value=0>
+                <input title="Control RC steering" type="range" id="steerDirection" aria-label="Steer Direction" class="RCcontrol immed bigThumb ignore" value=0>
                 <div name="rangeVal" style="top: 2px" class="rvThumb">0</div>
               </div>
               <div class="RCcontrolFmt RCmotorFmt">
-                <input title="Control RC speed" type="range" id="motorSpeed" class="RCcontrol immed bigThumb ignore" value=0>
+                <input title="Control RC speed" type="range" id="motorSpeed" aria-label="Motor Speed" class="RCcontrol immed bigThumb ignore" value=0>
                 <div name="rangeVal" class="rvThumb">0</div>
               </div>
             </div>

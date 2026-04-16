@@ -740,7 +740,8 @@ static bool setupLCD1602() {
 
 void lcdPrint(const char* str) {
   // write string to lcd
-	for (int i=0; i<strlen(str); i++) lcdSend((uint8_t)str[i], Rs);
+	int len = strlen(str);
+	for (int i=0; i<len; i++) lcdSend((uint8_t)str[i], Rs);
 }
 
 void lcdSetCursorPos(uint8_t row, uint8_t col) {
