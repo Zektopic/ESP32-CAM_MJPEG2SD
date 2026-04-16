@@ -1,8 +1,8 @@
 
-/* 
+/*
  Detect movement in sequential images using background subtraction.
- 
- Very small (96x96) bitmaps are used both to provide image smoothing to reduce spurious motion changes 
+
+ Very small (96x96) bitmaps are used both to provide image smoothing to reduce spurious motion changes
  and to enable rapid processing
  Bitmaps can either be color or grayscale. Color requires triple memory
  of grayscale and more processing.
@@ -10,13 +10,13 @@
  The amount of change between images will depend on the frame rate.
  A faster frame rate will need a higher sensitivity
 
- When frame size is changed the OV2640 outputs a few glitched frames whilst it 
+ When frame size is changed the OV2640 outputs a few glitched frames whilst it
  makes the transition. These could be interpreted as spurious motion.
 
- Machine Learning can be incorporated to further discriminate when motion detection 
+ Machine Learning can be incorporated to further discriminate when motion detection
  has occurred by classsifying whether the object in the frame is of a particular
- type of interest, eg a human, animal, vehicle etc. 
- 
+ type of interest, eg a human, animal, vehicle etc.
+
  s60sc 2020, 2023, 2025
 */
 
@@ -30,10 +30,10 @@
 #define RESIZE_DIM_SQ (RESIZE_DIM * RESIZE_DIM) // pixels in bitmap
 #define INACTIVE_COLOR 96 // color for inactive motion pixel
 #define JPEG_QUAL 80 // % quality for generated motion detect jpeg
-  
+
 // motion recording parameters
 bool dbgMotion = false;
-int detectMotionFrames = 5; // min sequence of changed frames to confirm motion 
+int detectMotionFrames = 5; // min sequence of changed frames to confirm motion
 int detectNightFrames = 10; // frames of sequential darkness to avoid spurious day / night switching
 // define region of interest, ie exclude top and bottom of image from movement detection if required
 // divide image into detectNumBands horizontal bands, define start and end bands of interest, 1 = top
@@ -46,7 +46,7 @@ static size_t stride;
 bool mlUse = false; // whether to use ML for motion detection, requires INCLUDE_TINYML to be true
 float mlProbability = 0.8; // minimum probability (0.0 - 1.0) for positive classification
 
-uint8_t lightLevel; // Current ambient light level 
+uint8_t lightLevel; // Current ambient light level
 uint8_t nightSwitch = 20; // initial white level % for night/day switching
 float motionVal = 8.0; // initial motion sensitivity setting
 uint8_t* motionJpeg = NULL;
@@ -102,35 +102,45 @@ bool isNight(uint8_t nightSwitch) {
       nightCnt++;
       // signal night time after given sequence of dark frames
       if (nightCnt > detectNightFrames) {
-        nightTime = true;     
-        LOG_INF("Night time"); 
+        nightTime = true;
+        LOG_INF("Night time");
       }
     }
-  } 
+  }
   return nightTime;
 }
 
 static void rescaleImage(const uint8_t* input, int inputWidth, int inputHeight, uint8_t* output, int outputWidth, int outputHeight) {
-  // use bilinear interpolation to resize image
-  float xRatio = (float)inputWidth / (float)outputWidth;
-  float yRatio = (float)inputHeight / (float)outputHeight;
+  // use fixed-point integer math for bilinear interpolation to avoid slow floating point operations
+  uint32_t xRatio = ((uint32_t)inputWidth << 16) / outputWidth;
+  uint32_t yRatio = ((uint32_t)inputHeight << 16) / outputHeight;
 
   for (int i = 0; i < outputHeight; ++i) {
+    uint32_t y = i * yRatio;
+    int yL = y >> 16;
+    int yH = yL + 1;
+    if (yH >= inputHeight) yH = inputHeight - 1;
+    uint32_t yWeight = y & 0xFFFF;
+    uint32_t yWeightInv = 65536 - yWeight;
+
     for (int j = 0; j < outputWidth; ++j) {
-      int xL = (int)floor(xRatio * j);
-      int yL = (int)floor(yRatio * i);
-      int xH = (int)ceil(xRatio * j);
-      int yH = (int)ceil(yRatio * i);
-      float xWeight = xRatio * j - xL;
-      float yWeight = yRatio * i - yL;
+      uint32_t x = j * xRatio;
+      int xL = x >> 16;
+      int xH = xL + 1;
+      if (xH >= inputWidth) xH = inputWidth - 1;
+      uint32_t xWeight = x & 0xFFFF;
+      uint32_t xWeightInv = 65536 - xWeight;
+
       for (int channel = 0; channel < colorDepth; ++channel) {
         uint8_t a = input[(yL * inputWidth + xL) * colorDepth + channel];
         uint8_t b = input[(yL * inputWidth + xH) * colorDepth + channel];
         uint8_t c = input[(yH * inputWidth + xL) * colorDepth + channel];
         uint8_t d = input[(yH * inputWidth + xH) * colorDepth + channel];
 
-        float pixel = a * (1 - xWeight) * (1 - yWeight) + b * xWeight * (1 - yWeight)
-                    + c * yWeight * (1 - xWeight) + d * xWeight * yWeight;
+        uint32_t top = (a * xWeightInv + b * xWeight) >> 16;
+        uint32_t bottom = (c * xWeightInv + d * xWeight) >> 16;
+        uint32_t pixel = (top * yWeightInv + bottom * yWeight) >> 16;
+
         output[(i * outputWidth + j) * colorDepth + channel] = (uint8_t)pixel;
       }
     }
@@ -153,18 +163,18 @@ static int getImageData(size_t offset, size_t length, float *out_ptr) {
   size_t pixelPtr = offset * colorDepth;
   size_t out_ptr_idx = 0;
   while (out_ptr_idx < length) {
-    out_ptr[out_ptr_idx++] = (colorDepth == RGB888_BYTES)  
+    out_ptr[out_ptr_idx++] = (colorDepth == RGB888_BYTES)
       ? (float)((currBuff[pixelPtr] << 16) + (currBuff[pixelPtr + 1] << 8) + currBuff[pixelPtr + 2])
-      : (float)((currBuff[pixelPtr] << 16) + (currBuff[pixelPtr] << 8) + currBuff[pixelPtr]);  
+      : (float)((currBuff[pixelPtr] << 16) + (currBuff[pixelPtr] << 8) + currBuff[pixelPtr]);
     pixelPtr += colorDepth;
-  } 
+  }
   return 0;
 }
 
 static bool tinyMLclassify() {
   // convert input data to appropriate format
   bool out = false;
-  uint32_t dTime = millis(); 
+  uint32_t dTime = millis();
   // reduce size of bitmap to that required by classifier and copy to features as grayscale or RGB
   if (RESIZE_DIM != EI_CLASSIFIER_INPUT_WIDTH) {
     uint8_t* tempBuff = (uint8_t*)ps_malloc(EI_CLASSIFIER_INPUT_WIDTH * EI_CLASSIFIER_INPUT_HEIGHT * colorDepth);
@@ -183,14 +193,14 @@ static bool tinyMLclassify() {
     if (result.classification[0].value > mlProbability) {
       out = true; // sufficient classification match, so keep motion detection
       if (dbgVerbose) {
-        LOG_VRB("Prob: %0.2f, Timing: DSP %d ms, inference %d ms, anomaly %d ms", 
+        LOG_VRB("Prob: %0.2f, Timing: DSP %d ms, inference %d ms, anomaly %d ms",
         result.classification[0].value, result.timing.dsp, result.timing.classification, result.timing.anomaly);
         char outcome[200] = {0};
         for (uint16_t i = 0; i < EI_CLASSIFIER_LABEL_COUNT; i++)
           sprintf(outcome + strlen(outcome), "%s: %.2f, ", ei_classifier_inferencing_categories[i], result.classification[i].value);
         LOG_VRB("Predictions - %s in %ums", outcome, millis() - dTime);
-      } 
-    } 
+      }
+    }
   } else LOG_WRN("Failed to run classifier (%d)", res);
   return out;
 }
@@ -211,12 +221,12 @@ bool checkMotion(camera_fb_t* fb, bool motionStatus, bool lightLevelOnly) {
  #if INCLUDE_NEW_JPG
   static struct esp_jpeg_stream jpegHandle = {0};
   static uint8_t* jpgBuf = (uint8_t*)ps_malloc(RESIZE_DIM_SQ * RGB888_BYTES);
-#endif  
+#endif
 
   // calculate parameters for sample size when resolution changes
   if (fsizePtr != fsizePtrPrev) {
     fsizePtrPrev = fsizePtr;
-    scaling = frameData[fsizePtr].scaleFactor; 
+    scaling = frameData[fsizePtr].scaleFactor;
     reducer = frameData[fsizePtr].sampleRate;
     downsize = pow(2, scaling) * reducer;
     stride = (colorDepth == RGB888_BYTES) ? GRAYSCALE_BYTES : RGB888_BYTES; // stride is inverse of colorDepth
@@ -238,21 +248,21 @@ bool checkMotion(camera_fb_t* fb, bool motionStatus, bool lightLevelOnly) {
   if (colorDepth == GRAYSCALE_BYTES) rgbToGray(rgbBuf, sampleWidth, sampleHeight);
 #endif
   LOG_VRB("JPEG to rescaled %s bitmap conversion %u bytes in %lums", colorDepth == RGB888_BYTES ? "color" : "grayscale", sampleWidth * sampleHeight * colorDepth, millis() - dTime);
-  
+
   // allocate buffer space on heap
   size_t resizeDimLen = RESIZE_DIM_SQ * colorDepth; // byte size of bitmap
   if (motionJpeg == NULL) motionJpeg = (uint8_t*)ps_malloc(32 * 1024);
   if (currBuff == NULL) currBuff = (uint8_t*)ps_malloc(RESIZE_DIM_SQ * RGB888_BYTES);
   static uint8_t* prevBuff = (uint8_t*)ps_malloc(RESIZE_DIM_SQ * RGB888_BYTES);
   static uint8_t* changeMap = (uint8_t*)ps_malloc(RESIZE_DIM_SQ * RGB888_BYTES);
-  
+
   dTime = millis();
   rescaleImage(rgbBuf, sampleWidth, sampleHeight, currBuff, RESIZE_DIM, RESIZE_DIM);
   LOG_VRB("Bitmap rescale to %u bytes in %lums", resizeDimLen, millis() - dTime);
-  // compare each pixel in current frame with previous frame 
+  // compare each pixel in current frame with previous frame
   dTime = millis();
   int changeCount = 0;
-  // set horizontal region of interest in image 
+  // set horizontal region of interest in image
   uint16_t startPixel = (RESIZE_DIM*(detectStartBand-1)/detectNumBands) * RESIZE_DIM * colorDepth;
   uint16_t endPixel = (RESIZE_DIM*(detectEndBand)/detectNumBands) * RESIZE_DIM * colorDepth;
   int moveThreshold = ((endPixel-startPixel)/colorDepth) * (11-motionVal)/100; // number of changed pixels that constitute a movement
@@ -280,7 +290,7 @@ bool checkMotion(camera_fb_t* fb, bool motionStatus, bool lightLevelOnly) {
   }
   lightLevel = (lux*100)/(RESIZE_DIM_SQ*255); // light value as a %
   nightTime = isNight(nightSwitch);
-  memcpy(prevBuff, currBuff, resizeDimLen); // save image for next comparison 
+  memcpy(prevBuff, currBuff, resizeDimLen); // save image for next comparison
   LOG_VRB("Detected %u changes, threshold %u, light level %u, in %lums", changeCount, moveThreshold, lightLevel, millis() - dTime);
   if (lightLevelOnly) return false; // no motion checking, only calc of light level
   if (dbgMotion) {
@@ -291,13 +301,13 @@ bool checkMotion(camera_fb_t* fb, bool motionStatus, bool lightLevelOnly) {
       // build jpeg of changeMap for debug streaming
 #if INCLUDE_NEW_JPG
       motionJpegLen = rgb2jpg(changeMap, RESIZE_DIM, RESIZE_DIM, JPEG_QUAL, jpgBuf);
-      if (motionJpegLen == 0) LOG_WRN("motionDetect: encode() failed"); 
-      memcpy(motionJpeg, jpgBuf, motionJpegLen); 
+      if (motionJpegLen == 0) LOG_WRN("motionDetect: encode() failed");
+      memcpy(motionJpeg, jpgBuf, motionJpegLen);
 #else
       uint8_t* jpg_buf = NULL;
       if (!fmt2jpg(changeMap, resizeDimLen, RESIZE_DIM, RESIZE_DIM, PIXFORMAT_RGB888, JPEG_QUAL, &jpg_buf, &motionJpegLen))
-        LOG_WRN("motionDetect: fmt2jpg() failed"); 
-      memcpy(motionJpeg, jpg_buf, motionJpegLen); 
+        LOG_WRN("motionDetect: fmt2jpg() failed");
+      memcpy(motionJpeg, jpg_buf, motionJpegLen);
       free(jpg_buf);
       jpg_buf = NULL;
 #endif
@@ -329,9 +339,9 @@ bool checkMotion(camera_fb_t* fb, bool motionStatus, bool lightLevelOnly) {
 #endif
         }
 #endif
-      } 
+      }
     } else motionCnt = 0;
-  
+
     if (motionStatus && !motionCnt) {
       // insufficient change or motion not classified
       LOG_VRB("***** Motion - STOP");
@@ -343,11 +353,11 @@ bool checkMotion(camera_fb_t* fb, bool motionStatus, bool lightLevelOnly) {
         mqttPublishPath("motion", "off");
       }
 #endif
-    } 
+    }
     if (motionStatus) LOG_VRB("*** Motion - ongoing %u frames", motionCnt);
   }
-  
-  if (dbgVerbose) checkMemory();  
+
+  if (dbgVerbose) checkMemory();
   LOG_VRB("============================");
   // motionStatus indicates whether motion previously ongoing or not
   return nightTime ? false : motionStatus;
@@ -362,7 +372,7 @@ bool checkMotion(camera_fb_t* fb, bool motionStatus, bool lightLevelOnly) {
 static void jpgReduce(int inWidth, int inHeight, uint8_t downsize, int* outWidth, int* outHeight) {
   // downsize then round width and height up to the nearest multiple of 8 while preserving the aspect ratio
   uint8_t roundTo8 = 8; // new width and height must be multiples of 8
-  // Calculate the original aspect ratio 
+  // Calculate the original aspect ratio
   inWidth /= downsize;
   inHeight /= downsize;
   float aspectRatio = (float)(inWidth) / inHeight;
@@ -374,7 +384,7 @@ static void jpgReduce(int inWidth, int inHeight, uint8_t downsize, int* outWidth
 
   // determine larger dimension
   int newLarger = inWidth;
-  int newSmaller = inHeight;   
+  int newSmaller = inHeight;
   if (inWidth < inHeight) {
     newLarger = inHeight;
     newSmaller = inWidth;
@@ -382,7 +392,7 @@ static void jpgReduce(int inWidth, int inHeight, uint8_t downsize, int* outWidth
 
   // Round the larger dimension up to the nearest multiple of 8.
   newLarger = roundUpToMultiple(inWidth, roundTo8);
-  
+
   // Calculate the new smaller based on the new larger and original aspect ratio, then round up.
   newSmaller = (int)(ceil((float)newLarger / aspectRatio));
   newSmaller = roundUpToMultiple(newSmaller, roundTo8);
@@ -523,7 +533,7 @@ static bool jpg2rgb(const uint8_t* src, size_t src_len, uint8_t* out, uint8_t sc
   };
   esp_jpeg_image_output_t output_img = {};
   esp_err_t res = esp_jpeg_decode(&jpeg_cfg, &output_img);
-  if (res != ESP_OK) LOG_WRN("jpg2rgb failure: %s", espErrMsg(res)); 
+  if (res != ESP_OK) LOG_WRN("jpg2rgb failure: %s", espErrMsg(res));
   return (res == ESP_OK) ? true : false;
 }
 
@@ -549,7 +559,7 @@ static bool _rgb_write(void * arg, uint16_t x, uint16_t y, uint16_t w, uint16_t 
       // write start
       jpeg->width = w;
       jpeg->height = h;
-    } 
+    }
     return true;
   }
 
@@ -593,7 +603,7 @@ static bool jpg2rgb(const uint8_t* src, size_t src_len, uint8_t* out, uint8_t sc
   jpeg.output = out;
   jpeg.data_offset = 0;
   esp_err_t res = esp_jpg_decode(src_len, (jpg_scale_t)scale, _jpg_read, _rgb_write, (void*)&jpeg);
-  if (res != ESP_OK) LOG_WRN("jpg2rgb failure: %s", espErrMsg(res)); 
+  if (res != ESP_OK) LOG_WRN("jpg2rgb failure: %s", espErrMsg(res));
   return (res == ESP_OK) ? true : false;
 }
 
@@ -601,9 +611,8 @@ static bool jpg2rgb(const uint8_t* src, size_t src_len, uint8_t* out, uint8_t sc
 
 #endif // INCLUDE_NEW_JPG
 
-#else 
+#else
 // dummies
 bool isNight(uint8_t nightSwitch) {return false;}
 
 #endif // AUXILIARY
-
