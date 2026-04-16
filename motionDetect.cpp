@@ -138,11 +138,14 @@ static void rescaleImage(const uint8_t* input, int inputWidth, int inputHeight, 
 }
 
 static void rgbToGray(uint8_t* buffer, int width, int height) {
-  // convert rgb buffer to grayscale in place
-  for (int i = 0; i < width * height; ++i) {
-    int index = i * 3;
+  // convert rgb buffer to grayscale in place using pointer bumping for performance
+  int pixels = width * height;
+  uint8_t* src = buffer;
+  uint8_t* dst = buffer;
+  for (int i = 0; i < pixels; ++i) {
     // Calculate grayscale value using luminance formula
-    buffer[i] = (uint8_t)(((77 * buffer[index]) + (150 * buffer[index + 1]) + (29 * buffer[index + 2])) >> 8);
+    *dst++ = (uint8_t)(((77 * src[0]) + (150 * src[1]) + (29 * src[2])) >> 8);
+    src += 3;
   }
 }
 
