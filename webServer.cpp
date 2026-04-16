@@ -98,17 +98,23 @@ bool checkAuth(httpd_req_t* req) {
     size_t credLen = strlen(Auth_Name) + strlen(Auth_Pass) + 2; // +2 for colon & terminator
     char credentials[credLen];
     snprintf(credentials, credLen, "%s:%s", Auth_Name, Auth_Pass);
-    size_t authLen = httpd_req_get_hdr_value_len(req, "Authorization") + 1;
-    if (authLen) {
+    const char* encodedCreds = encode64(credentials);
+    size_t expectedLen = strlen("Basic ") + strlen(encodedCreds) + 1;
+    char expectedAuth[expectedLen];
+    snprintf(expectedAuth, expectedLen, "Basic %s", encodedCreds);
+
+    size_t authHdrLen = httpd_req_get_hdr_value_len(req, "Authorization");
+    bool authenticated = false;
+
+    if (authHdrLen) {
       // check credentials supplied are valid
+      size_t authLen = authHdrLen + 1;
       char auth[authLen];
-      httpd_req_get_hdr_value_str(req, "Authorization", auth, authLen);
-      const char* expected_encoded = encode64(credentials);
-      char expected_auth[strlen(expected_encoded) + 7];
-      snprintf(expected_auth, sizeof(expected_auth), "Basic %s", expected_encoded);
-      if (strcmp(auth, expected_auth) != 0) authLen = 0; // credentials not valid
+      if (httpd_req_get_hdr_value_str(req, "Authorization", auth, authLen) == ESP_OK) {
+        if (strcmp(auth, expectedAuth) == 0) authenticated = true;
+      }
     }
-    if (!authLen) {
+    if (!authenticated) {
       // not authenticated
       httpd_resp_set_hdr(req, "WWW-Authenticate", "Basic");
       httpd_resp_set_status(req, "401 Unauthorised");
@@ -169,7 +175,8 @@ esp_err_t extractQueryKeyVal(httpd_req_t *req, char* variable, char* value) {
   char* endPtr = strchr(variable, '=');
   if (endPtr != NULL) {
     *endPtr = 0; // split variable into 2 strings, first is key name
-    strcpy(value, variable + strlen(variable) + 1); // value is now second part of string
+    strncpy(value, variable + strlen(variable) + 1, IN_FILE_NAME_LEN - 1); // value is now second part of string
+    value[IN_FILE_NAME_LEN - 1] = 0; // ensure null termination
     if (isPathTraversal(variable) || isPathTraversal(value)) {
       LOG_WRN("Path traversal attempt detected in query string");
       httpd_resp_set_status(req, "400 Bad Request");
@@ -205,26 +212,27 @@ static esp_err_t webHandler(httpd_req_t* req) {
   }
 
   // check file extension to determine required processing before response sent to browser
+  size_t varLen = strlen(variable); // Bolt: Cache length to prevent O(N^2) behavior in if/else chain
   if (!strcmp(variable, "OTA.htm")) {
     // request for built in OTA page, if index html defective
     httpd_resp_set_type(req, "text/html");
     return httpd_resp_sendstr(req, otaPage_html);
-  } else if (!strcmp(HTML_EXT, variable+(strlen(variable)-strlen(HTML_EXT)))) {
+  } else if (varLen >= strlen(HTML_EXT) && !strcmp(HTML_EXT, variable+(varLen-strlen(HTML_EXT)))) {
     // any other html file
     httpd_resp_set_type(req, "text/html");
-  } else if (!strcmp(JS_EXT, variable+(strlen(variable)-strlen(JS_EXT)))) {
+  } else if (varLen >= strlen(JS_EXT) && !strcmp(JS_EXT, variable+(varLen-strlen(JS_EXT)))) {
     // any js file
     httpd_resp_set_type(req, "text/javascript");
-  } else if (!strcmp(CSS_EXT, variable+(strlen(variable)-strlen(CSS_EXT)))) {
+  } else if (varLen >= strlen(CSS_EXT) && !strcmp(CSS_EXT, variable+(varLen-strlen(CSS_EXT)))) {
     // any css file
     httpd_resp_set_type(req, "text/css");
-  } else if (!strcmp(TEXT_EXT, variable+(strlen(variable)-strlen(TEXT_EXT)))) {
+  } else if (varLen >= strlen(TEXT_EXT) && !strcmp(TEXT_EXT, variable+(varLen-strlen(TEXT_EXT)))) {
     // any text file
     httpd_resp_set_type(req, "text/plain");
-  } else if (!strcmp(ICO_EXT, variable+(strlen(variable)-strlen(ICO_EXT)))) {
+  } else if (varLen >= strlen(ICO_EXT) && !strcmp(ICO_EXT, variable+(varLen-strlen(ICO_EXT)))) {
     // any icon file
     httpd_resp_set_type(req, "image/x-icon");
-  } else if (!strcmp(SVG_EXT, variable+(strlen(variable)-strlen(SVG_EXT)))) {
+  } else if (varLen >= strlen(SVG_EXT) && !strcmp(SVG_EXT, variable+(varLen-strlen(SVG_EXT)))) {
     // any svg file
     httpd_resp_set_type(req, "image/svg+xml");
   } else LOG_WRN("Unknown file type %s", variable);
@@ -241,7 +249,8 @@ static esp_err_t controlHandler(httpd_req_t *req) {
   if (extractQueryKeyVal(req, variable, value) != ESP_OK) return ESP_FAIL;
   if (!strcmp(variable, "displayLog")) displayLog(req);
   else {
-    strcpy(value, variable + strlen(variable) + 1); // value points to second part of string
+    strncpy(value, variable + strlen(variable) + 1, IN_FILE_NAME_LEN - 1); // value points to second part of string
+    value[IN_FILE_NAME_LEN - 1] = 0; // ensure null termination
     if (!strcmp(variable, "reset")) {
       httpd_resp_sendstr(req, NULL); // stop browser resending reset
       doRestart(value);
@@ -590,10 +599,10 @@ static void https_server_user_callback(esp_https_server_user_cb_arg_t *user_cb) 
 
 static esp_err_t customOrNotFoundHandler(httpd_req_t *req, httpd_err_code_t err) {
   // either handle WebDAV methods or report non existent URI
-  if (req->method == HTTP_OPTIONS) sendCrossOriginHeader(req);
 #if INCLUDE_WEBDAV
   if (strncmp(req->uri, WEBDAV, strlen(WEBDAV)) == 0) return handleWebDav(req) ? ESP_OK : ESP_FAIL;
 #endif
+  if (req->method == HTTP_OPTIONS) return sendCrossOriginHeader(req);
   // For any other URI send 404 and close socket
   httpd_resp_send_404(req);
   return ESP_FAIL;
