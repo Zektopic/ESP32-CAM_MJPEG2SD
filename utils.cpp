@@ -34,7 +34,7 @@ UBaseType_t HEAP_MEM; // allow some task stacks to use psram if available
 /************************** Network (WiFi/Ethernet) **************************/
 
 #include <esp_task_wdt.h>
- 
+
 /** Do not hard code anything below here unless you know what you are doing **/
 /** Use the web interface to configure wifi settings **/
 
@@ -65,7 +65,7 @@ int ethMiso = -1; // W5500 SPI data pin
 int ethMosi = -1; // W5500 SPI data pin
 
 // basic HTTP Authentication access to web page
-char Auth_Name[MAX_HOST_LEN] = ""; 
+char Auth_Name[MAX_HOST_LEN] = "";
 char Auth_Pass[MAX_PWD_LEN] = "";
 
 int responseTimeoutSecs = 10; // time to wait for FTP or SMTP response
@@ -82,18 +82,18 @@ static void boardInfo();
 int netMode = 0; // 0=WiFi only, 1=Ethernet only, 2=Ethernet+AP
 
 // LAN8720
-#define ETH_PHY_ADDR  0 
+#define ETH_PHY_ADDR  0
 #define ETH_CLK_MODE  ETH_CLOCK_GPIO0_IN // external clock from crystal oscillator
 
-static void setupMdnsHost() {  
-  // set up MDNS service 
+static void setupMdnsHost() {
+  // set up MDNS service
   char mdnsName[MAX_IP_LEN]; // max mdns host name length
   snprintf(mdnsName, MAX_IP_LEN, "%.*s", MAX_IP_LEN - 1, hostName);
   if (MDNS.begin(mdnsName)) {
     // Add service to MDNS
     useHttps ? MDNS.addService("https", "tcp", HTTPS_PORT) : MDNS.addService("http", "tcp", HTTP_PORT);
     MDNS.addService("ws", "udp", 83);
-    MDNS.addService("ftp", "tcp", 21);    
+    MDNS.addService("ftp", "tcp", 21);
     LOG_INF("mDNS service: http%s://%s.local", useHttps ? "s" : "", mdnsName);
   } else LOG_WRN("mDNS host: %s Failed", mdnsName);
   debugMemory("setupMdnsHost");
@@ -108,7 +108,7 @@ static const char* wifiStatusStr(wl_status_t wlStat) {
     case WL_CONNECTED: return "WL_CONNECTED";
     case WL_CONNECT_FAILED: return "WL_CONNECT_FAILED";
     case WL_CONNECTION_LOST: return "WL_CONNECTION_LOST";
-    case WL_DISCONNECTED: return "unable to connect";  
+    case WL_DISCONNECTED: return "unable to connect";
     case WL_STOPPED: return "wifi stopped";
     default: return "Invalid WiFi.status";
   }
@@ -188,14 +188,14 @@ static void setWifiAP() {
     WiFi.AP.begin();
     // Set access point with static ip if provided
     if (strlen(AP_ip) > 1) {
-      LOG_INF("Set AP static IP :%s, %s, %s", AP_ip, AP_gw, AP_sn);  
+      LOG_INF("Set AP static IP :%s, %s, %s", AP_ip, AP_gw, AP_sn);
       IPAddress _ip, _gw, _sn, _ns1, _ns2;
       _ip.fromString(AP_ip);
       _gw.fromString(AP_gw);
       _sn.fromString(AP_sn);
       // set static ip
       WiFi.AP.config(_ip, _gw, _sn);
-    } 
+    }
     WiFi.AP.create(AP_SSID, AP_Pass);
     debugMemory("setWifiAP");
   }
@@ -215,9 +215,9 @@ static void setWifiSTA() {
       // set static ip
       WiFi.STA.config(_ip, _gw, _sn, _ns1); // need DNS for SNTP
       LOG_INF("Wifi Station set static IP");
-    } 
+    }
   } else LOG_INF("Wifi Station IP from DHCP");
-  WiFi.STA.enableIPv6(USE_IP6); 
+  WiFi.STA.enableIPv6(USE_IP6);
   WiFi.STA.begin();
   WiFi.STA.connect(ST_SSID, ST_Pass);
   debugMemory("setWifiSTA");
@@ -257,7 +257,7 @@ static bool startEth() {
                    ethSclk,
                    ethMiso,
                    ethMosi,
-                   ETH_PHY_SPI_FREQ_MHZ)) { 
+                   ETH_PHY_SPI_FREQ_MHZ)) {
       LOG_WRN("Ethernet W5500 init failed");
       return false;
     }
@@ -271,10 +271,10 @@ static bool startEth() {
     // RMII uses predefined pins 19, 21, 22, 25, 26, 27
     if (!ETH.begin(ETH_PHY_LAN8720,
                    ETH_PHY_ADDR,
-                   ethCS,  // LAN8720 MDC 
+                   ethCS,  // LAN8720 MDC
                    ethInt, // LAN8720 MDIO
                    ethRst, // LAN8720 POWER
-                   ETH_CLK_MODE)) { 
+                   ETH_CLK_MODE)) {
       LOG_WRN("Ethernet LAN8720 init failed");
       return false;
     }
@@ -321,7 +321,7 @@ static bool startWifi(bool firstcall = true) {
     WiFi.STA.setHostname(hostName);
     delay(100);
   }
-  
+
   wl_status_t wlStat = WL_NO_SSID_AVAIL;
   if (netMode == 0) {
     // connect to Wifi station
@@ -343,8 +343,8 @@ static bool startWifi(bool firstcall = true) {
     }
     if (wlStat != WL_CONNECTED) LOG_WRN("SSID %s not connected %s", ST_SSID, wifiStatusStr(wlStat));
   }
-  
-  if (wlStat == WL_NO_SSID_AVAIL || allowAP) setWifiAP(); // AP allowed if no Station SSID eg on first time use 
+
+  if (wlStat == WL_NO_SSID_AVAIL || allowAP) setWifiAP(); // AP allowed if no Station SSID eg on first time use
 #if CONFIG_IDF_TARGET_ESP32S3
   if (netMode == 0) setupMdnsHost(); // not on ESP32 as uses 6k of heap
 #endif
@@ -395,7 +395,7 @@ void resetWatchDog(int wdIndex, uint32_t wdTimeout) {
   if (watchDogStarted[wdIndex]) esp_task_wdt_reset();
   else {
     // setup watchdog on first call
-    esp_task_wdt_deinit(); 
+    esp_task_wdt_deinit();
     esp_task_wdt_config_t twdt_config = {
       .timeout_ms = wdTimeout,
       .idle_core_mask = (1 << portNUM_PROCESSORS) - 1,
@@ -480,20 +480,20 @@ static void pingTimeout(esp_ping_handle_t hdl, void *args) {
 static void startPing() {
   IPAddress ipAddr = netGatewayIP();
   if (!ipAddr) return; // don't start ping until gateway is known
-  ip_addr_t pingDest; 
+  ip_addr_t pingDest;
   IP_ADDR4(&pingDest, ipAddr[0], ipAddr[1], ipAddr[2], ipAddr[3]);
   esp_ping_config_t pingConfig = ESP_PING_DEFAULT_CONFIG();
-  pingConfig.target_addr = pingDest;  
+  pingConfig.target_addr = pingDest;
   pingConfig.count = ESP_PING_COUNT_INFINITE;
   pingConfig.interval_ms = wifiTimeoutSecs * 1000;
   pingConfig.timeout_ms = 5000;
   pingConfig.task_stack_size = PING_STACK_SIZE;
   pingConfig.task_prio = 1;
-  // set ping task callback functions 
+  // set ping task callback functions
   esp_ping_callbacks_t cbs;
   cbs.on_ping_success = pingSuccess;
   cbs.on_ping_timeout = pingTimeout;
-  cbs.on_ping_end = NULL; 
+  cbs.on_ping_end = NULL;
   cbs.cb_args = NULL;
   esp_ping_new_session(&pingConfig, &cbs, &pingHandle);
   esp_ping_start(pingHandle);
@@ -515,7 +515,7 @@ bool doGetExtIP = true;
 
 void getExtIP() {
   // Get external IP address
-  if (doGetExtIP) { 
+  if (doGetExtIP) {
     NetworkClientSecure hclient;
     if (remoteServerConnect(hclient, EXT_IP_HOST, HTTPS_PORT, "", GETEXTIP)) {
       HTTPClient https;
@@ -524,7 +524,7 @@ void getExtIP() {
         char newExtIp[MAX_IP_LEN] = "";
         httpCode = https.GET();
         if (httpCode == HTTP_CODE_OK) {
-          strncpy(newExtIp, https.getString().c_str(), sizeof(newExtIp) - 1);  
+          strncpy(newExtIp, https.getString().c_str(), sizeof(newExtIp) - 1);
           if (strcmp(newExtIp, extIP)) {
             // external IP changed
             strncpy(extIP, newExtIp, sizeof(extIP) - 1);
@@ -532,9 +532,9 @@ void getExtIP() {
             updateStatus("save", "0");
             externalAlert("External IP changed", extIP);
           } else LOG_INF("External IP: %s", extIP);
-        } else LOG_WRN("External IP request failed, error: %s", https.errorToString(httpCode).c_str());    
+        } else LOG_WRN("External IP request failed, error: %s", https.errorToString(httpCode).c_str());
         if (httpCode != HTTP_CODE_OK) doGetExtIP = false;
-        https.end();     
+        https.end();
       }
       remoteServerClose(hclient);
     }
@@ -564,7 +564,7 @@ bool remoteServerConnect(NetworkClientSecure& sclient, const char* serverName, u
         // not connected, so try for a period of time
         if (useSecure && strlen(serverCert)) sclient.setCACert(serverCert);
         else sclient.setInsecure(); // no cert check
-    
+
         uint32_t startTime = millis();
         while (!sclient.connected()) {
           if (sclient.connect(serverName, serverPort)) break;
@@ -628,7 +628,7 @@ bool getLocalNTP() {
   LOG_INF("Using NTP server: %s", ntpServer);
   configTzTime(timezone, ntpServer);
   if (getEpoch() > 10000) {
-    showLocalTime("NTP");    
+    showLocalTime("NTP");
     return true;
   }
   else {
@@ -727,17 +727,22 @@ bool calcProgress(int progressVal, int totalVal, int percentReport, uint8_t &pcP
   } else return false;
 }
 
+// Security enhancement: Fix URL encode buffer overflow
 bool urlEncode(const char* inVal, char* encoded, size_t maxSize) {
   int encodedLen = 0;
   char hexTable[] = "0123456789ABCDEF";
   while (*inVal) {
-    if (isalnum(*inVal) || strchr("$-_.+!*'(),:@~#", *inVal)) *encoded++ = *inVal;
-    else {
-      encodedLen += 3; 
-      if (encodedLen >= maxSize) return false;  // Buffer overflow
+    if (isalnum((unsigned char)*inVal) || strchr("$-_.+!*'(),:@~#", *inVal)) {
+      encodedLen++;
+      // Check considering null terminator
+      if (encodedLen + 1 > maxSize) return false;
+      *encoded++ = *inVal;
+    } else {
+      encodedLen += 3;
+      if (encodedLen + 1 > maxSize) return false;  // Buffer overflow
       *encoded++ = '%';
-      *encoded++ = hexTable[(*inVal) >> 4];
-      *encoded++ = hexTable[*inVal & 0xf];
+      *encoded++ = hexTable[((unsigned char)*inVal) >> 4];
+      *encoded++ = hexTable[((unsigned char)*inVal) & 0xf];
     }
     inVal++;
   }
@@ -746,16 +751,19 @@ bool urlEncode(const char* inVal, char* encoded, size_t maxSize) {
 }
 
 void urlDecode(char* inVal) {
-  // replace url encoded characters
-  std::string decodeVal(inVal); 
-  std::string replaceVal = decodeVal;
-  std::smatch match; 
-  while (regex_search(decodeVal, match, std::regex("(%)([0-9A-Fa-f]{2})"))) {
-    std::string s(1, static_cast<char>(std::strtoul(match.str(2).c_str(),nullptr,16))); // hex to ascii 
-    replaceVal = std::regex_replace(replaceVal, std::regex(match.str(0)), s);
-    decodeVal = match.suffix().str();
+  // replace url encoded characters in-place
+  char* readPtr = inVal;
+  char* writePtr = inVal;
+  while (*readPtr) {
+    if (*readPtr == '%' && isxdigit((unsigned char)readPtr[1]) && isxdigit((unsigned char)readPtr[2])) {
+      char hexStr[3] = { readPtr[1], readPtr[2], 0 };
+      *writePtr++ = (char)strtoul(hexStr, NULL, 16);
+      readPtr += 3;
+    } else {
+      *writePtr++ = *readPtr++;
+    }
   }
-  strcpy(inVal, replaceVal.c_str());
+  *writePtr = '\0';
 }
 
 void listBuff (const uint8_t* b, size_t len) {
@@ -795,7 +803,7 @@ void replaceChar(char* s, char c, char r) {
   int reader = 0;
   while (s[reader]) {
     if (s[reader] == c) s[reader] = r;
-    reader++;       
+    reader++;
   }
 }
 
@@ -838,10 +846,10 @@ char* toCase(char *s, bool toLower) {
 /********************** analog functions ************************/
 
 uint16_t smoothAnalog(int analogPin, int samples) {
-  // get averaged analog pin value 
-  uint32_t level = 0; 
+  // get averaged analog pin value
+  uint32_t level = 0;
   if (analogPin > 0) {
-    for (int j = 0; j < samples; j++) level += analogRead(analogPin); 
+    for (int j = 0; j < samples; j++) level += analogRead(analogPin);
     level /= samples;
   }
   return level;
@@ -853,7 +861,7 @@ void setupADC() {
 }
 
 float smoothSensor(float latestVal, float smoothedVal, float alpha) {
-  // simple Exponential Moving Average filter 
+  // simple Exponential Moving Average filter
   // where alpha between 0.0 (max smooth) and 1.0 (no smooth)
   return (latestVal * alpha) + smoothedVal * (1.0 - alpha);
 }
@@ -884,20 +892,20 @@ float readInternalTemp() {
   // convert on chip raw temperature in F to Celsius degrees
   intTemp = (temprature_sens_read() - 32) / 1.8;  // value of 55 means not present
 #elif CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S3
-    temperature_sensor_get_celsius(temp_sensor, &intTemp); 
+    temperature_sensor_get_celsius(temp_sensor, &intTemp);
 #endif
   return intTemp;
 }
 
 /*********************** Remote loggging ***********************/
 /*
- * Log mode selection in user interface: 
+ * Log mode selection in user interface:
  * false : log to serial / web monitor only
  * true  : also saves log on SD card. To download the log generated, either:
  *  - To view the log, press Show Log button on the browser
  * - To clear the log file contents, on log web page press Clear Log link
  */
- 
+
 #define MAX_OUT 200
 static va_list arglist;
 static char fmtBuf[MAX_OUT];
@@ -928,7 +936,7 @@ static void ramLogClear() {
   mlogEnd = 0;
   memset(messageLog, 0, RAM_LOG_LEN);
 }
-  
+
 static void ramLogStore(size_t msgLen) {
   // save log entry in ram buffer
   if (mlogEnd + msgLen >= RAM_LOG_LEN) {
@@ -944,14 +952,14 @@ static void ramLogStore(size_t msgLen) {
 
 void flush_log(bool andClose) {
   if (log_remote_fp != NULL) {
-    fsync(fileno(log_remote_fp));  
+    fsync(fileno(log_remote_fp));
     fflush(log_remote_fp);
     if (andClose) {
       LOG_INF("Closed SD file for logging");
       fclose(log_remote_fp);
       log_remote_fp = NULL;
     } else delay(1000);
-  }  
+  }
 }
 
 static void remote_log_init_SD() {
@@ -975,7 +983,7 @@ void reset_log() {
     STORAGE.remove(LOG_FILE_PATH);
     remote_log_init_SD();
   }
-  LOG_INF("Cleared %s log file", logType == 0 ? "RAM" : "SD"); 
+  LOG_INF("Cleared %s log file", logType == 0 ? "RAM" : "SD");
 }
 
 void remote_log_init() {
@@ -1001,10 +1009,10 @@ void logPrint(const char *format, ...) {
   if (logMutex == NULL) logSetup();
   if (xSemaphoreTake(logMutex, pdMS_TO_TICKS(logWait)) == pdTRUE) {
     strncpy(fmtBuf, format, MAX_OUT);
-    va_start(arglist, format); 
+    va_start(arglist, format);
     vTaskPrioritySet(logHandle, uxTaskPriorityGet(NULL) + 1);
     xTaskNotifyGive(logHandle);
-    outBuf[MAX_OUT - 2] = '\n'; 
+    outBuf[MAX_OUT - 2] = '\n';
     outBuf[MAX_OUT - 1] = 0; // ensure always have ending newline
     xSemaphoreTake(logSemaphore, portMAX_DELAY); // wait for logTask to complete
 
@@ -1021,18 +1029,18 @@ void logPrint(const char *format, ...) {
     if (monitorOpen) Serial.print(outBuf); // output to monitor console if attached
     else delay(10); // allow time for other tasks
     if (msgLen > 1) {
-      ramLogStore(msgLen); // store in rtc ram 
+      ramLogStore(msgLen); // store in rtc ram
       if (sdLog) {
         if (log_remote_fp != NULL) {
           // output to SD if file opened
           fwrite(outBuf, sizeof(char), msgLen, log_remote_fp); // log.txt
           // periodic sync to SD
           if (counter_write++ % WRITE_CACHE_CYCLE == 0) fsync(fileno(log_remote_fp));
-        } 
+        }
       }
     }
     xSemaphoreGive(logMutex);
-  } 
+  }
 }
 
 void logLine() {
@@ -1060,7 +1068,7 @@ void logSetup() {
     Serial.begin(115200);
     Serial.setDebugOutput(DBG_ON);
     printf("\n\n");
-    if (DEBUG_MEM) printf("init > Free: heap %lu\n", ESP.getFreeHeap()); 
+    if (DEBUG_MEM) printf("init > Free: heap %lu\n", ESP.getFreeHeap());
     (DBG_ON) ? esp_log_level_set("*", DBG_LVL) : esp_log_level_set("*", ESP_LOG_NONE); // suppress esp log m+essages
     esp_log_set_vprintf(vprintfRedirect); // redirect esp_log output to app log
     if (crashLoop == MAGIC_NUM) snprintf(startupFailure, SF_LEN, STARTUP_FAIL "Crash loop detected, check log %s", (brownoutStatus == 'B' || brownoutStatus == 'R') ? "(brownout)" : " ");
@@ -1078,7 +1086,7 @@ void logSetup() {
     boardInfo();
     LOG_INF("Compiled with arduino-esp32 v%s", ESP_ARDUINO_VERSION_STR);
     wakeupResetReason();
-     if (jsonBuff == NULL) jsonBuff = psramFound() ? (char*)ps_malloc(JSON_BUFF_LEN) : (char*)malloc(JSON_BUFF_LEN); 
+     if (jsonBuff == NULL) jsonBuff = psramFound() ? (char*)ps_malloc(JSON_BUFF_LEN) : (char*)malloc(JSON_BUFF_LEN);
     if (!DBG_ON) esp_log_level_set("*", ESP_LOG_ERROR); // show ESP_LOG_ERROR messages during init
     debugMemory("logSetup");
   }
@@ -1106,29 +1114,33 @@ const char* espErrMsg(esp_err_t errCode) {
 
 const uint8_t* encode64chunk(const uint8_t* inp, int rem) {
   // receive 3 byte input buffer and return 4 byte base64 buffer
-  rem = 3 - rem; // last chunk may be less than 3 bytes 
+  rem = 3 - rem; // last chunk may be less than 3 bytes
   uint32_t buff = 0; // hold 3 bytes as shifted 24 bits
   static uint8_t b64[4];
   // shift input into buffer
-  for (int i = 0; i < 3 - rem; i++) buff |= inp[i] << (8*(2-i)); 
+  for (int i = 0; i < 3 - rem; i++) buff |= inp[i] << (8*(2-i));
   // shift 6 bit output from buffer and encode
-  for (int i = 0; i < 4 - rem; i++) b64[i] = BASE64[buff >> (6*(3-i)) & 0x3F]; 
+  for (int i = 0; i < 4 - rem; i++) b64[i] = BASE64[buff >> (6*(3-i)) & 0x3F];
   // filler for last chunk if less than 3 bytes
-  for (int i = 0; i < rem; i++) b64[3-i] = '='; 
+  for (int i = 0; i < rem; i++) b64[3-i] = '=';
   return b64;
 }
 
 const char* encode64(const char* inp) {
   // helper to base64 encode strings up to 90 chars long
+  // Bolt: Use memcpy with outLen offset to prevent O(N^2) Schlemiel the Painter's algorithm from strncat
   static char encoded[121]; // space for 4/3 expansion + terminator
-  encoded[0] = 0;
   int len = strlen(inp);
   if (len > 90) {
     LOG_WRN("Input string too long: %u chars", len);
     len = 90;
   }
-  for (int i = 0; i < len; i += 3) 
-    strncat(encoded, (char*)encode64chunk((uint8_t*)inp + i, min(len - i, 3)), 4);
+  int outLen = 0;
+  for (int i = 0; i < len; i += 3) {
+    memcpy(encoded + outLen, encode64chunk((uint8_t*)inp + i, min(len - i, 3)), 4);
+    outLen += 4;
+  }
+  encoded[outLen] = 0;
   return encoded;
 }
 
@@ -1138,31 +1150,31 @@ const char* encode64(const char* inp) {
 #if ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 1, 0)
 
 static const char* getTaskStateString(eTaskState state) {
-  // 
-  switch (state) { 
-    case eRunning: return "Running"; 
-    case eReady: return "Ready"; 
-    case eBlocked: return "Blocked"; 
-    case eSuspended: return "Suspended"; 
-    case eDeleted: return "Deleted"; 
-    case eInvalid: return "Invalid"; 
+  //
+  switch (state) {
+    case eRunning: return "Running";
+    case eReady: return "Ready";
+    case eBlocked: return "Blocked";
+    case eSuspended: return "Suspended";
+    case eDeleted: return "Deleted";
+    case eInvalid: return "Invalid";
     default: return "Unknown";
   }
 }
 
-static void statsTask(void *arg) { 
+static void statsTask(void *arg) {
   // Output real time task stats periodically
   #define STATS_TASK_PRIO     10
   #define STATS_INTERVAL      30000 // ms
   #define ARRAY_SIZE_OFFSET   40   // Increase this if ESP_ERR_INVALID_SIZE
 
-  bool onceOnly = *(bool*)arg; 
-  esp_err_t ret = ESP_OK;  
+  bool onceOnly = *(bool*)arg;
+  esp_err_t ret = ESP_OK;
   TaskStatus_t *statsArray = NULL;
   UBaseType_t statsArraySize;
   static configRUN_TIME_COUNTER_TYPE prevRunCounter = 0;
   configRUN_TIME_COUNTER_TYPE runCounter;
-  
+
   do {
     delay(STATS_INTERVAL);
 
@@ -1190,15 +1202,15 @@ static void statsTask(void *arg) {
 
       logPrint("\nTask stats interval %lus on %u cores\n", STATS_INTERVAL / 1000, CONFIG_FREERTOS_NUMBER_OF_CORES);
       logPrint("\n| %-16s | %-10s | %-3s | %-4s | %-6s |\n", "Task name", "State", "Pri", "Core", "Core%");
-      logPrint("|------------------|------------|-----|------|--------|\n"); 
+      logPrint("|------------------|------------|-----|------|--------|\n");
       // Match each task in start_array to those in the end_array
       for (int i = 0; i < statsArraySize; i++) {
         float percentage_time = ((float)statsArray[i].ulRunTimeCounter * 100.0) / runCounter;
         UBaseType_t coreId = statsArray[i].xCoreID;
-        logPrint("| %-16s | %-10s | %3u | %4c | %5.1f%% |\n", 
+        logPrint("| %-16s | %-10s | %3u | %4c | %5.1f%% |\n",
           statsArray[i].pcTaskName, getTaskStateString(statsArray[i].eCurrentState), (int)statsArray[i].uxCurrentPriority, coreId == tskNO_AFFINITY ? '*' : '0' + (int)coreId, percentage_time);
       }
-      logPrint("|------------------|------------|-----|------|--------|\n"); 
+      logPrint("|------------------|------------|-----|------|--------|\n");
     } while (false);
 
     prevRunCounter = runCounter;
@@ -1228,7 +1240,7 @@ void checkMemory(const char* source) {
 uint32_t checkStackUse(TaskHandle_t thisTask, int taskIdx) {
   // get minimum free stack size for task since started
   // taskIdx used to index minStack[] array
-  static uint32_t minStack[20]; 
+  static uint32_t minStack[20];
   uint32_t freeStack = 0;
   if (thisTask != NULL) {
     freeStack = (uint32_t)uxTaskGetStackHighWaterMark(thisTask);
@@ -1264,7 +1276,7 @@ void doRestart(const char* restartStr) {
 #endif
 #if INCLUDE_MQTT
   if (mqtt_active) stopMqttClient();
-#endif  
+#endif
   resetCrashLoop();
   flush_log(true);
   delay(2000);
@@ -1279,8 +1291,8 @@ static esp_sleep_wakeup_cause_t printWakeupReason() {
     case ESP_SLEEP_WAKEUP_TIMER : LOG_INF("Wakeup by internal timer"); break;
     case ESP_SLEEP_WAKEUP_TOUCHPAD : LOG_INF("Wakeup by touchpad"); break;
     case ESP_SLEEP_WAKEUP_ULP : LOG_INF("Wakeup by ULP program"); break;
-    case ESP_SLEEP_WAKEUP_GPIO: LOG_INF("Wakeup by GPIO"); break;    
-    case ESP_SLEEP_WAKEUP_UART: LOG_INF("Wakeup by UART"); break; 
+    case ESP_SLEEP_WAKEUP_GPIO: LOG_INF("Wakeup by GPIO"); break;
+    case ESP_SLEEP_WAKEUP_UART: LOG_INF("Wakeup by UART"); break;
     default : LOG_INF("Wakeup by reset"); break;
   }
   return wakeup_reason;
@@ -1305,7 +1317,7 @@ static void showBacktrace() {
     sprintf(bt, "%s on core %d", btReason, btCore);
     LOG_WRN("%s", bt);
     bt[0] = 0;
-    for (int i = 0; i < btLen; i++) { 
+    for (int i = 0; i < btLen; i++) {
       snprintf(bt + strlen(bt), sizeof(bt) - strlen(bt) - 11, "0x%08x ", (unsigned int)backtrace[i]); // 11 is size of new trace hex
     }
     LOG_WRN("Paste backtrace below into Arduino Exception Decoder:\n");
@@ -1350,7 +1362,7 @@ void goToSleep(bool deepSleep) {
   // if light sleep, restarts by continuing this function
   LOG_INF("Going into %s sleep", deepSleep ? "deep" : "light");
   delay(100);
-  if (deepSleep) { 
+  if (deepSleep) {
     if (wakePin >= 0) {
       // wakeup on pin low (0) or high (1)
       // needs to be RTC pin and support input pullup/down
@@ -1362,7 +1374,7 @@ void goToSleep(bool deepSleep) {
     // light sleep
     esp_wifi_stop();
     // wakeup on selected pin
-    if (wakePin >= 0) gpio_wakeup_enable((gpio_num_t)wakePin, wakeLevel == 0 ? GPIO_INTR_LOW_LEVEL : GPIO_INTR_HIGH_LEVEL); 
+    if (wakePin >= 0) gpio_wakeup_enable((gpio_num_t)wakePin, wakeLevel == 0 ? GPIO_INTR_LOW_LEVEL : GPIO_INTR_HIGH_LEVEL);
     esp_light_sleep_start();
   }
   // light sleep restarts here
@@ -1410,7 +1422,7 @@ static void initBrownout(void) {
     brownout_ll_intr_clear();
     rtc_isr_register(notifyBrownout, NULL, RTC_CNTL_BROWN_OUT_INT_ENA_M, RTC_INTR_FLAG_IRAM);
     brownout_ll_intr_enable(true);
-    brownoutStatus = 0; 
+    brownoutStatus = 0;
   }
 }
 
@@ -1431,7 +1443,7 @@ static void boardInfo() {
 
 #if defined(CONFIG_SPIRAM_MODE_OCT)
   const char* psramMode = "OPI";
-#else 
+#else
   const char* psramMode = "QSPI";
 #endif
   char memInfo[100] = "none";
