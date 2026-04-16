@@ -175,7 +175,8 @@ esp_err_t extractQueryKeyVal(httpd_req_t *req, char* variable, char* value) {
   char* endPtr = strchr(variable, '=');
   if (endPtr != NULL) {
     *endPtr = 0; // split variable into 2 strings, first is key name
-    strcpy(value, variable + strlen(variable) + 1); // value is now second part of string
+    strncpy(value, variable + strlen(variable) + 1, IN_FILE_NAME_LEN - 1); // value is now second part of string
+    value[IN_FILE_NAME_LEN - 1] = 0; // ensure null termination
     if (isPathTraversal(variable) || isPathTraversal(value)) {
       LOG_WRN("Path traversal attempt detected in query string");
       httpd_resp_set_status(req, "400 Bad Request");
@@ -248,7 +249,8 @@ static esp_err_t controlHandler(httpd_req_t *req) {
   if (extractQueryKeyVal(req, variable, value) != ESP_OK) return ESP_FAIL;
   if (!strcmp(variable, "displayLog")) displayLog(req);
   else {
-    strcpy(value, variable + strlen(variable) + 1); // value points to second part of string
+    strncpy(value, variable + strlen(variable) + 1, IN_FILE_NAME_LEN - 1); // value points to second part of string
+    value[IN_FILE_NAME_LEN - 1] = 0; // ensure null termination
     if (!strcmp(variable, "reset")) {
       httpd_resp_sendstr(req, NULL); // stop browser resending reset
       doRestart(value);
@@ -597,10 +599,10 @@ static void https_server_user_callback(esp_https_server_user_cb_arg_t *user_cb) 
 
 static esp_err_t customOrNotFoundHandler(httpd_req_t *req, httpd_err_code_t err) {
   // either handle WebDAV methods or report non existent URI
-  if (req->method == HTTP_OPTIONS) sendCrossOriginHeader(req);
 #if INCLUDE_WEBDAV
   if (strncmp(req->uri, WEBDAV, strlen(WEBDAV)) == 0) return handleWebDav(req) ? ESP_OK : ESP_FAIL;
 #endif
+  if (req->method == HTTP_OPTIONS) return sendCrossOriginHeader(req);
   // For any other URI send 404 and close socket
   httpd_resp_send_404(req);
   return ESP_FAIL;
