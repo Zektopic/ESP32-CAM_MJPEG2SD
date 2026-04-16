@@ -815,8 +815,9 @@
                       valCntr = 0;
                       inputHtml = '';
                       value.substring(2).split(":").forEach(opt => {
-                        inputHtml += '<label for="' + saveKey + valCntr + '">' + opt + '</label>' +
-                          '<input type="radio" class="configItem" id="' + saveKey + valCntr + '" name="' + saveKey + '" value="' + valCntr +
+                        let radioId = valCntr === 0 ? saveKey : saveKey + '_' + valCntr;
+                        inputHtml += '<label for="' + radioId + '">' + opt + '</label>' +
+                          '<input type="radio" id="' + radioId + '" class="configItem" name="' + saveKey + '" value="' + valCntr +
                           (saveVal == valCntr ? '" checked>' : '">');
                         valCntr++;
                       });
