@@ -111,26 +111,36 @@ bool isNight(uint8_t nightSwitch) {
 }
 
 static void rescaleImage(const uint8_t* input, int inputWidth, int inputHeight, uint8_t* output, int outputWidth, int outputHeight) {
-  // use bilinear interpolation to resize image
-  float xRatio = (float)inputWidth / (float)outputWidth;
-  float yRatio = (float)inputHeight / (float)outputHeight;
+  // use fixed-point integer math for bilinear interpolation to avoid slow floating point operations
+  uint32_t xRatio = ((uint32_t)inputWidth << 16) / outputWidth;
+  uint32_t yRatio = ((uint32_t)inputHeight << 16) / outputHeight;
 
   for (int i = 0; i < outputHeight; ++i) {
+    uint32_t y = i * yRatio;
+    int yL = y >> 16;
+    int yH = yL + 1;
+    if (yH >= inputHeight) yH = inputHeight - 1;
+    uint32_t yWeight = y & 0xFFFF;
+    uint32_t yWeightInv = 65536 - yWeight;
+
     for (int j = 0; j < outputWidth; ++j) {
-      int xL = (int)floor(xRatio * j);
-      int yL = (int)floor(yRatio * i);
-      int xH = (int)ceil(xRatio * j);
-      int yH = (int)ceil(yRatio * i);
-      float xWeight = xRatio * j - xL;
-      float yWeight = yRatio * i - yL;
+      uint32_t x = j * xRatio;
+      int xL = x >> 16;
+      int xH = xL + 1;
+      if (xH >= inputWidth) xH = inputWidth - 1;
+      uint32_t xWeight = x & 0xFFFF;
+      uint32_t xWeightInv = 65536 - xWeight;
+
       for (int channel = 0; channel < colorDepth; ++channel) {
         uint8_t a = input[(yL * inputWidth + xL) * colorDepth + channel];
         uint8_t b = input[(yL * inputWidth + xH) * colorDepth + channel];
         uint8_t c = input[(yH * inputWidth + xL) * colorDepth + channel];
         uint8_t d = input[(yH * inputWidth + xH) * colorDepth + channel];
 
-        float pixel = a * (1 - xWeight) * (1 - yWeight) + b * xWeight * (1 - yWeight)
-                    + c * yWeight * (1 - xWeight) + d * xWeight * yWeight;
+        uint32_t top = (a * xWeightInv + b * xWeight) >> 16;
+        uint32_t bottom = (c * xWeightInv + d * xWeight) >> 16;
+        uint32_t pixel = (top * yWeightInv + bottom * yWeight) >> 16;
+
         output[(i * outputWidth + j) * colorDepth + channel] = (uint8_t)pixel;
       }
     }

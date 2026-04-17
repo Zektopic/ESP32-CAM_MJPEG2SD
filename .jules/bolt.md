@@ -24,6 +24,9 @@
 ## 2024-05-30 - O(N) strlen overhead when building large JSON objects
 **Learning:** When building a large string incrementally across multiple functions (e.g. `buildJsonString` calling `buildAppJsonString`), having the child function return `void` and then using `p += strlen(buffer)` in the parent function forces an O(N) recalculation of the string length just to find the new end of the buffer.
 **Action:** Modify the child function to return a pointer to the new end of the string (`char*`) instead of `void`. The parent function can then directly update its pointer without calling `strlen`, eliminating the overhead.
+## 2025-02-12 - Fixed-point integer math in image processing
+**Learning:** On ESP32 devices, floating-point arithmetic inside tight image processing loops (e.g., bilinear interpolation in `rescaleImage`) causes severe performance bottlenecks because floating point operations are expensive.
+**Action:** Use fixed-point integer math with bitshifting (e.g., scaling ratios by `1 << 16` into `uint32_t`) to optimize performance while maintaining required precision.
 ## 2024-05-30 - O(N^2) String Concatenation in Loops (Schlemiel the Painter's Algorithm)
 **Learning:** When concatenating strings inside a loop in C/C++ (e.g., during base64 encoding), avoid using `strcat` or `strncat`. These functions repeatedly scan the destination string from the beginning to find the null terminator on every single iteration, leading to O(N^2) time complexity.
 **Action:** Always maintain an offset tracking variable (`int outLen = 0`) and use `memcpy` to append data (`memcpy(encoded + outLen, chunk, size); outLen += size;`). This ensures the write location is explicitly known, dropping the time complexity to O(N).
