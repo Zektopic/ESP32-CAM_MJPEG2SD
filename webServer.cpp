@@ -147,12 +147,12 @@ static esp_err_t indexHandler(httpd_req_t* req) {
   return fileHandler(req);
 }
 
-esp_err_t extractHeaderVal(httpd_req_t *req, const char* variable, char* value) {
+esp_err_t extractHeaderVal(httpd_req_t *req, const char* variable, char* value, size_t valueSize) {
   // check if header field present, if so extract value
   esp_err_t res = ESP_FAIL;
   size_t hdrFieldLen = httpd_req_get_hdr_value_len(req, variable);
   if (!hdrFieldLen) return ESP_ERR_INVALID_ARG; // header not present
-  else if (hdrFieldLen >= IN_FILE_NAME_LEN - 1) LOG_WRN("Field %s value too long (%d)", variable, hdrFieldLen);
+  else if (hdrFieldLen >= valueSize - 1) LOG_WRN("Field %s value too long (%d)", variable, hdrFieldLen);
   else {
     res = httpd_req_get_hdr_value_str(req, variable, value, hdrFieldLen + 1);
     if (res != ESP_OK) LOG_ERR("Value for %s could not be retrieved: %s", variable, espErrMsg(res));
@@ -160,7 +160,7 @@ esp_err_t extractHeaderVal(httpd_req_t *req, const char* variable, char* value) 
   return res;
 }
 
-esp_err_t extractQueryKeyVal(httpd_req_t *req, char* variable, char* value) {
+esp_err_t extractQueryKeyVal(httpd_req_t *req, char* variable, char* value, size_t valueSize) {
   // get variable and value pair from URL query
   size_t queryLen = httpd_req_get_url_query_len(req) + 1;
   if (queryLen > FILE_NAME_LEN) {
@@ -175,8 +175,8 @@ esp_err_t extractQueryKeyVal(httpd_req_t *req, char* variable, char* value) {
   char* endPtr = strchr(variable, '=');
   if (endPtr != NULL) {
     *endPtr = 0; // split variable into 2 strings, first is key name
-    strncpy(value, variable + strlen(variable) + 1, IN_FILE_NAME_LEN - 1); // value is now second part of string
-    value[IN_FILE_NAME_LEN - 1] = 0; // ensure null termination
+    strncpy(value, variable + strlen(variable) + 1, valueSize - 1); // value is now second part of string
+    value[valueSize - 1] = 0; // ensure null termination
     if (isPathTraversal(variable) || isPathTraversal(value)) {
       LOG_WRN("Path traversal attempt detected in query string");
       httpd_resp_set_status(req, "400 Bad Request");
@@ -246,7 +246,7 @@ static esp_err_t controlHandler(httpd_req_t *req) {
   // obtain details from query string
   httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
   if (!checkAuth(req)) return ESP_OK;
-  if (extractQueryKeyVal(req, variable, value) != ESP_OK) return ESP_FAIL;
+  if (extractQueryKeyVal(req, variable, value, sizeof(value)) != ESP_OK) return ESP_FAIL;
   if (!strcmp(variable, "displayLog")) displayLog(req);
   else {
     strncpy(value, variable + strlen(variable) + 1, IN_FILE_NAME_LEN - 1); // value points to second part of string

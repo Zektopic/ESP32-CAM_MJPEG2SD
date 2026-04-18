@@ -153,7 +153,7 @@ static bool handleProp() {
   // get depth header
   bool depth = false;
   char value[IN_FILE_NAME_LEN];
-  if (extractHeaderVal(req, "Depth", value) == ESP_OK) depth = (!strcmp(value, "0")) ? false : true;
+  if (extractHeaderVal(req, "Depth", value, sizeof(value)) == ESP_OK) depth = (!strcmp(value, "0")) ? false : true;
 
   // get request payload content if present
   char payload[req->content_len + 1] = {0};
@@ -279,7 +279,7 @@ static bool handleMove() {
   // rename file or folder, or change file location
   bool res = false;
   char dest[IN_FILE_NAME_LEN];
-  if (extractHeaderVal(req, "Destination", dest) == ESP_OK) {
+  if (extractHeaderVal(req, "Destination", dest, sizeof(dest)) == ESP_OK) {
     // obtain destination filename
     res = true;
     urlDecode(dest);
