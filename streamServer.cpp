@@ -290,7 +290,7 @@ esp_err_t appSpecificSustainHandler(httpd_req_t* req) {
   if (checkAuth(req)) { 
     // handle long running request as separate task
     // obtain details from query string
-    if (extractQueryKeyVal(req, variable, value) == ESP_OK) {
+    if (extractQueryKeyVal(req, variable, value, sizeof(value)) == ESP_OK) {
       // playback, download, web streaming uses task 0
       // remote streaming eg video uses task 1, audio task 2, srt task 3
       uint8_t taskNum = 99;
