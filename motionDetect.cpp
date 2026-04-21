@@ -114,6 +114,7 @@ static void rescaleImage(const uint8_t* input, int inputWidth, int inputHeight, 
   // use fixed-point integer math for bilinear interpolation to avoid slow floating point operations
   uint32_t xRatio = ((uint32_t)inputWidth << 16) / outputWidth;
   uint32_t yRatio = ((uint32_t)inputHeight << 16) / outputHeight;
+  uint8_t* outPtr = output;
 
   for (int i = 0; i < outputHeight; ++i) {
     uint32_t y = i * yRatio;
@@ -123,6 +124,9 @@ static void rescaleImage(const uint8_t* input, int inputWidth, int inputHeight, 
     uint32_t yWeight = y & 0xFFFF;
     uint32_t yWeightInv = 65536 - yWeight;
 
+    int yL_offset = yL * inputWidth * colorDepth;
+    int yH_offset = yH * inputWidth * colorDepth;
+
     for (int j = 0; j < outputWidth; ++j) {
       uint32_t x = j * xRatio;
       int xL = x >> 16;
@@ -131,17 +135,25 @@ static void rescaleImage(const uint8_t* input, int inputWidth, int inputHeight, 
       uint32_t xWeight = x & 0xFFFF;
       uint32_t xWeightInv = 65536 - xWeight;
 
+      int xL_offset = xL * colorDepth;
+      int xH_offset = xH * colorDepth;
+
+      int idxA = yL_offset + xL_offset;
+      int idxB = yL_offset + xH_offset;
+      int idxC = yH_offset + xL_offset;
+      int idxD = yH_offset + xH_offset;
+
       for (int channel = 0; channel < colorDepth; ++channel) {
-        uint8_t a = input[(yL * inputWidth + xL) * colorDepth + channel];
-        uint8_t b = input[(yL * inputWidth + xH) * colorDepth + channel];
-        uint8_t c = input[(yH * inputWidth + xL) * colorDepth + channel];
-        uint8_t d = input[(yH * inputWidth + xH) * colorDepth + channel];
+        uint8_t a = input[idxA++];
+        uint8_t b = input[idxB++];
+        uint8_t c = input[idxC++];
+        uint8_t d = input[idxD++];
 
         uint32_t top = (a * xWeightInv + b * xWeight) >> 16;
         uint32_t bottom = (c * xWeightInv + d * xWeight) >> 16;
         uint32_t pixel = (top * yWeightInv + bottom * yWeight) >> 16;
 
-        output[(i * outputWidth + j) * colorDepth + channel] = (uint8_t)pixel;
+        *outPtr++ = (uint8_t)pixel;
       }
     }
   }
