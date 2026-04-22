@@ -30,3 +30,6 @@
 ## 2024-05-30 - O(N^2) String Concatenation in Loops (Schlemiel the Painter's Algorithm)
 **Learning:** When concatenating strings inside a loop in C/C++ (e.g., during base64 encoding), avoid using `strcat` or `strncat`. These functions repeatedly scan the destination string from the beginning to find the null terminator on every single iteration, leading to O(N^2) time complexity.
 **Action:** Always maintain an offset tracking variable (`int outLen = 0`) and use `memcpy` to append data (`memcpy(encoded + outLen, chunk, size); outLen += size;`). This ensures the write location is explicitly known, dropping the time complexity to O(N).
+## 2024-06-25 - Array Offset Recalculation Overhead in Nested Loops
+**Learning:** Found an inefficiency in `motionDetect.cpp` during bilinear interpolation where matrix elements were fetched dynamically within a tight inner loop utilizing multi-dimensional matrix mathematics `input[(yL * inputWidth + xL) * colorDepth + channel]`. For every pixel on every channel, these variables are re-calculated repeatedly, causing significant lag on ESP32 devices when handling real-time streams.
+**Action:** Extract all base matrix additions before the loops and increment loop matrix arrays with pointer-bumping (`idxA++`) rather than performing full matrix element math on every operation.
