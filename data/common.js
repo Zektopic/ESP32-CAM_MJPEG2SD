@@ -623,6 +623,8 @@
             let keyPress = event.keyCode || event.which;
             if (event.target.id == 'txtCmd') {
               if (keyPress == 13) sendWsCmd();
+            } else if (event.target.id === 'ipInput') {
+              if (keyPress === 13) addIP();
             }
             // trigger click for elements with role="button" or SVG rects when Enter or Space is pressed
             if (keyPress === 13 || keyPress === 32) {
@@ -932,6 +934,11 @@
           removeButton.style.top = '0';
           removeButton.style.right = '0';
 
+          // Make the container keyboard-accessible
+          ipContainer.setAttribute('role', 'button');
+          ipContainer.setAttribute('tabindex', '0');
+          ipContainer.setAttribute('aria-label', `Open camera stream for ${ipStr}`);
+
           // Add click event listener to each container for fetching the web page for the IP address
           ipContainer.onclick = function () {
             window.open(`http://${ipStr}`, '_blank');
@@ -961,7 +968,7 @@
         let newIP = ipInput.value.trim();
         if (newIP !== '' && !ipAddresses.some(item => item.includes(newIP))) {
           // if only ip address supplied then add default URI, otherwise use supplied URL
-          if (newIP.indexOf('/') == -1) newIP += '/control?hub=${Date.now()';
+          if (newIP.indexOf('/') == -1) newIP += `/control?hub=${Date.now()}`;
           ipAddresses.push(newIP);
           localStorage.setItem('enteredIPs', JSON.stringify(ipAddresses));
           // Call the function to create image elements with the updated IP addresses
@@ -982,9 +989,10 @@
 
       // Function to clear local storage
       function clearLocalStorage() {
-        const ipAddresses = localStorage.getItem('enteredIPs') ? JSON.parse(localStorage.getItem('enteredIPs')) : [];
-        localStorage.removeItem('enteredIPs');
-        createImageElements(ipAddresses); // Update images after clearing local storage
+        if (window.confirm('Delete all saved IPs?')) {
+          localStorage.removeItem('enteredIPs');
+          createImageElements([]); // Update images after clearing local storage
+        }
       }
 
       // Retrieve and populate the input field with the saved IPs on page load
