@@ -47,3 +47,7 @@
 ## 2025-04-21 - [Fix Accordion Menu Toggling]
 **Learning:** [In `data/MJPEG2SD.htm` and `data/Auxil.htm`, `.menu-action` checkboxes are separated from their `.nav-toggle` labels by a `.pin-menu` div. While CSS rules linking checkbox focus state to the label should use `~` (e.g., `.menu-action:focus-visible ~ .nav-toggle`), rules targeting the content div for visibility toggling must use the explicit adjacent chain (e.g., `.menu-action + .pin-menu + label + div`) rather than `~ label + div` to avoid inadvertently hiding subsequent unrelated menu sections.]
 **Action:** [When modifying UI templates with custom checkbox-based accordions or menus, strictly verify adjacent vs general sibling CSS selectors to ensure intermediate injected DOM elements (like pins or icons) don't silently break expand/collapse functionality.]
+
+## 2026-04-24 - Protecting Destructive Actions with Confirmation Dialogs
+**Learning:** Destructive actions like clearing all local storage IPs lacked a confirmation step, potentially leading to accidental data loss with a single misclick.
+**Action:** Always wrap destructive actions in `window.confirm()` dialogs to ensure intentionality before irreversible changes occur.
