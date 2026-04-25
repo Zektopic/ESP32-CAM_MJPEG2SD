@@ -124,8 +124,8 @@ static void rescaleImage(const uint8_t* input, int inputWidth, int inputHeight, 
     uint32_t yWeight = y & 0xFFFF;
     uint32_t yWeightInv = 65536 - yWeight;
 
-    int yL_offset = yL * inputWidth * colorDepth;
-    int yH_offset = yH * inputWidth * colorDepth;
+    const uint8_t* rowL = input + (yL * inputWidth * colorDepth);
+    const uint8_t* rowH = input + (yH * inputWidth * colorDepth);
 
     for (int j = 0; j < outputWidth; ++j) {
       uint32_t x = j * xRatio;
@@ -138,22 +138,38 @@ static void rescaleImage(const uint8_t* input, int inputWidth, int inputHeight, 
       int xL_offset = xL * colorDepth;
       int xH_offset = xH * colorDepth;
 
-      int idxA = yL_offset + xL_offset;
-      int idxB = yL_offset + xH_offset;
-      int idxC = yH_offset + xL_offset;
-      int idxD = yH_offset + xH_offset;
+      const uint8_t* pA = rowL + xL_offset;
+      const uint8_t* pB = rowL + xH_offset;
+      const uint8_t* pC = rowH + xL_offset;
+      const uint8_t* pD = rowH + xH_offset;
 
-      for (int channel = 0; channel < colorDepth; ++channel) {
-        uint8_t a = input[idxA++];
-        uint8_t b = input[idxB++];
-        uint8_t c = input[idxC++];
-        uint8_t d = input[idxD++];
+      if (colorDepth == RGB888_BYTES) {
+        uint32_t top = (pA[0] * xWeightInv + pB[0] * xWeight) >> 16;
+        uint32_t bottom = (pC[0] * xWeightInv + pD[0] * xWeight) >> 16;
+        *outPtr++ = (uint8_t)((top * yWeightInv + bottom * yWeight) >> 16);
 
-        uint32_t top = (a * xWeightInv + b * xWeight) >> 16;
-        uint32_t bottom = (c * xWeightInv + d * xWeight) >> 16;
-        uint32_t pixel = (top * yWeightInv + bottom * yWeight) >> 16;
+        top = (pA[1] * xWeightInv + pB[1] * xWeight) >> 16;
+        bottom = (pC[1] * xWeightInv + pD[1] * xWeight) >> 16;
+        *outPtr++ = (uint8_t)((top * yWeightInv + bottom * yWeight) >> 16);
 
-        *outPtr++ = (uint8_t)pixel;
+        top = (pA[2] * xWeightInv + pB[2] * xWeight) >> 16;
+        bottom = (pC[2] * xWeightInv + pD[2] * xWeight) >> 16;
+        *outPtr++ = (uint8_t)((top * yWeightInv + bottom * yWeight) >> 16);
+      } else if (colorDepth == GRAYSCALE_BYTES) {
+        uint32_t top = (pA[0] * xWeightInv + pB[0] * xWeight) >> 16;
+        uint32_t bottom = (pC[0] * xWeightInv + pD[0] * xWeight) >> 16;
+        *outPtr++ = (uint8_t)((top * yWeightInv + bottom * yWeight) >> 16);
+      } else {
+        for (int channel = 0; channel < colorDepth; ++channel) {
+          uint8_t a = pA[channel];
+          uint8_t b = pB[channel];
+          uint8_t c = pC[channel];
+          uint8_t d = pD[channel];
+
+          uint32_t top = (a * xWeightInv + b * xWeight) >> 16;
+          uint32_t bottom = (c * xWeightInv + d * xWeight) >> 16;
+          *outPtr++ = (uint8_t)((top * yWeightInv + bottom * yWeight) >> 16);
+        }
       }
     }
   }
