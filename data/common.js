@@ -982,9 +982,11 @@
 
       // Function to clear local storage
       function clearLocalStorage() {
-        const ipAddresses = localStorage.getItem('enteredIPs') ? JSON.parse(localStorage.getItem('enteredIPs')) : [];
-        localStorage.removeItem('enteredIPs');
-        createImageElements(ipAddresses); // Update images after clearing local storage
+        if (window.confirm("Are you sure you want to delete all saved IP addresses?")) {
+          const ipAddresses = localStorage.getItem('enteredIPs') ? JSON.parse(localStorage.getItem('enteredIPs')) : [];
+          localStorage.removeItem('enteredIPs');
+          createImageElements(ipAddresses); // Update images after clearing local storage
+        }
       }
 
       // Retrieve and populate the input field with the saved IPs on page load
