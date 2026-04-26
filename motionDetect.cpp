@@ -143,7 +143,25 @@ static void rescaleImage(const uint8_t* input, int inputWidth, int inputHeight, 
       int idxC = yH_offset + xL_offset;
       int idxD = yH_offset + xH_offset;
 
-      for (int channel = 0; channel < colorDepth; ++channel) {
+      if (colorDepth == 3) {
+        // RGB
+        uint8_t a0 = input[idxA++]; uint8_t b0 = input[idxB++]; uint8_t c0 = input[idxC++]; uint8_t d0 = input[idxD++];
+        uint8_t a1 = input[idxA++]; uint8_t b1 = input[idxB++]; uint8_t c1 = input[idxC++]; uint8_t d1 = input[idxD++];
+        uint8_t a2 = input[idxA++]; uint8_t b2 = input[idxB++]; uint8_t c2 = input[idxC++]; uint8_t d2 = input[idxD++];
+
+        uint32_t top0 = (a0 * xWeightInv + b0 * xWeight) >> 16;
+        uint32_t bottom0 = (c0 * xWeightInv + d0 * xWeight) >> 16;
+        *outPtr++ = (uint8_t)((top0 * yWeightInv + bottom0 * yWeight) >> 16);
+
+        uint32_t top1 = (a1 * xWeightInv + b1 * xWeight) >> 16;
+        uint32_t bottom1 = (c1 * xWeightInv + d1 * xWeight) >> 16;
+        *outPtr++ = (uint8_t)((top1 * yWeightInv + bottom1 * yWeight) >> 16);
+
+        uint32_t top2 = (a2 * xWeightInv + b2 * xWeight) >> 16;
+        uint32_t bottom2 = (c2 * xWeightInv + d2 * xWeight) >> 16;
+        *outPtr++ = (uint8_t)((top2 * yWeightInv + bottom2 * yWeight) >> 16);
+      } else {
+        // Grayscale
         uint8_t a = input[idxA++];
         uint8_t b = input[idxB++];
         uint8_t c = input[idxC++];
@@ -177,12 +195,18 @@ static int getImageData(size_t offset, size_t length, float *out_ptr) {
   // copy to features as grayscale or RGB
   size_t pixelPtr = offset * colorDepth;
   size_t out_ptr_idx = 0;
-  while (out_ptr_idx < length) {
-    out_ptr[out_ptr_idx++] = (colorDepth == RGB888_BYTES)  
-      ? (float)((currBuff[pixelPtr] << 16) + (currBuff[pixelPtr + 1] << 8) + currBuff[pixelPtr + 2])
-      : (float)((currBuff[pixelPtr] << 16) + (currBuff[pixelPtr] << 8) + currBuff[pixelPtr]);  
-    pixelPtr += colorDepth;
-  } 
+
+  if (colorDepth == RGB888_BYTES) {
+    while (out_ptr_idx < length) {
+      out_ptr[out_ptr_idx++] = (float)((currBuff[pixelPtr] << 16) + (currBuff[pixelPtr + 1] << 8) + currBuff[pixelPtr + 2]);
+      pixelPtr += 3;
+    }
+  } else {
+    while (out_ptr_idx < length) {
+      out_ptr[out_ptr_idx++] = (float)((currBuff[pixelPtr] << 16) + (currBuff[pixelPtr] << 8) + currBuff[pixelPtr]);
+      pixelPtr += 1;
+    }
+  }
   return 0;
 }
 
@@ -283,12 +307,13 @@ bool checkMotion(camera_fb_t* fb, bool motionStatus, bool lightLevelOnly) {
   int moveThreshold = ((endPixel-startPixel)/colorDepth) * (11-motionVal)/100; // number of changed pixels that constitute a movement
   for (int i = 0; i < resizeDimLen; i += colorDepth) {
     uint16_t currPix = 0, prevPix = 0;
-    for (int j = 0; j < colorDepth; j++) {
-      currPix += currBuff[i + j];
-      prevPix += prevBuff[i + j];
+    if (colorDepth == 3) {
+      currPix = (currBuff[i] + currBuff[i + 1] + currBuff[i + 2]) / 3;
+      prevPix = (prevBuff[i] + prevBuff[i + 1] + prevBuff[i + 2]) / 3;
+    } else {
+      currPix = currBuff[i];
+      prevPix = prevBuff[i];
     }
-    currPix /= colorDepth;
-    prevPix /= colorDepth;
     lux += currPix; // for calculating light level
     uint8_t pixVal = 255; // show active changed pixel as bright red color in changeMap image
     // set up display image for motion tracking debug

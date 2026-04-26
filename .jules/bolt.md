@@ -33,3 +33,7 @@
 ## 2024-06-25 - Array Offset Recalculation Overhead in Nested Loops
 **Learning:** Found an inefficiency in `motionDetect.cpp` during bilinear interpolation where matrix elements were fetched dynamically within a tight inner loop utilizing multi-dimensional matrix mathematics `input[(yL * inputWidth + xL) * colorDepth + channel]`. For every pixel on every channel, these variables are re-calculated repeatedly, causing significant lag on ESP32 devices when handling real-time streams.
 **Action:** Extract all base matrix additions before the loops and increment loop matrix arrays with pointer-bumping (`idxA++`) rather than performing full matrix element math on every operation.
+
+## 2024-06-25 - Unroll runtime-constant loops in tight paths
+**Learning:** Found an inefficiency in `motionDetect.cpp` where pixel processing functions (`rescaleImage`, `getImageData`, `checkMotion`) used inner `for` loops (e.g., `for (int channel = 0; channel < colorDepth; channel++)`) to process color channels. Since `colorDepth` is constant for any given frame execution, continuously evaluating this condition within loops that run ~9,216 times per frame causes substantial loop setup and branch prediction overhead on ESP32.
+**Action:** Unroll loops that depend on runtime-configured variables that are locally constant inside performance-critical paths by using explicit branches (e.g., `if (colorDepth == 3) { ... } else { ... }`). This completely eliminates loop iteration overhead in tight algorithms on microcontrollers.
