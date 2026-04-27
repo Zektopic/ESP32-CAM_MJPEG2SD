@@ -51,3 +51,7 @@
 ## 2024-05-20 - Confirmations for Destructive Actions
 **Learning:** Found that a destructive action (clearing all saved IP addresses from the Camera Hub's local storage) was performed immediately upon clicking a "Delete All" button without any confirmation dialog. This can lead to accidental data loss.
 **Action:** Always wrap custom destructive actions (e.g., clearing local storage) in `window.confirm()` dialogs to prevent accidental data loss and improve the overall UX.
+
+## 2025-02-18 - Dynamically Generated Keyboard Accessible Tiles
+**Learning:** When generating interactive tiles or buttons using `div` or `span` elements via JavaScript (like the device hub camera tiles), it is crucial to explicitly add `role="button"`, `tabindex="0"`, and `aria-label` to ensure they are discovered and operable by assistive technologies. Additionally, destructive actions (like removing an item) should be wrapped in confirmation dialogs (e.g., `window.confirm`) to prevent accidental data loss. Furthermore, for non-native interactive elements (e.g. `div`), assigning an `onclick` handler does not automatically provide keyboard support; you must explicitly add an `onkeydown` handler to intercept the `Enter` and `Space` keys to trigger the action.
+**Action:** Always verify that dynamically created interactive elements implement proper ARIA roles and keyboard event handlers, and ensure that data removal flows include a confirmation step.
