@@ -37,6 +37,10 @@
 ## 2024-06-25 - Unroll runtime-constant loops in tight paths
 **Learning:** Found an inefficiency in `motionDetect.cpp` where pixel processing functions (`rescaleImage`, `getImageData`, `checkMotion`) used inner `for` loops (e.g., `for (int channel = 0; channel < colorDepth; channel++)`) to process color channels. Since `colorDepth` is constant for any given frame execution, continuously evaluating this condition within loops that run ~9,216 times per frame causes substantial loop setup and branch prediction overhead on ESP32.
 **Action:** Unroll loops that depend on runtime-configured variables that are locally constant inside performance-critical paths by using explicit branches (e.g., `if (colorDepth == 3) { ... } else { ... }`). This completely eliminates loop iteration overhead in tight algorithms on microcontrollers.
+
+## 2024-06-25 - Batch Network Writes to Prevent TCP Overhead
+**Learning:** When sending base64 encoded data over a network socket (e.g., in SMTP attachments), using `client.write` for tiny chunks (e.g., 4 bytes) causes severe TCP network overhead due to tiny packet sizes.
+**Action:** Always allocate a larger buffer to batch encoded data before transmitting it over the network to reduce network calls and packet overhead.
 ## 2025-02-13 - Correct Fallback Behavior When Loop Unswitching
 **Learning:** When manually unswitching/unrolling loops based on runtime constants like `colorDepth` (e.g., in `motionDetect.cpp`), explicitly ensure that the fallback `else` branch retains the dynamic increment (`i += colorDepth`) rather than hardcoding it to `1`, to correctly support configurations where `colorDepth` is neither 1 nor 3 (e.g., RGB565).
 **Action:** When creating unrolled loop branches, closely match the increment and array access logic of the original loop in the fallback branch instead of making assumptions about alternative values.
