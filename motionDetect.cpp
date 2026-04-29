@@ -305,26 +305,40 @@ bool checkMotion(camera_fb_t* fb, bool motionStatus, bool lightLevelOnly) {
   uint16_t startPixel = (RESIZE_DIM*(detectStartBand-1)/detectNumBands) * RESIZE_DIM * colorDepth;
   uint16_t endPixel = (RESIZE_DIM*(detectEndBand)/detectNumBands) * RESIZE_DIM * colorDepth;
   int moveThreshold = ((endPixel-startPixel)/colorDepth) * (11-motionVal)/100; // number of changed pixels that constitute a movement
-  for (int i = 0; i < resizeDimLen; i += colorDepth) {
-    uint16_t currPix = 0, prevPix = 0;
-    if (colorDepth == 3) {
-      currPix = (currBuff[i] + currBuff[i + 1] + currBuff[i + 2]) / 3;
-      prevPix = (prevBuff[i] + prevBuff[i + 1] + prevBuff[i + 2]) / 3;
-    } else {
-      currPix = currBuff[i];
-      prevPix = prevBuff[i];
+  if (colorDepth == 3) {
+    for (int i = 0; i < resizeDimLen; i += 3) {
+      uint16_t currPix = (currBuff[i] + currBuff[i + 1] + currBuff[i + 2]) / 3;
+      uint16_t prevPix = (prevBuff[i] + prevBuff[i + 1] + prevBuff[i + 2]) / 3;
+      lux += currPix; // for calculating light level
+      uint8_t pixVal = 255; // show active changed pixel as bright red color in changeMap image
+      // set up display image for motion tracking debug
+      if (dbgMotion) for (int j = 0; j < RGB888_BYTES; j++) changeMap[(i * stride) + j] = currPix; // grayscale
+      // determine pixel change status
+      if (abs((int)currPix - (int)prevPix) > detectChangeThreshold) {
+        if (i > startPixel && i < endPixel) changeCount++; // number of changed pixels
+        else pixVal = 80; // show inactive changed pixel as dark red color in changeMap image
+        if (dbgMotion) {
+          changeMap[(i * stride) + 2] = pixVal;
+          for (int j = 0; j < RGB888_BYTES - 1; j++) changeMap[(i * stride) + j] = 0;
+        }
+      }
     }
-    lux += currPix; // for calculating light level
-    uint8_t pixVal = 255; // show active changed pixel as bright red color in changeMap image
-    // set up display image for motion tracking debug
-    if (dbgMotion) for (int j = 0; j < RGB888_BYTES; j++) changeMap[(i * stride) + j] = currPix; // grayscale
-    // determine pixel change status
-    if (abs((int)currPix - (int)prevPix) > detectChangeThreshold) {
-      if (i > startPixel && i < endPixel) changeCount++; // number of changed pixels
-      else pixVal = 80; // show inactive changed pixel as dark red color in changeMap image
-      if (dbgMotion) {
-        changeMap[(i * stride) + 2] = pixVal;
-        for (int j = 0; j < RGB888_BYTES - 1; j++) changeMap[(i * stride) + j] = 0;
+  } else {
+    for (int i = 0; i < resizeDimLen; i += colorDepth) {
+      uint16_t currPix = currBuff[i];
+      uint16_t prevPix = prevBuff[i];
+      lux += currPix; // for calculating light level
+      uint8_t pixVal = 255; // show active changed pixel as bright red color in changeMap image
+      // set up display image for motion tracking debug
+      if (dbgMotion) for (int j = 0; j < RGB888_BYTES; j++) changeMap[(i * stride) + j] = currPix; // grayscale
+      // determine pixel change status
+      if (abs((int)currPix - (int)prevPix) > detectChangeThreshold) {
+        if (i > startPixel && i < endPixel) changeCount++; // number of changed pixels
+        else pixVal = 80; // show inactive changed pixel as dark red color in changeMap image
+        if (dbgMotion) {
+          changeMap[(i * stride) + 2] = pixVal;
+          for (int j = 0; j < RGB888_BYTES - 1; j++) changeMap[(i * stride) + j] = 0;
+        }
       }
     }
   }
