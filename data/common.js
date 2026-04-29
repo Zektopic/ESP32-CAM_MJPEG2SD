@@ -624,6 +624,12 @@
             if (event.target.id == 'txtCmd') {
               if (keyPress == 13) sendWsCmd();
             }
+            if (event.target.id == 'ipInput') {
+              if (keyPress == 13) {
+                event.preventDefault();
+                addIP();
+              }
+            }
             // trigger click for elements with role="button" or SVG rects when Enter or Space is pressed
             if (keyPress === 13 || keyPress === 32) {
               const e = event.target;
@@ -884,9 +890,16 @@
 
         // Convert the array of IP addresses into individual IPs
         for (const ip of ipAddresses) {
+          let ipStr = ip;
+          const index = ip.indexOf('/');
+          if (index !== -1) ipStr = ip.substring(0, index);
+
           // Create a container div for each image
           const ipContainer = document.createElement('div');
           ipContainer.classList.add('ipContainer');
+          ipContainer.setAttribute('role', 'button');
+          ipContainer.setAttribute('tabindex', '0');
+          ipContainer.setAttribute('aria-label', `Open camera at ${ipStr}`);
           // Create an image element
           const hubImg = document.createElement('img');
           hubImg.classList.add('hubImg');
@@ -918,9 +931,6 @@
           ipUrl.style.display = 'none';
           const ipText = document.createElement('span');
           ipText.classList.add('ipText');
-          let ipStr = ip;
-          const index = ip.indexOf('/');
-          if (index !== -1) ipStr = ip.substring(0, index);
           ipText.textContent = ipStr;
 
           // Append the image, IP text, and remove button to the container
