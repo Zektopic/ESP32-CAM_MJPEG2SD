@@ -301,10 +301,12 @@ bool updateAppStatus(const char* variable, const char* value, bool fromUser) {
 static bool extractKeyVal(const char* wsMsg) {
   // extract key
   strncpy(variable, wsMsg, FILE_NAME_LEN - 1);
+  variable[FILE_NAME_LEN - 1] = 0; // ensure null termination
   char* endPtr = strchr(variable, '=');
   if (endPtr != NULL) {
     *endPtr = 0; // split variable into 2 strings, first is key name
-    strcpy(value, variable + strlen(variable) + 1); // value is now second part of string
+    strncpy(value, variable + strlen(variable) + 1, FILE_NAME_LEN - 1); // value is now second part of string
+    value[FILE_NAME_LEN - 1] = 0; // ensure null termination
     return true;
   } else LOG_ERR("Invalid query string: %s", wsMsg);
   return false;
@@ -728,9 +730,10 @@ static bool downloadAvi(const char* userCmd) {
     // add folder name and avi extension to incoming file name
     char fileName[FILE_NAME_LEN];
     strncpy(fileName, userCmd, FILE_NAME_LEN - 1);
+    fileName[FILE_NAME_LEN - 1] = 0;
     pos = strchr(fileName, '_');
     memmove(pos, fileName, sizeof(fileName) - (pos - fileName));
-    strncat(fileName, ".avi", sizeof(fileName - 1) - strlen(fileName));
+    strncat(fileName, ".avi", sizeof(fileName) - 1 - strlen(fileName));
     if (STORAGE.exists(fileName)) sendTgramFile(fileName, "video/x-msvideo", "");
     else sendTgramMessage("AVI file not found: ", fileName, "");
   }
