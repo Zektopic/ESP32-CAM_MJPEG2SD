@@ -44,3 +44,7 @@
 ## 2025-02-13 - Correct Fallback Behavior When Loop Unswitching
 **Learning:** When manually unswitching/unrolling loops based on runtime constants like `colorDepth` (e.g., in `motionDetect.cpp`), explicitly ensure that the fallback `else` branch retains the dynamic increment (`i += colorDepth`) rather than hardcoding it to `1`, to correctly support configurations where `colorDepth` is neither 1 nor 3 (e.g., RGB565).
 **Action:** When creating unrolled loop branches, closely match the increment and array access logic of the original loop in the fallback branch instead of making assumptions about alternative values.
+
+## 2024-06-25 - Avoid O(N^2) strlen overhead in formatting loops
+**Learning:** Calling `strlen()` to find the end of a buffer inside a loop (e.g. `sprintf(buf + strlen(buf), ...)`) causes an O(N^2) performance hit because it has to traverse the entire string on each iteration.
+**Action:** Maintain an `offset` variable and use `offset += snprintf(buf + offset, size - offset, ...)` to concatenate strings in O(N) time.
