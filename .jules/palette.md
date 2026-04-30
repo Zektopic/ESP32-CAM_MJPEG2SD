@@ -51,3 +51,6 @@
 ## 2024-05-20 - Confirmations for Destructive Actions
 **Learning:** Found that a destructive action (clearing all saved IP addresses from the Camera Hub's local storage) was performed immediately upon clicking a "Delete All" button without any confirmation dialog. This can lead to accidental data loss.
 **Action:** Always wrap custom destructive actions (e.g., clearing local storage) in `window.confirm()` dialogs to prevent accidental data loss and improve the overall UX.
+## 2024-05-14 - Empty States in Dynamic UI
+**Learning:** For sections of the UI generated dynamically via JS (like the camera hub list), users are left confused when data is empty because the container renders completely blank.
+**Action:** Always verify what the UI looks like when state arrays are empty, and inject an explicit empty state message utilizing existing `itemInactive` and font-style CSS to guide the user.
