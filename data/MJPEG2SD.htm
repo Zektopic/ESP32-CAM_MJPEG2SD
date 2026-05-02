@@ -944,7 +944,7 @@
             <li><button id="forceRecord" aria-label="Start Recording" style="float:right;">➤&nbsp;Start Recording</button></li>
             <li><div class="sep"></div></li>
             <li><button id="forceStream" aria-label="Start Stream" class="local" style="float:right;">➤&nbsp;Start Stream</button></li>
-            <li><button id="get-still" class="local" style="float:right;">Get Still</button></li>
+            <li><button id="get-still" class="local" style="float:right;" title="Capture a still image" aria-label="Capture a still image">Get Still</button></li>
             <li><div class="sep"></div></li>
             <li><button id="forcePlayback" aria-label="Start Playback" class="local disabled" style="float:right;" title="Select a video in 'Playback & File Transfers' to activate playback.">➤&nbsp;Start Playback</button></li>
           </ul>
@@ -2051,6 +2051,7 @@
             stopAll("activatePlaybackButton");
             playbackButton.classList.add("active");
             playbackButton.innerHTML = "▢&nbsp;Stop Playback";
+            playbackButton.setAttribute("aria-label", "Stop Playback");
             playbackButton.classList.add("blinking");
             if (await checkTask('/sustain?playback=0')) {
               view.src = webServer + '/sustain?playback=0';
@@ -2065,6 +2066,7 @@
       function deactivatePlaybackButton(sendStop = true) {
         playbackButton.classList.remove("active");
         playbackButton.innerHTML = "➤&nbsp;Start Playback";
+        playbackButton.setAttribute("aria-label", "Start Playback");
         playbackButton.classList.remove("blinking");
         disable(playbackButton);
         stopAll("deactivatePlaybackButton");
@@ -2075,6 +2077,7 @@
         if (!recordButton.classList.contains("active")) {
           recordButton.classList.add("active");
           recordButton.innerHTML = "▢&nbsp;Stop Recording";
+          recordButton.setAttribute("aria-label", "Stop Recording");
         }
         if (isHidden(recordingIndicator)) {
           show(recordingIndicator);
@@ -2085,6 +2088,7 @@
       function deactivateRecordButton() {
         recordButton.classList.remove("active");
         recordButton.innerHTML = "➤&nbsp;Start Recording";
+        recordButton.setAttribute("aria-label", "Start Recording");
         recordingIndicator.classList.remove("blinking");
         hide(recordingIndicator);
       }
@@ -2100,6 +2104,7 @@
         stopAll("activateStreamButton");
         streamButton.classList.add("active");
         streamButton.innerHTML = "▢&nbsp;Stop Stream";
+        streamButton.setAttribute("aria-label", "Stop Stream");
         streamButton.classList.add('blinking');
         showRC ? show($('#RCenable')) : hide($('#RCenable'));
         if (await checkTask('/sustain?stream=0')) {
@@ -2111,6 +2116,7 @@
       function deactivateStreamButton(sendStop = true) {
         streamButton.classList.remove("active");
         streamButton.innerHTML ="➤&nbsp;Start Stream";
+        streamButton.setAttribute("aria-label", "Start Stream");
         streamButton.classList.remove('blinking');
         stopAll("deactivateStreamButton");
         if (sendStop) sendAll("stopStream", "0");
