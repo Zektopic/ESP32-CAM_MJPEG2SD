@@ -51,3 +51,7 @@
 ## 2024-05-20 - Confirmations for Destructive Actions
 **Learning:** Found that a destructive action (clearing all saved IP addresses from the Camera Hub's local storage) was performed immediately upon clicking a "Delete All" button without any confirmation dialog. This can lead to accidental data loss.
 **Action:** Always wrap custom destructive actions (e.g., clearing local storage) in `window.confirm()` dialogs to prevent accidental data loss and improve the overall UX.
+
+## 2026-05-02 - Keep dynamic ARIA labels synchronized with visual text updates
+**Learning:** When JavaScript dynamically updates the visual text of an interactive element (e.g., changing 'Start Recording' to 'Stop Recording' on a button), the `aria-label` (if present) is NOT automatically updated. If the element relies on `aria-label` to mask unicode icons or provide a clean accessible name, screen readers will announce the old state, causing severe confusion.
+**Action:** When updating the `.innerHTML` or `.textContent` of an element to reflect a state change, always check if the element has an `aria-label`. If it does, ensure you also call `.setAttribute('aria-label', ...)` with the new accessible name to keep it synchronized with the visual state.
