@@ -48,3 +48,6 @@
 ## 2024-06-25 - Avoid O(N^2) strlen overhead in formatting loops
 **Learning:** Calling `strlen()` to find the end of a buffer inside a loop (e.g. `sprintf(buf + strlen(buf), ...)`) causes an O(N^2) performance hit because it has to traverse the entire string on each iteration.
 **Action:** Maintain an `offset` variable and use `offset += snprintf(buf + offset, size - offset, ...)` to concatenate strings in O(N) time.
+## 2024-05-03 - String Pointer Optimization
+**Learning:** In C/C++ applications on the ESP32, repeatedly calculating string offsets with `strlen()` during in-place string splitting loops introduces an unnecessary O(N) performance penalty.
+**Action:** When a pointer to a split character (e.g., via `strchr()`) is already computed and bounded, use pointer arithmetic (`endPtr + 1`) to advance to the remainder of the string instead of re-calculating the length (`variable + strlen(variable) + 1`).
