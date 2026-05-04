@@ -1317,8 +1317,15 @@ static void showBacktrace() {
     sprintf(bt, "%s on core %d", btReason, btCore);
     LOG_WRN("%s", bt);
     bt[0] = 0;
+    int offset = 0;
+    // Bolt: Cache length using pointer offset to prevent O(N^2) strlen recalculation inside loop
     for (int i = 0; i < btLen; i++) {
-      snprintf(bt + strlen(bt), sizeof(bt) - strlen(bt) - 11, "0x%08x ", (unsigned int)backtrace[i]); // 11 is size of new trace hex
+      int written = snprintf(bt + offset, sizeof(bt) - offset, "0x%08x ", (unsigned int)backtrace[i]);
+      if (written > 0 && written < (int)(sizeof(bt) - offset)) {
+        offset += written;
+      } else {
+        break; // Buffer is full or error occurred
+      }
     }
     LOG_WRN("Paste backtrace below into Arduino Exception Decoder:\n");
     logPrint("Backtrace: %s\n\n", bt);

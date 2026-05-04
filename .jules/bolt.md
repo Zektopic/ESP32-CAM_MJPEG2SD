@@ -48,3 +48,6 @@
 ## 2024-06-25 - Avoid O(N^2) strlen overhead in formatting loops
 **Learning:** Calling `strlen()` to find the end of a buffer inside a loop (e.g. `sprintf(buf + strlen(buf), ...)`) causes an O(N^2) performance hit because it has to traverse the entire string on each iteration.
 **Action:** Maintain an `offset` variable and use `offset += snprintf(buf + offset, size - offset, ...)` to concatenate strings in O(N) time.
+## 2025-02-13 - O(N^2) strlen overhead in backtrace string formatting
+**Learning:** Calling `strlen()` to find the end of a buffer inside a formatting loop (e.g., `snprintf(bt + strlen(bt), ...)`) causes an O(N^2) performance hit because it has to traverse the entire string on each iteration (Schlemiel the Painter's Algorithm).
+**Action:** Always maintain an explicit `offset` tracker variable and use `offset += snprintf(bt + offset, size - offset, ...)` to concatenate strings in O(1) time per iteration, along with proper bounds checking `if (written > 0 && written < (int)(size - offset))`.
