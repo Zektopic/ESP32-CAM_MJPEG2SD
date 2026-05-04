@@ -249,8 +249,6 @@ static esp_err_t controlHandler(httpd_req_t *req) {
   if (extractQueryKeyVal(req, variable, value, sizeof(value)) != ESP_OK) return ESP_FAIL;
   if (!strcmp(variable, "displayLog")) displayLog(req);
   else {
-    strncpy(value, variable + strlen(variable) + 1, IN_FILE_NAME_LEN - 1); // value points to second part of string
-    value[IN_FILE_NAME_LEN - 1] = 0; // ensure null termination
     if (!strcmp(variable, "reset")) {
       httpd_resp_sendstr(req, NULL); // stop browser resending reset
       doRestart(value);
