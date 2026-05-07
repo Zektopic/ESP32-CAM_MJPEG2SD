@@ -1317,8 +1317,17 @@ static void showBacktrace() {
     sprintf(bt, "%s on core %d", btReason, btCore);
     LOG_WRN("%s", bt);
     bt[0] = 0;
+    // Track offset to avoid O(N^2) strlen calls
+    int offset = 0;
     for (int i = 0; i < btLen; i++) {
-      snprintf(bt + strlen(bt), sizeof(bt) - strlen(bt) - 11, "0x%08x ", (unsigned int)backtrace[i]); // 11 is size of new trace hex
+      int remaining = sizeof(bt) - offset;
+      if (remaining < 12) break; // Need space for 11 chars + null terminator
+      int written = snprintf(bt + offset, remaining, "0x%08x ", (unsigned int)backtrace[i]);
+      if (written > 0 && written < remaining) {
+        offset += written;
+      } else {
+        break;
+      }
     }
     LOG_WRN("Paste backtrace below into Arduino Exception Decoder:\n");
     logPrint("Backtrace: %s\n\n", bt);
