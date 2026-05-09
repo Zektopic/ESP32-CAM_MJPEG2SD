@@ -55,3 +55,7 @@
 ## 2026-05-02 - Keep dynamic ARIA labels synchronized with visual text updates
 **Learning:** When JavaScript dynamically updates the visual text of an interactive element (e.g., changing 'Start Recording' to 'Stop Recording' on a button), the `aria-label` (if present) is NOT automatically updated. If the element relies on `aria-label` to mask unicode icons or provide a clean accessible name, screen readers will announce the old state, causing severe confusion.
 **Action:** When updating the `.innerHTML` or `.textContent` of an element to reflect a state change, always check if the element has an `aria-label`. If it does, ensure you also call `.setAttribute('aria-label', ...)` with the new accessible name to keep it synchronized with the visual state.
+
+## 2024-05-20 - CSS `pointer-events: none` Accessibility Pitfall
+**Learning:** Applying `.disabled` CSS class with `pointer-events: none` only visually prevents mouse interactions but leaves elements fully accessible to keyboards/screen readers.
+**Action:** Always pair visual CSS classes with the native HTML `disabled` attribute for full accessibility compliance. Use `cursor: not-allowed` instead of `cursor: default` for clearer UX feedback, and ensure all associated JavaScript enable/disable functions explicitly toggle `el.disabled = true/false`.
