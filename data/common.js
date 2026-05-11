@@ -456,6 +456,7 @@
           const itemInactiveColor =  getComputedStyle(rangeVal).getPropertyValue('--itemInactive');
           rangeVal.style.background = itemInactiveColor;
           el.classList.add('disabled');
+          el.disabled = true;
         }
 
         function enableRangeSlider(el) {;
@@ -463,6 +464,7 @@
           const itemInactiveColor =  getComputedStyle(rangeVal).getPropertyValue('--buttonReady');
           rangeVal.style.background = itemInactiveColor;
           el.classList.remove('disabled');
+          el.disabled = false;
         }
 
         function isActive(el) {
