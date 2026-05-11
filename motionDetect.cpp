@@ -116,34 +116,36 @@ static void rescaleImage(const uint8_t* input, int inputWidth, int inputHeight, 
   uint32_t yRatio = ((uint32_t)inputHeight << 16) / outputHeight;
   uint8_t* outPtr = output;
 
-  for (int i = 0; i < outputHeight; ++i) {
-    uint32_t y = i * yRatio;
-    int yL = y >> 16;
-    int yH = yL + 1;
-    if (yH >= inputHeight) yH = inputHeight - 1;
-    uint32_t yWeight = y & 0xFFFF;
-    uint32_t yWeightInv = 65536 - yWeight;
+  // Bolt: Manually unswitched loop to eliminate branch prediction misses
+  // inside the tight nested pixel iteration loop.
+  if (colorDepth == 3) {
+    for (int i = 0; i < outputHeight; ++i) {
+      uint32_t y = i * yRatio;
+      int yL = y >> 16;
+      int yH = yL + 1;
+      if (yH >= inputHeight) yH = inputHeight - 1;
+      uint32_t yWeight = y & 0xFFFF;
+      uint32_t yWeightInv = 65536 - yWeight;
 
-    int yL_offset = yL * inputWidth * colorDepth;
-    int yH_offset = yH * inputWidth * colorDepth;
+      int yL_offset = yL * inputWidth * 3;
+      int yH_offset = yH * inputWidth * 3;
 
-    for (int j = 0; j < outputWidth; ++j) {
-      uint32_t x = j * xRatio;
-      int xL = x >> 16;
-      int xH = xL + 1;
-      if (xH >= inputWidth) xH = inputWidth - 1;
-      uint32_t xWeight = x & 0xFFFF;
-      uint32_t xWeightInv = 65536 - xWeight;
+      for (int j = 0; j < outputWidth; ++j) {
+        uint32_t x = j * xRatio;
+        int xL = x >> 16;
+        int xH = xL + 1;
+        if (xH >= inputWidth) xH = inputWidth - 1;
+        uint32_t xWeight = x & 0xFFFF;
+        uint32_t xWeightInv = 65536 - xWeight;
 
-      int xL_offset = xL * colorDepth;
-      int xH_offset = xH * colorDepth;
+        int xL_offset = xL * 3;
+        int xH_offset = xH * 3;
 
-      int idxA = yL_offset + xL_offset;
-      int idxB = yL_offset + xH_offset;
-      int idxC = yH_offset + xL_offset;
-      int idxD = yH_offset + xH_offset;
+        int idxA = yL_offset + xL_offset;
+        int idxB = yL_offset + xH_offset;
+        int idxC = yH_offset + xL_offset;
+        int idxD = yH_offset + xH_offset;
 
-      if (colorDepth == 3) {
         // RGB
         uint8_t a0 = input[idxA++]; uint8_t b0 = input[idxB++]; uint8_t c0 = input[idxC++]; uint8_t d0 = input[idxD++];
         uint8_t a1 = input[idxA++]; uint8_t b1 = input[idxB++]; uint8_t c1 = input[idxC++]; uint8_t d1 = input[idxD++];
@@ -160,7 +162,36 @@ static void rescaleImage(const uint8_t* input, int inputWidth, int inputHeight, 
         uint32_t top2 = (a2 * xWeightInv + b2 * xWeight) >> 16;
         uint32_t bottom2 = (c2 * xWeightInv + d2 * xWeight) >> 16;
         *outPtr++ = (uint8_t)((top2 * yWeightInv + bottom2 * yWeight) >> 16);
-      } else {
+      }
+    }
+  } else {
+    for (int i = 0; i < outputHeight; ++i) {
+      uint32_t y = i * yRatio;
+      int yL = y >> 16;
+      int yH = yL + 1;
+      if (yH >= inputHeight) yH = inputHeight - 1;
+      uint32_t yWeight = y & 0xFFFF;
+      uint32_t yWeightInv = 65536 - yWeight;
+
+      int yL_offset = yL * inputWidth * colorDepth;
+      int yH_offset = yH * inputWidth * colorDepth;
+
+      for (int j = 0; j < outputWidth; ++j) {
+        uint32_t x = j * xRatio;
+        int xL = x >> 16;
+        int xH = xL + 1;
+        if (xH >= inputWidth) xH = inputWidth - 1;
+        uint32_t xWeight = x & 0xFFFF;
+        uint32_t xWeightInv = 65536 - xWeight;
+
+        int xL_offset = xL * colorDepth;
+        int xH_offset = xH * colorDepth;
+
+        int idxA = yL_offset + xL_offset;
+        int idxB = yL_offset + xH_offset;
+        int idxC = yH_offset + xL_offset;
+        int idxD = yH_offset + xH_offset;
+
         // Grayscale
         uint8_t a = input[idxA++];
         uint8_t b = input[idxB++];
