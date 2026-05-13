@@ -890,6 +890,11 @@
         const container = document.getElementById('imageContainer');
         container.innerHTML = ''; // Clear existing content
 
+        if (ipAddresses.length === 0) {
+          container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--itemInactive); font-style: italic;">No cameras added yet. Enter an IP address above to add your first camera.</div>';
+          return;
+        }
+
         // Convert the array of IP addresses into individual IPs
         for (const ip of ipAddresses) {
           let ipStr = ip;
