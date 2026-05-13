@@ -48,6 +48,9 @@
 ## 2024-06-25 - Avoid O(N^2) strlen overhead in formatting loops
 **Learning:** Calling `strlen()` to find the end of a buffer inside a loop (e.g. `sprintf(buf + strlen(buf), ...)`) causes an O(N^2) performance hit because it has to traverse the entire string on each iteration.
 **Action:** Maintain an `offset` variable and use `offset += snprintf(buf + offset, size - offset, ...)` to concatenate strings in O(N) time.
+## 2026-05-11 - Unswitch loops for constants in performance critical sections
+**Learning:** For manually unswitching loops on runtime-configured but locally constant variables like `colorDepth`, copying the inner operations in full branches saves branch predictions and avoids looping overheads on embedded microcontrollers like the ESP32.
+**Action:** When working with image processing loops in ESP32 projects, always hoist if checks over constants like `colorDepth` outside to duplicate the loops.
 
 ## 2024-11-20 - O(N) Performance hit via redundant strlen Calls
 **Learning:** Redundant `strlen(variable)` calls in string extraction paths (e.g., `extractQueryKeyVal` and `appSpecific.cpp`) or in `strncpy` operations are causing redundant string traversal. Instead of using pointer math or recalculating, we can remove the redundant splitting logic completely if the function has already separated them, or use a cached length/direct pointer math like `endPtr + 1`.
