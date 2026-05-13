@@ -175,7 +175,7 @@ esp_err_t extractQueryKeyVal(httpd_req_t *req, char* variable, char* value, size
   char* endPtr = strchr(variable, '=');
   if (endPtr != NULL) {
     *endPtr = 0; // split variable into 2 strings, first is key name
-    strncpy(value, variable + strlen(variable) + 1, valueSize - 1); // value is now second part of string
+    strncpy(value, endPtr + 1, valueSize - 1); // value is now second part of string
     value[valueSize - 1] = 0; // ensure null termination
     if (isPathTraversal(variable) || isPathTraversal(value)) {
       LOG_WRN("Path traversal attempt detected in query string");
