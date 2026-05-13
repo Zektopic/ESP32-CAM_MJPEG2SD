@@ -1,4 +1,4 @@
-## $(date +%Y-%m-%d) - CSS Disabled States
+## 2026-05-13 - CSS Disabled States
 
 **Learning:** Removing `pointer-events: none` from disabled CSS classes is necessary to allow `cursor: not-allowed` to function correctly, but requires applying the native `disabled` attribute to prevent fall-through clicks and ensure screen reader/keyboard accessibility. Dynamic enabling/disabling via JS must also explicitly toggle the element's `.disabled` property.
 **Action:** Always pair visual CSS `.disabled` classes with the native HTML `disabled` attribute, and ensure JS toggle functions synchronize both.
@@ -58,6 +58,9 @@
 ## 2026-05-02 - Keep dynamic ARIA labels synchronized with visual text updates
 **Learning:** When JavaScript dynamically updates the visual text of an interactive element (e.g., changing 'Start Recording' to 'Stop Recording' on a button), the `aria-label` (if present) is NOT automatically updated. If the element relies on `aria-label` to mask unicode icons or provide a clean accessible name, screen readers will announce the old state, causing severe confusion.
 **Action:** When updating the `.innerHTML` or `.textContent` of an element to reflect a state change, always check if the element has an `aria-label`. If it does, ensure you also call `.setAttribute('aria-label', ...)` with the new accessible name to keep it synchronized with the visual state.
+## 2026-05-08 - Native Disabled Attributes and Not-Allowed Cursor
+**Learning:** Relying solely on CSS classes (like `.disabled`) and `pointer-events: none` to disable UI elements prevents mouse interaction visually, but leaves the elements completely accessible and operable to keyboard and screen reader users. Additionally, `cursor: default` fails to convey the disabled state clearly compared to `cursor: not-allowed`.
+**Action:** When disabling elements, always ensure the native HTML `disabled` attribute is toggled alongside any visual CSS changes. Furthermore, use `cursor: not-allowed` for clearer user feedback and avoid `pointer-events: none` which completely hides the element's disabled state from the cursor interaction.
 ## 2025-02-13 - Fixed Accessibility for Disabled States
 **Learning:** Applying a `.disabled` CSS class with `pointer-events: none` only visually prevents mouse interactions but leaves elements fully accessible to keyboards/screen readers.
 **Action:** Always pair visual CSS classes with the native HTML `disabled` attribute for full accessibility compliance, and use `cursor: not-allowed` instead of `cursor: default` for clearer UX feedback. When removing `pointer-events: none`, ensure all associated JavaScript enable/disable functions explicitly toggle the `el.disabled = true/false` attribute to prevent elements from becoming functionally clickable.
