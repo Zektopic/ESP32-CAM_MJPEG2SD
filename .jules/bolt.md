@@ -48,3 +48,7 @@
 ## 2024-06-25 - Avoid O(N^2) strlen overhead in formatting loops
 **Learning:** Calling `strlen()` to find the end of a buffer inside a loop (e.g. `sprintf(buf + strlen(buf), ...)`) causes an O(N^2) performance hit because it has to traverse the entire string on each iteration.
 **Action:** Maintain an `offset` variable and use `offset += snprintf(buf + offset, size - offset, ...)` to concatenate strings in O(N) time.
+
+## 2024-11-20 - O(N) Performance hit via redundant strlen Calls
+**Learning:** Redundant `strlen(variable)` calls in string extraction paths (e.g., `extractQueryKeyVal` and `appSpecific.cpp`) or in `strncpy` operations are causing redundant string traversal. Instead of using pointer math or recalculating, we can remove the redundant splitting logic completely if the function has already separated them, or use a cached length/direct pointer math like `endPtr + 1`.
+**Action:** Avoid re-splitting strings that have already been separated by `extractQueryKeyVal`, and avoid calling `strlen` repeatedly on the same variable to extract the value if a pointer like `endPtr` is already available from `strchr`.
