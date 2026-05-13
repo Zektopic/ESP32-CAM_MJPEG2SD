@@ -920,10 +920,12 @@
           removeButton.innerHTML = '×';
           removeButton.onclick = function (event) {
             event.stopPropagation(); // Prevent container click from triggering at the same time
-            // Remove the IP from local storage, remove the IP container, and update images
-            const updatedIPs = removeFromLocalStorage(ip);
-            container.removeChild(ipContainer);
-            createImageElements(updatedIPs);
+            if (window.confirm("Are you sure you want to remove this camera?")) {
+              // Remove the IP from local storage, remove the IP container, and update images
+              const updatedIPs = removeFromLocalStorage(ip);
+              container.removeChild(ipContainer);
+              createImageElements(updatedIPs);
+            }
           };
 
           // Create a text element to display the IP address overlay
