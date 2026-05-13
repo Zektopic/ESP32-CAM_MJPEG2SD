@@ -451,18 +451,20 @@
           el.disabled = false;
         }
 
-        function disableRangeSlider(el) {;
+        function disableRangeSlider(el) {
           const rangeVal = el.parentElement.children.rangeVal;
           const itemInactiveColor =  getComputedStyle(rangeVal).getPropertyValue('--itemInactive');
           rangeVal.style.background = itemInactiveColor;
           el.classList.add('disabled');
+          el.disabled = true;
         }
 
-        function enableRangeSlider(el) {;
+        function enableRangeSlider(el) {
           const rangeVal = el.parentElement.children.rangeVal;
           const itemInactiveColor =  getComputedStyle(rangeVal).getPropertyValue('--buttonReady');
           rangeVal.style.background = itemInactiveColor;
           el.classList.remove('disabled');
+          el.disabled = false;
         }
 
         function isActive(el) {

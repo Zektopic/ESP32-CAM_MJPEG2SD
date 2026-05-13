@@ -1,7 +1,7 @@
-## 2024-05-20 - Global Keyboard Event Handling for Custom Components
-**Learning:** This application makes heavy use of interactive SVG `<rect>` elements and icon-only `<div>` elements as custom buttons. While ARIA labels and `tabindex` make them focusable for screen readers, they do not inherently trigger `click` events upon receiving 'Enter' or 'Space' keystrokes like native `<button>` tags do.
-**Action:** Always ensure that a global or component-level `keydown` listener exists to translate 'Enter' (keyCode 13) and 'Space' (keyCode 32) presses into `click()` events for non-native interactive elements (like SVG rects or divs with `role="button"`), while also preventing default scrolling for the Space key.
+## $(date +%Y-%m-%d) - CSS Disabled States
 
+**Learning:** Removing `pointer-events: none` from disabled CSS classes is necessary to allow `cursor: not-allowed` to function correctly, but requires applying the native `disabled` attribute to prevent fall-through clicks and ensure screen reader/keyboard accessibility. Dynamic enabling/disabling via JS must also explicitly toggle the element's `.disabled` property.
+**Action:** Always pair visual CSS `.disabled` classes with the native HTML `disabled` attribute, and ensure JS toggle functions synchronize both.
 ## 2024-03-25 - Focus Visible Styles for Keyboard Navigation
 **Learning:** The project's UI relies heavily on generic `button` elements, but previously lacked a distinct visual focus indicator for keyboard navigation (`:focus-visible`). This made it difficult for users relying on keyboard navigation (Tab key) to identify which element had focus.
 **Action:** Added `button:focus-visible` to `data/MJPEG2SD.htm` and `data/Auxil.htm` using existing design tokens (`var(--buttonActive)`). This ensures a clear focus ring is present for keyboard users without affecting mouse/touch users. Always ensure interactive elements have clear focus states.
@@ -55,3 +55,6 @@
 ## 2026-05-02 - Keep dynamic ARIA labels synchronized with visual text updates
 **Learning:** When JavaScript dynamically updates the visual text of an interactive element (e.g., changing 'Start Recording' to 'Stop Recording' on a button), the `aria-label` (if present) is NOT automatically updated. If the element relies on `aria-label` to mask unicode icons or provide a clean accessible name, screen readers will announce the old state, causing severe confusion.
 **Action:** When updating the `.innerHTML` or `.textContent` of an element to reflect a state change, always check if the element has an `aria-label`. If it does, ensure you also call `.setAttribute('aria-label', ...)` with the new accessible name to keep it synchronized with the visual state.
+## 2024-05-12 - Disabled Cursor Visibility
+**Learning:** `pointer-events: none` completely blocks mouse interactions, which inherently prevents the `cursor: not-allowed` style from rendering when a user hovers over a disabled element. Using this CSS approach alone fails to provide clear visual feedback to mouse users.
+**Action:** Always combine the native HTML `disabled` attribute (managed via JavaScript) with CSS pseudo-selectors (`:disabled` or `.disabled`) containing `cursor: not-allowed`, and explicitly avoid `pointer-events: none` on interactive elements where hover feedback is desired.
