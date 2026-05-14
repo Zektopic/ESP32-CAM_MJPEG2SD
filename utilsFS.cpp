@@ -29,8 +29,8 @@ static int sdmmcFreq = BOARD_MAX_SDMMC_FREQ; // board specific default SD_MMC sp
 
 enum fsInd {SDMMC, LITTLEFS, SPIFFSS, TBD};
 static fsInd thisFS = TBD; 
-static const char* fsTypes[] = {"SD_MMC", "LittleFS", "SPIFFS"};
-static const char* fsPaths[] = {"/sdcard", "/littlefs", "/spiffs"};
+static const char* fsTypes[] = {"SD_MMC", "LittleFS", "SPIFFS", "Unknown"};
+static const char* fsPaths[] = {"/sdcard", "/littlefs", "/spiffs", "/"};
 
 // hold sorted list of filenames/folders names in order of newest first
 static std::vector<std::string> fileVec;
