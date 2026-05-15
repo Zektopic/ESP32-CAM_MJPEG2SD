@@ -71,3 +71,6 @@
 ## 2024-05-12 - Disabled Cursor Visibility
 **Learning:** `pointer-events: none` completely blocks mouse interactions, which inherently prevents the `cursor: not-allowed` style from rendering when a user hovers over a disabled element. Using this CSS approach alone fails to provide clear visual feedback to mouse users.
 **Action:** Always combine the native HTML `disabled` attribute (managed via JavaScript) with CSS pseudo-selectors (`:disabled` or `.disabled`) containing `cursor: not-allowed`, and explicitly avoid `pointer-events: none` on interactive elements where hover feedback is desired.
+## 2025-02-12 - Inline Form Validation ARIA Feedback
+**Learning:** In `data/common.js`, dynamically generated error messages for inline form validation (`showInputError`) were missing crucial accessibility bindings, leaving screen reader users unaware of the specific input errors.
+**Action:** Always ensure that dynamic error message containers are assigned an ID and `aria-live="polite"`. The corresponding input fields must be dynamically updated with `aria-invalid="true"` and `aria-describedby="[error-id]"` when an error occurs, and these attributes must be removed when the error is resolved.
