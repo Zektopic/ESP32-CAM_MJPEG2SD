@@ -395,9 +395,19 @@
             errorEl.classList.add('error-message');
             errorEl.style.color = 'red';
             errorEl.style.fontSize = '0.8em';
+            errorEl.id = inputEl.id + '-error';
+            errorEl.setAttribute('aria-live', 'polite');
             inputEl.parentElement.appendChild(errorEl);
           }
           errorEl.textContent = errorMessage;
+
+          if (errorMessage) {
+            inputEl.setAttribute('aria-invalid', 'true');
+            inputEl.setAttribute('aria-describedby', errorEl.id);
+          } else {
+            inputEl.removeAttribute('aria-invalid');
+            inputEl.removeAttribute('aria-describedby');
+          }
         }
 
         function debounce(func, timeout = 500){
