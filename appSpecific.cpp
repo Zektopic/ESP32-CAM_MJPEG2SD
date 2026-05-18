@@ -725,15 +725,16 @@ void tgramAlert(const char* subject, const char* message) {
 }
 
 static bool downloadAvi(const char* userCmd) {
-  char* pos = strchr(userCmd, '_'); // if contains '_', assume filename
+  const char* pos = strchr(userCmd, '_'); // if contains '_', assume filename
   if (pos != NULL) {
     // add folder name and avi extension to incoming file name
     char fileName[FILE_NAME_LEN];
-    strncpy(fileName, userCmd, FILE_NAME_LEN - 1);
-    fileName[FILE_NAME_LEN - 1] = 0;
-    pos = strchr(fileName, '_');
-    memmove(pos, fileName, sizeof(fileName) - (pos - fileName));
-    strncat(fileName, ".avi", sizeof(fileName) - 1 - strlen(fileName));
+    int folderLen = pos - userCmd;
+    if (userCmd[0] == '/') {
+      snprintf(fileName, sizeof(fileName), "%.*s/%s.avi", folderLen, userCmd, userCmd + 1);
+    } else {
+      snprintf(fileName, sizeof(fileName), "/%.*s/%s.avi", folderLen, userCmd, userCmd);
+    }
     if (STORAGE.exists(fileName)) sendTgramFile(fileName, "video/x-msvideo", "");
     else sendTgramMessage("AVI file not found: ", fileName, "");
   }
