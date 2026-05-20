@@ -485,19 +485,7 @@ char* buildAppJsonString(bool filter) {
  #endif
 #endif
 #if INCLUDE_MCPWM
-  p += sprintf(p, "\"maxSteerAngle\":\"%d\",", maxSteerAngle);
-  p += sprintf(p, "\"maxDutyCycle\":\"%d\",", maxDutyCycle);
-  p += sprintf(p, "\"minDutyCycle\":\"%d\",", minDutyCycle);
-  p += sprintf(p, "\"allowReverse\":\"%d\",", allowReverse);
-  p += sprintf(p, "\"autoControl\":\"%d\",", autoControl);
-  p += sprintf(p, "\"waitTime\":\"%d\",", waitTime);
   p += sprintf(p, "\"RCactive\":\"%d\",", RCactive);
-  p += sprintf(p, "\"maxSteerAngle\":\"%d\",", maxSteerAngle);
-  p += sprintf(p, "\"maxDutyCycle\":\"%d\",", maxDutyCycle);
-  p += sprintf(p, "\"minDutyCycle\":\"%d\",", minDutyCycle);
-  p += sprintf(p, "\"allowReverse\":\"%d\",", allowReverse);
-  p += sprintf(p, "\"autoControl\":\"%d\",", autoControl);
-  p += sprintf(p, "\"waitTime\":\"%d\",", waitTime);
   p += sprintf(p, "\"heartbeatRC\":\"%d\",", heartbeatRC);
 #endif
   p += sprintf(p, "\"sustainId\":\"%u\",", sustainId);
@@ -655,12 +643,39 @@ static void heartBeatTask (void *pvParameter) {
 void startHeartbeat() {
   // start heartbeat to check websocket and / or uart connectivity for RC control
   if (RCactive || useUart) {
-    if (heartBeatHandle == NULL) xTaskCreateWithCaps(&heartBeatTask, "heartBeatTask", HB_STACK_SIZE, NULL, HB_PRI, &heartBeatHandle, HEAP_MEM);
+    if (heartBeatHandle == NULL) xTaskCreateWithCaps(&heartBeatTask, "heartBeatTask", HB_STACK_SIZE, NULL, HB_PRI, &heartBeatHandle, STACK_MEM);
   }
 }
 #endif
 
-void doAppPing() {
+#define EXT_NOCT_HOST "api.sunrise-sunset.org"
+#define EXT_NOCT_PATH "/json?lat=%0.6f&lng=%0.6f&formatted=0"
+void getNocturnal() {
+  // Get length of current location night time in secs
+  if (doGetExtIP) {
+    NetworkClientSecure hclient;
+    if (remoteServerConnect(hclient, EXT_NOCT_HOST, HTTPS_PORT, "", GETEXTNOCT)) {
+      HTTPClient http;
+      int httpCode = HTTP_CODE_NOT_FOUND;
+      char extNoctPath[100];
+      sprintf(extNoctPath, EXT_NOCT_PATH, latLon[0], latLon[1]);
+      if (http.begin(hclient, EXT_NOCT_HOST, HTTPS_PORT, extNoctPath)) {
+        httpCode = http.GET();
+        if (httpCode == HTTP_CODE_OK) {
+          String payload = http.getString();
+          char jsonVal[FILE_NAME_LEN] = "";
+          if (getJsonValue(payload.c_str(), "day_length", jsonVal)) deepSleepTimer = DAY_LENGTH - atoi(jsonVal);
+          else LOG_WRN("'day_length' field not present");
+        } else LOG_WRN("Noctural duration request failed, error: %s", http.errorToString(httpCode).c_str());
+        http.end();
+      }
+      remoteServerClose(hclient);
+    }
+  }
+  if (deepSleepTimer) LOG_INF("Night time duration: %lu secs at Lat: %0.6f, Lon: %0.6f", deepSleepTimer, latLon[0], latLon[1]);
+}
+
+void doAppPing(bool timeSynced) {
   if (DEBUG_MEM) {
     currentStackUsage();
     checkMemory();
@@ -679,16 +694,11 @@ void doAppPing() {
 #if INCLUDE_EXTHB
   if (external_heartbeat_active) sendExternalHeartbeat();
 #endif
-#if INCLUDE_PERIPH
-    static bool atNight = false;
-#endif
   // check for night time actions
+  static bool atNight = false;
+  if (wakeUse && wakePin < 0 && deepSleepTimer == 0 && timeSynced) getNocturnal();
   if (isNight(nightSwitch)) {
-    if (wakeUse && wakePin) {
-      // to use LDR on wake pin, connect it between pin and 3V3
-      // uses internal pulldown resistor as voltage divider
-      // but may need to add external pull down between pin
-      // and GND to alter required light level for wakeup
+    if (wakeUse) {
 #ifndef AUXILIARY
       digitalWrite(PWDN_GPIO_NUM, 1); // power down camera
 #endif

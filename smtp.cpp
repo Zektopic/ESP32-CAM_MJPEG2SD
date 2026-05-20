@@ -124,9 +124,9 @@ static bool emailSend(const char* mimeType = MIME_TYPE, const char* fileName = A
       sprintf(content, "Content-Disposition: attachment; filename=\"%s\"; size=%d;", fileName, alertBufferSize); 
       
       client.println(content); 
-      // base64 encode attachment and send out in larger batches to reduce network overhead
+      // base64 encode attachment and buffer for output
       size_t chunkSize = 3;
-      uint8_t* outBuf = (uint8_t*)malloc(1024); // Buffer for batched output
+      uint8_t* outBuf = (uint8_t*)ps_malloc(1024); // Buffer for batched output
       if (outBuf) {
         size_t outLen = 0;
         for (size_t i = 0; i < alertBufferSize; i += chunkSize) {
@@ -139,12 +139,8 @@ static bool emailSend(const char* mimeType = MIME_TYPE, const char* fileName = A
         }
         if (outLen > 0) client.write(outBuf, outLen);
         free(outBuf);
-      } else {
-        // fallback to chunks if malloc fails
-        for (size_t i = 0; i < alertBufferSize; i += chunkSize)
-          client.write(encode64chunk(alertBuffer + i, min(alertBufferSize - i, chunkSize)), 4);
-      }
-    } 
+      } else LOG_ERR("Unable to alloc outBuf");
+    }
     client.println("\n"); // two lines to finish header
         
     // close message data and quit
@@ -179,7 +175,7 @@ void emailAlert(const char* _subject, const char* _message) {
         strncpy(subject, _subject, sizeof(subject)-1);
         snprintf(subject+strlen(subject), sizeof(subject)-strlen(subject), " from %s", hostName);
         strncpy(message, _message, sizeof(message)-1);
-        xTaskCreateWithCaps(&emailTask, "emailTask", EMAIL_STACK_SIZE, NULL, EMAIL_PRI, &emailHandle, HEAP_MEM);
+        xTaskCreateWithCaps(&emailTask, "emailTask", EMAIL_STACK_SIZE, NULL, EMAIL_PRI, &emailHandle, STACK_MEM);
         debugMemory("emailAlert");
       } else LOG_WRN("Email alert already in progress");
     } else LOG_WRN("Need to restart to setup email");

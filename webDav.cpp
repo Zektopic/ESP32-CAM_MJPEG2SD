@@ -152,8 +152,8 @@ static bool handleProp() {
   if (!haveResource()) return false;
   // get depth header
   bool depth = false;
-  char value[IN_FILE_NAME_LEN];
-  if (extractHeaderVal(req, "Depth", value, sizeof(value)) == ESP_OK) depth = (!strcmp(value, "0")) ? false : true;
+  char value[10];
+  if (extractHeaderVal(req, "Depth", value) == ESP_OK) depth = (!strcmp(value, "0")) ? false : true;
 
   // get request payload content if present
   char payload[req->content_len + 1] = {0};
@@ -179,6 +179,11 @@ static bool handleProp() {
   root.close();
   httpd_resp_sendstr_chunk(req, "</D:multistatus>");
   httpd_resp_sendstr_chunk(req, NULL);
+  return true;
+}
+
+static bool handleOptions() {
+  httpd_resp_sendstr(req, NULL);
   return true;
 }
 
@@ -269,25 +274,19 @@ static bool checkSamePath(const char *source_path, const char *dest_path) {
 
   size_t src_len = src_slash - source_path;
   size_t dest_len = dest_slash - dest_path;
-
   if (src_len != dest_len) return false;
-
+  
   return strncmp(source_path, dest_path, src_len) == 0;
 }
 
 static bool handleMove() {
   // rename file or folder, or change file location
   bool res = false;
-  char dest[IN_FILE_NAME_LEN];
-  if (extractHeaderVal(req, "Destination", dest, sizeof(dest)) == ESP_OK) {
+  char dest[100];
+  if (extractHeaderVal(req, "Destination", dest) == ESP_OK) {
     // obtain destination filename
     res = true;
     urlDecode(dest);
-    if (isPathTraversal(dest)) {
-      LOG_WRN("Path traversal attempt detected in WebDAV move destination: %s", dest);
-      httpd_resp_send_404(req);
-      return false;
-    }
     char* pos = strstr(dest, WEBDAV);
     if (!pos) {
       httpd_resp_send_404(req);
@@ -317,30 +316,12 @@ static bool handleCopy() {
 }
 
 bool handleWebDav(httpd_req_t* rreq) {
-  req = rreq;
-  if (req->method == HTTP_OPTIONS) {
-    httpd_resp_set_hdr(req, "DAV", "1");
-    httpd_resp_set_hdr(req, "Allow", ALLOW);
-    httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
-    httpd_resp_set_hdr(req, "Access-Control-Max-Age", "600");
-    httpd_resp_set_hdr(req, "Access-Control-Allow-Methods", "POST,GET,HEAD,OPTIONS,PUT,DELETE,MKCOL,COPY,MOVE,PROPFIND,PROPPATCH,LOCK,UNLOCK");
-    httpd_resp_set_hdr(req, "Access-Control-Allow-Headers", "*");
-    httpd_resp_sendstr(req, NULL);
-    return true;
-  }
-  if (!checkAuth(rreq)) return true;
   // extract method to determine which WebDAV action to take
-  //showHttpHeaders(rreq);
-  snprintf(pathName, IN_FILE_NAME_LEN, "%s", req->uri + strlen(WEBDAV)); // strip out "/webdav"
-  size_t pathLen = strlen(pathName);
-  if (pathLen > 0 && pathName[pathLen - 1] == '/') pathName[pathLen - 1] = 0; // remove final / if present
+  req = rreq;
+  sprintf(pathName, "%s", req->uri + strlen(WEBDAV)); // strip out "/webdav"
+  if (pathName[strlen(pathName) - 1] == '/') pathName[strlen(pathName) - 1] = 0; // remove final / if present
   if (!strlen(pathName)) strcpy(pathName, "/"); // if pathname empty, use single /
   urlDecode(pathName);
-  if (isPathTraversal(pathName)) {
-    LOG_WRN("Path traversal attempt detected in WebDAV path: %s", pathName);
-    httpd_resp_send_404(req);
-    return false;
-  }
   // common response header
   httpd_resp_set_hdr(req, "DAV", "1");
   httpd_resp_set_hdr(req, "Allow", ALLOW);
@@ -351,6 +332,7 @@ bool handleWebDav(httpd_req_t* rreq) {
     case HTTP_PROPPATCH: return handleProp(); // set file or directory properties
     case HTTP_GET: return handleGet(); // file downloads
     case HTTP_HEAD: return handleHead(); // file properties
+    case HTTP_OPTIONS: return handleOptions(); // supported options
     case HTTP_LOCK: return handleLock(); // open file lock
     case HTTP_UNLOCK: return handleUnlock(); // close file lock
     case HTTP_MKCOL: return handleMkdir(); // folder creation

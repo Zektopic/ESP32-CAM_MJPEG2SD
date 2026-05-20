@@ -172,15 +172,14 @@ void prepRTSP() {
   if (transport != RTSPServer::NONE) {
     if (rtspServer.init()) { 
       LOG_INF("RTSP server started successfully with transport%s", transportStr);
-      IPAddress ipLocal = netLocalIP();
-      LOG_INF("Connect to: rtsp://%s%u.%u.%u.%u:%d%s", useAuth ? "<username>:<password>@" : "", ipLocal[0], ipLocal[1], ipLocal[2], ipLocal[3],
+      LOG_INF("Connect to: rtsp://%s%s:%d%s", useAuth ? "<username>:<password>@" : "", formatIPstr(), 
         rtspServer.rtspPort, useAuth ? " (credentials not shown for security reasons)" : "");
 
       // start RTSP tasks, need bigger stack for video
 #ifdef ISCAM
-      if (rtspVideo) xTaskCreateWithCaps(sendRTSPVideo, "sendRTSPVideo", 1024 * 5, NULL, SUSTAIN_PRI, &sustainHandle[1], HEAP_MEM); 
-      if (rtspAudio) xTaskCreateWithCaps(sendRTSPAudio, "sendRTSPAudio", 1024 * 5, NULL, SUSTAIN_PRI, &sustainHandle[2], HEAP_MEM);
-      if (rtspSubtitles) xTaskCreateWithCaps(startRTSPSubtitles, "startRTSPSubtitles", 1024 * 1, NULL, SUSTAIN_PRI, &sustainHandle[3], HEAP_MEM);
+      if (rtspVideo) xTaskCreateWithCaps(sendRTSPVideo, "sendRTSPVideo", 1024 * 5, NULL, SUSTAIN_PRI, &sustainHandle[1], STACK_MEM); 
+      if (rtspAudio) xTaskCreateWithCaps(sendRTSPAudio, "sendRTSPAudio", 1024 * 5, NULL, SUSTAIN_PRI, &sustainHandle[2], STACK_MEM);
+      if (rtspSubtitles) xTaskCreateWithCaps(startRTSPSubtitles, "startRTSPSubtitles", 1024 * 1, NULL, SUSTAIN_PRI, &sustainHandle[3], STACK_MEM);
 #endif
 #ifdef ISVC
       xTaskCreate(sendRTSPAudio, "sendRTSPAudio", 1024 * 5, NULL, 5, NULL);

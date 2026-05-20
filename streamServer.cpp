@@ -161,7 +161,7 @@ static void showStream(httpd_req_t* req, uint8_t taskNum) {
   if (res == ESP_OK) httpd_resp_sendstr_chunk(req, NULL);
   uint32_t mjpegTime = millis() - startTime;
   float mjpegTimeF = float(mjpegTime) / 1000; // secs
-  LOG_INF("MJPEG: %u frames, total %s in %0.1fs @ %0.1ffps", frameCnt, fmtSize(mjpegLen), mjpegTimeF, (float)(frameCnt) / mjpegTimeF);
+  LOG_INF("MJPEG: %lu frames, total %s in %0.1fs @ %0.1ffps", frameCnt, fmtSize(mjpegLen), mjpegTimeF, (float)(frameCnt) / mjpegTimeF);
 }
 
 static void audioStream(httpd_req_t* req, uint8_t taskNum) {
@@ -225,8 +225,6 @@ static void srtStream(httpd_req_t* req, uint8_t taskNum) {
 #endif
     if (res == ESP_OK) res = httpd_resp_sendstr_chunk(req, "\n\n");
     if (res != ESP_OK) isStreaming[taskNum] = false; // client connection closed
-    // Bolt: calculate elapsed time first to prevent unsigned integer underflow
-    // when millis() is less than sampleInterval, ensuring the task yields correctly.
     else while (isStreaming[taskNum] && (millis() - startTime) < sampleInterval) delay(50);
   }
   if (res == ESP_OK) httpd_resp_sendstr_chunk(req, NULL);
@@ -277,7 +275,7 @@ void startSustainTasks() {
   for (int i = 0; i < numStreams; i++) {
     sustainReq[i].taskNum = i; // so task knows its number
     if (includeRTSP && i > 0) continue; // as RTSP tasks created in rtsp.cpp
-    xTaskCreateWithCaps(sustainTask, "sustainTask", SUSTAIN_STACK_SIZE, &sustainReq[i].taskNum, SUSTAIN_PRI, &sustainHandle[i], HEAP_MEM); 
+    xTaskCreateWithCaps(sustainTask, "sustainTask", SUSTAIN_STACK_SIZE, &sustainReq[i].taskNum, SUSTAIN_PRI, &sustainHandle[i], STACK_MEM); 
   }
   
   LOG_INF("Started %d sustain tasks", numStreams);
@@ -290,7 +288,7 @@ esp_err_t appSpecificSustainHandler(httpd_req_t* req) {
   if (checkAuth(req)) { 
     // handle long running request as separate task
     // obtain details from query string
-    if (extractQueryKeyVal(req, variable, value, sizeof(value)) == ESP_OK) {
+    if (extractQueryKeyVal(req, variable, value) == ESP_OK) {
       // playback, download, web streaming uses task 0
       // remote streaming eg video uses task 1, audio task 2, srt task 3
       uint8_t taskNum = 99;

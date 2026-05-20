@@ -29,7 +29,7 @@ static int sdmmcFreq = BOARD_MAX_SDMMC_FREQ; // board specific default SD_MMC sp
 
 enum fsInd {SDMMC, LITTLEFS, SPIFFSS, TBD};
 static fsInd thisFS = TBD; 
-static const char* fsTypes[] = {"SD_MMC", "LittleFS", "SPIFFS", "Unknown"};
+static const char* fsTypes[] = {"SD_MMC", "LittleFS", "SPIFFS", "TBD"};
 static const char* fsPaths[] = {"/sdcard", "/littlefs", "/spiffs", "/"};
 
 // hold sorted list of filenames/folders names in order of newest first
@@ -145,11 +145,11 @@ bool startStorage() {
       if (res) LittleFS.mkdir(DATA_DIR);
     }
 #endif
-    if (res) {  
-      // list details of files on file system
-      const char* rootDir = thisFS == LITTLEFS ? DATA_DIR : "/";
-      listFolder(rootDir);
-    }
+  }
+  if (res) {
+    // list details of files on file system
+    const char* rootDir = thisFS == LITTLEFS ? DATA_DIR : "/";
+    listFolder(rootDir);
   } else {
     snprintf(startupFailure, SF_LEN, STARTUP_FAIL "Failed to mount %s", fsTypes[thisFS]);  
     dataFilesChecked = true; // disable setupAssist as no file system
@@ -177,7 +177,7 @@ void inline getFileDate(File& file, char* fileDate) {
   time_t writeTime = file.getLastWrite();
   struct tm lt;
   localtime_r(&writeTime, &lt);
-  strftime(fileDate, sizeof(fileDate), "%Y-%m-%d %H:%M:%S", &lt);
+  strftime(fileDate, strlen(fileDate), "%Y-%m-%d %H:%M:%S", &lt);
 }
 
 bool checkFreeStorage() { 
@@ -189,7 +189,7 @@ bool checkFreeStorage() {
   else {
     // delete to make space
     while (freeSize < sdMinCardFreeSpace) {
-      char oldestDir[FILE_NAME_LEN];
+      char oldestDir[FILE_NAME_LEN] = {0};
       getOldestDir(oldestDir);
       LOG_WRN("Deleting oldest folder: %s %s", oldestDir, sdFreeSpaceMode == 2 ? "after uploading" : "");
 #if INCLUDE_FTP_HFS
@@ -317,8 +317,7 @@ void deleteFolderOrFile(const char* deleteThis) {
     LOG_WRN("Failed to open %s", fileName);
     return;
   }
-  if (df.isDirectory() && (strstr(fileName, "System") != NULL 
-      || strstr("/", fileName) != NULL)) {
+  if (df.isDirectory() && (strstr(fileName, "System") != NULL)) {
     df.close();   
     LOG_WRN("Deletion of %s not permitted", fileName);
     delay(1000); // reduce thrashing on same error
@@ -369,7 +368,7 @@ static esp_err_t writeHeader(File& inFile, httpd_req_t* req) {
   // Calculate and set the checksum
   uint32_t checksum = 0;
   for (const auto& ch : tarHeader) checksum += ch;
-  sprintf(tarHeader + 148, "%06lo", checksum); // six digit octal number with leading zeroes followed by a NUL and then a space.
+  sprintf(tarHeader + 148, "%06lo ", checksum); // six digit octal number with leading zeroes followed by a NUL and then a space.
   return httpd_resp_send_chunk(req, tarHeader, BLOCKSIZE);
 }
 
