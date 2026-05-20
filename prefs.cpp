@@ -157,10 +157,30 @@ static bool loadConfigVect() {
   configs.reserve(MAX_CONFIGS);
   // extract each config line from file
   File file = STORAGE.open(CONFIG_FILE_PATH, FILE_READ);
-  while (file.available()) {
-    String configLineStr = file.readStringUntil('\n');
-    if (configLineStr.length()) loadVectItem(configLineStr.c_str());
+  if (file) {
+    size_t fsize = file.size();
+    if (fsize > 0) {
+      char* fileBuf = (char*)malloc(fsize + 1);
+      if (fileBuf) {
+        size_t bytesRead = file.read((uint8_t*)fileBuf, fsize);
+        fileBuf[bytesRead] = 0;
+        char* p = fileBuf;
+        char* end = fileBuf + bytesRead;
+        while (p < end) {
+          char* nl = strchr(p, '\n');
+          if (nl) *nl = 0;
+          if (*p) loadVectItem(p);
+          if (nl) p = nl + 1;
+          else break;
+        }
+        free(fileBuf);
+      } else {
+        LOG_WRN("Failed to allocate memory for config file reading");
+      }
+    }
+    file.close();
   }
+
   // sort vector by key (element 0 in row)
   std::sort(configs.begin(), configs.end(), [] (
     const std::vector<std::string> &a, const std::vector<std::string> &b) {
@@ -168,7 +188,6 @@ static bool loadConfigVect() {
   );
   // return malloc to default
   if (psramFound()) heap_caps_malloc_extmem_enable(MAX_RAM);
-  file.close();
   return true;
 }
 

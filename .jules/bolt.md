@@ -55,3 +55,6 @@
 ## 2024-11-20 - O(N) Performance hit via redundant strlen Calls
 **Learning:** Redundant `strlen(variable)` calls in string extraction paths (e.g., `extractQueryKeyVal` and `appSpecific.cpp`) or in `strncpy` operations are causing redundant string traversal. Instead of using pointer math or recalculating, we can remove the redundant splitting logic completely if the function has already separated them, or use a cached length/direct pointer math like `endPtr + 1`.
 **Action:** Avoid re-splitting strings that have already been separated by `extractQueryKeyVal`, and avoid calling `strlen` repeatedly on the same variable to extract the value if a pointer like `endPtr` is already available from `strchr`.
+## 2026-05-20 - File Read Return Values
+**Learning:** When performing bulk I/O with `file.read()` on ESP32, the reported `file.size()` may not exactly match the bytes read. Relying on `file.size()` to set loop bounds without capturing the return value can result in out-of-bounds reads into uninitialized memory.
+**Action:** Always capture the return value of `file.read()` (e.g. `size_t bytesRead = file.read(...)`) and use it to bound operations and set the null terminator.
