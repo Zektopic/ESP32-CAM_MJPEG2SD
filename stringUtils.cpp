@@ -8,12 +8,4 @@ bool isPathTraversal(const char* path) {
          !strcmp(path, "..");
 }
 
-void removeChar(char* s, char c) {
-  // remove specified character from string
-  int writer = 0, reader = 0;
-  while (s[reader]) {
-    if (s[reader] != c) s[writer++] = s[reader];
-    reader++;
-  }
-  s[writer] = 0;
-}
+// removeChar is defined in utils.cpp and declared in globals.h

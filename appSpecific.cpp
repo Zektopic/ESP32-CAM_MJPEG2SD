@@ -434,7 +434,7 @@ void appSpecificWsHandler(const char* wsMsg) {
         case 'S':
           // status request
           buildJsonString(wsLen); // required config number
-          logPrint("%s\n", jsonBuff);
+          LOG_INF("%s", jsonBuff);
         break;
         case 'U':
           // update or control request
@@ -751,21 +751,7 @@ static bool downloadAvi(const char* userCmd) {
   return (bool)pos;
 }
 
-static void saveRamLog(const char* ramLogName) {
-  // save ramlog to storage for upload to telegram
-  File ramFile = STORAGE.open(ramLogName, FILE_WRITE);
-  int startPtr, endPtr;
-  startPtr = endPtr = mlogEnd;
-  // write log in chunks
-  do {
-    int maxChunk = startPtr < endPtr ? endPtr - startPtr : RAM_LOG_LEN - startPtr;
-    size_t chunkSize = std::min(CHUNKSIZE, maxChunk);
-    if (chunkSize > 0) ramFile.write((uint8_t*)messageLog + startPtr, chunkSize);
-    startPtr += chunkSize;
-    if (startPtr >= RAM_LOG_LEN) startPtr = 0;
-  } while (startPtr != endPtr);
-  ramFile.close();
-}
+// saveRamLog is defined in utilsLog.cpp and declared extern in globals.h
 
 void appSpecificTelegramTask(void* p) {
 #if INCLUDE_TGRAM
