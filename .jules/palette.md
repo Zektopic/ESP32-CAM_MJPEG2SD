@@ -71,6 +71,7 @@
 ## 2024-05-12 - Disabled Cursor Visibility
 **Learning:** `pointer-events: none` completely blocks mouse interactions, which inherently prevents the `cursor: not-allowed` style from rendering when a user hovers over a disabled element. Using this CSS approach alone fails to provide clear visual feedback to mouse users.
 **Action:** Always combine the native HTML `disabled` attribute (managed via JavaScript) with CSS pseudo-selectors (`:disabled` or `.disabled`) containing `cursor: not-allowed`, and explicitly avoid `pointer-events: none` on interactive elements where hover feedback is desired.
+<<<<<<< HEAD
 ## 2024-05-18 - Dynamically Link Error Messages to Inputs
 **Learning:** Screen readers need explicit linking (`aria-describedby`) and live regions (`aria-live`) to properly associate dynamically inserted validation error text with the form inputs causing them. Just appending a red text div next to the input is only visual, leaving screen-reader users uninformed of validation failures.
 **Action:** Always add unique IDs to dynamic error elements, set `aria-live="polite"` on them, and tie them to their input fields via `aria-describedby` and `aria-invalid="true"`.
@@ -97,3 +98,6 @@
 ## 2024-05-18 - Dynamically Generated Keyboard Accessibility & Destructive Confirm Flows
 **Learning:** Dynamically generated UI elements (like `div` cards displaying saved IP cameras) are often built with `onclick` handlers but omit native keyboard focus states. Additionally, custom local-storage clearing mechanisms often execute immediately without confirmation, deviating from expected app behaviors and causing accidental data loss.
 **Action:** When dynamically generating clickable elements via JavaScript, explicitly set `role="button"`, `tabindex="0"`, and an appropriate `aria-label`. For destructive actions (e.g., `clearLocalStorage()`), always wrap the logic in a `window.confirm()` dialog to match standard patterns.
+## 2025-02-12 - Inline Form Validation ARIA Feedback
+**Learning:** In `data/common.js`, dynamically generated error messages for inline form validation (`showInputError`) were missing crucial accessibility bindings, leaving screen reader users unaware of the specific input errors.
+**Action:** Always ensure that dynamic error message containers are assigned an ID and `aria-live="polite"`. The corresponding input fields must be dynamically updated with `aria-invalid="true"` and `aria-describedby="[error-id]"` when an error occurs, and these attributes must be removed when the error is resolved.
