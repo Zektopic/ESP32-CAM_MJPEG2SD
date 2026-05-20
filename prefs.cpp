@@ -482,7 +482,7 @@ void buildJsonString(uint8_t filter) {
         }
         // for each config item, list - key:value, key:label text, key:type identifier
         p += sprintf(p, "\"%s\":\"%s\",\"lab%s\":\"%s\",\"typ%s\":\"%s\",", row[0].c_str(),
-          strstr(row[0].c_str(), "_Pass") == NULL ? row[1].c_str() : pwdHide, row[0].c_str(), row[4].c_str(), row[0].c_str(), row[3].c_str());
+          row[0].find("_Pass") == std::string::npos ? row[1].c_str() : pwdHide, row[0].c_str(), row[4].c_str(), row[0].c_str(), row[3].c_str());
       }
     }
   }

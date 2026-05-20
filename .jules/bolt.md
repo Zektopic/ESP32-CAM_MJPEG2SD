@@ -58,3 +58,7 @@
 ## 2026-05-20 - File Read Return Values
 **Learning:** When performing bulk I/O with `file.read()` on ESP32, the reported `file.size()` may not exactly match the bytes read. Relying on `file.size()` to set loop bounds without capturing the return value can result in out-of-bounds reads into uninitialized memory.
 **Action:** Always capture the return value of `file.read()` (e.g. `size_t bytesRead = file.read(...)`) and use it to bound operations and set the null terminator.
+
+## 2024-05-24 - Avoid O(N) length recalculations and pointer extraction overhead in String comparisons
+**Learning:** Comparing `String` or `std::string` objects using `.c_str()` with `strcmp()`, `strlen()`, or `strstr()` bypasses the string object's cached length, introducing unnecessary O(N) length recalculations and pointer extraction overhead.
+**Action:** Use native string methods and operators (e.g. `==`, `.length()`, `.find()`, `.compare()`) instead of converting to C-strings for string operations and comparisons.
