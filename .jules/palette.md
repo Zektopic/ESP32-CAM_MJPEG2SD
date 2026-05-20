@@ -74,3 +74,7 @@
 ## 2024-05-18 - Dynamically Link Error Messages to Inputs
 **Learning:** Screen readers need explicit linking (`aria-describedby`) and live regions (`aria-live`) to properly associate dynamically inserted validation error text with the form inputs causing them. Just appending a red text div next to the input is only visual, leaving screen-reader users uninformed of validation failures.
 **Action:** Always add unique IDs to dynamic error elements, set `aria-live="polite"` on them, and tie them to their input fields via `aria-describedby` and `aria-invalid="true"`.
+
+## 2026-04-24 - Protecting Destructive Actions with Confirmation Dialogs
+**Learning:** Destructive actions like clearing all local storage IPs lacked a confirmation step, potentially leading to accidental data loss with a single misclick.
+**Action:** Always wrap destructive actions in `window.confirm()` dialogs to ensure intentionality before irreversible changes occur.
