@@ -390,21 +390,25 @@
         // Display error messages below input fields
         function showInputError(inputEl, errorMessage) {
           let errorEl = inputEl.nextElementSibling;
+          const inputId = inputEl.id || inputEl.name || ('input-' + Math.random().toString(36).substr(2, 9));
+          const errorId = inputId + '-error';
           if (!errorEl || !errorEl.classList.contains('error-message')) {
             errorEl = document.createElement('div');
             errorEl.classList.add('error-message');
             errorEl.style.color = 'red';
             errorEl.style.fontSize = '0.8em';
-            errorEl.id = inputEl.id + '-error';
             errorEl.setAttribute('aria-live', 'polite');
             inputEl.parentElement.appendChild(errorEl);
           }
-          errorEl.textContent = errorMessage;
+          // Ensure the ID is always set, even if the element already existed
+          errorEl.id = errorId;
 
           if (errorMessage) {
+            errorEl.textContent = errorMessage;
             inputEl.setAttribute('aria-invalid', 'true');
-            inputEl.setAttribute('aria-describedby', errorEl.id);
+            inputEl.setAttribute('aria-describedby', errorId);
           } else {
+            errorEl.textContent = '';
             inputEl.removeAttribute('aria-invalid');
             inputEl.removeAttribute('aria-describedby');
           }
