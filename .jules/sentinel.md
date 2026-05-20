@@ -78,3 +78,8 @@
 **Vulnerability:** Array out-of-bounds read vulnerability when accessing `fsTypes` and `fsPaths` using `thisFS` when `thisFS` defaults to `TBD`.
 **Learning:** Hardcoded mapping arrays matching an enum need to be the same length as the enum values used to access them, including the default or error states.
 **Prevention:** Extend arrays to cover all enum variants, and use tools like `cppcheck` continuously.
+
+## 2024-06-25 - [CRITICAL] Stack Buffer Overflow in downloadAvi via Incorrect memmove Size
+**Vulnerability:** In `appSpecific.cpp:downloadAvi`, an incorrect size argument was used in a `memmove` operation: `memmove(pos, fileName, sizeof(fileName) - (pos - fileName))`. The size argument incorrectly used the remaining size of the destination buffer rather than the length of the source string. This caused an out-of-bounds read past the null terminator of the source string into uninitialized stack memory, copying garbage data. The resulting buffer lacked a null terminator where `strncat` expected one, further triggering an underflow in `strncat` length limits and causing stack corruption.
+**Learning:** Using the remaining space of a destination buffer as the copy length for string manipulation is a classic buffer over-read/overflow vulnerability.
+**Prevention:** Always base `memmove` and `memcpy` lengths on the source string length (e.g. `strlen(src) + 1`), bounded by the destination size. Alternatively, use `snprintf` to safely format strings without manual pointer arithmetic.
