@@ -914,34 +914,6 @@
           // Create a container div for each image
           const ipContainer = document.createElement('div');
           ipContainer.classList.add('ipContainer');
-          ipContainer.setAttribute('role', 'button');
-          ipContainer.setAttribute('tabindex', '0');
-          ipContainer.setAttribute('aria-label', `Open camera at ${ipStr}`);
-          // Create an image element
-          const hubImg = document.createElement('img');
-          hubImg.classList.add('hubImg');
-          // Set the source attribute to request image
-          hubImg.src = `http://${ip}`;
-          // Set an alt attribute for accessibility
-          hubImg.alt = `No Image`;
-
-          // Create a remove button for each container
-          const removeButton = document.createElement('span');
-          removeButton.classList.add('removeButton');
-          removeButton.classList.add('iconSize');
-          removeButton.setAttribute('role', 'button');
-          removeButton.setAttribute('tabindex', '0');
-          removeButton.setAttribute('aria-label', 'Remove IP');
-          removeButton.innerHTML = '×';
-          removeButton.onclick = function (event) {
-            event.stopPropagation(); // Prevent container click from triggering at the same time
-            if (window.confirm("Are you sure you want to remove this camera?")) {
-              // Remove the IP from local storage, remove the IP container, and update images
-              const updatedIPs = removeFromLocalStorage(ip);
-              container.removeChild(ipContainer);
-              createImageElements(updatedIPs);
-            }
-          };
 
           // Create a text element to display the IP address overlay
           const ipUrl = document.createElement('span');
@@ -951,6 +923,42 @@
           const ipText = document.createElement('span');
           ipText.classList.add('ipText');
           ipText.textContent = ipStr;
+
+          ipContainer.setAttribute('role', 'button');
+          ipContainer.setAttribute('tabindex', '0');
+          ipContainer.setAttribute('aria-label', `Open device hub for ${ipStr}`);
+
+          // Create an image element
+          const hubImg = document.createElement('img');
+          hubImg.classList.add('hubImg');
+          // Set the source attribute to request image
+          hubImg.src = `http://${ip}`;
+          // Set an alt attribute for accessibility
+          hubImg.alt = `Camera feed from ${ipStr}`;
+
+          // Create a remove button for each container
+          const removeButton = document.createElement('span');
+          removeButton.classList.add('removeButton');
+          removeButton.classList.add('iconSize');
+          removeButton.setAttribute('role', 'button');
+          removeButton.setAttribute('tabindex', '0');
+          removeButton.setAttribute('aria-label', `Remove IP ${ipStr}`);
+          removeButton.innerHTML = '×';
+          removeButton.onclick = function (event) {
+            event.stopPropagation(); // Prevent container click from triggering at the same time
+            if (window.confirm(`Are you sure you want to remove ${ipStr}?`)) {
+              // Remove the IP from local storage, remove the IP container, and update images
+              const updatedIPs = removeFromLocalStorage(ip);
+              container.removeChild(ipContainer);
+              createImageElements(updatedIPs);
+            }
+          };
+          removeButton.onkeydown = function(event) {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              removeButton.click();
+            }
+          };
 
           // Append the image, IP text, and remove button to the container
           ipContainer.appendChild(ipUrl);
@@ -964,6 +972,12 @@
           // Add click event listener to each container for fetching the web page for the IP address
           ipContainer.onclick = function () {
             window.open(`http://${ipStr}`, '_blank');
+          };
+          ipContainer.onkeydown = function(event) {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              ipContainer.click();
+            }
           };
 
           // Append the container to the main image container
