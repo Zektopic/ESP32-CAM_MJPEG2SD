@@ -78,3 +78,7 @@
 ## 2026-04-24 - Protecting Destructive Actions with Confirmation Dialogs
 **Learning:** Destructive actions like clearing all local storage IPs lacked a confirmation step, potentially leading to accidental data loss with a single misclick.
 **Action:** Always wrap destructive actions in `window.confirm()` dialogs to ensure intentionality before irreversible changes occur.
+
+## 2026-05-03 - Native HTML disabled vs CSS pointer-events
+**Learning:** In the UI (e.g., `MJPEG2SD.htm`), applying a `.disabled` CSS class with `pointer-events: none` only visually prevents mouse interactions but leaves the element fully accessible to keyboard navigation and screen readers. Furthermore, JavaScript functions manipulating disabled states (like `disableRangeSlider` in `data/common.js`) often overlook the native DOM state.
+**Action:** When creating or manipulating disabled states for interactive elements (like `<button>` or `<input>`), always pair visual CSS classes with the native HTML `disabled` attribute (`disabled` in HTML or `el.disabled = true` in JavaScript) to ensure full accessibility compliance. Additionally, use `cursor: not-allowed` instead of `cursor: default` for clearer UX feedback.
