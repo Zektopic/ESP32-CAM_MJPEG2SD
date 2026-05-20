@@ -973,6 +973,11 @@
           removeButton.style.top = '0';
           removeButton.style.right = '0';
 
+          // Make the container keyboard-accessible
+          ipContainer.setAttribute('role', 'button');
+          ipContainer.setAttribute('tabindex', '0');
+          ipContainer.setAttribute('aria-label', `Open camera stream for ${ipStr}`);
+
           // Add click event listener to each container for fetching the web page for the IP address
           ipContainer.onclick = function () {
             window.open(`http://${ipStr}`, '_blank');
@@ -1008,7 +1013,7 @@
         let newIP = ipInput.value.trim();
         if (newIP !== '' && !ipAddresses.some(item => item.includes(newIP))) {
           // if only ip address supplied then add default URI, otherwise use supplied URL
-          if (newIP.indexOf('/') == -1) newIP += '/control?hub=${Date.now()';
+          if (newIP.indexOf('/') == -1) newIP += `/control?hub=${Date.now()}`;
           ipAddresses.push(newIP);
           localStorage.setItem('enteredIPs', JSON.stringify(ipAddresses));
           // Call the function to create image elements with the updated IP addresses

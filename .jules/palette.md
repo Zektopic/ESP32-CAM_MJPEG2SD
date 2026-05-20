@@ -46,6 +46,7 @@
 ## 2025-04-21 - [Fix Accordion Menu Toggling]
 **Learning:** [In `data/MJPEG2SD.htm` and `data/Auxil.htm`, `.menu-action` checkboxes are separated from their `.nav-toggle` labels by a `.pin-menu` div. While CSS rules linking checkbox focus state to the label should use `~` (e.g., `.menu-action:focus-visible ~ .nav-toggle`), rules targeting the content div for visibility toggling must use the explicit adjacent chain (e.g., `.menu-action + .pin-menu + label + div`) rather than `~ label + div` to avoid inadvertently hiding subsequent unrelated menu sections.]
 **Action:** [When modifying UI templates with custom checkbox-based accordions or menus, strictly verify adjacent vs general sibling CSS selectors to ensure intermediate injected DOM elements (like pins or icons) don't silently break expand/collapse functionality.]
+<<<<<<< HEAD
 
 ## 2024-05-20 - Confirmations for Destructive Actions
 **Learning:** Found that a destructive action (clearing all saved IP addresses from the Camera Hub's local storage) was performed immediately upon clicking a "Delete All" button without any confirmation dialog. This can lead to accidental data loss.
@@ -93,3 +94,6 @@
 ## 2024-05-24 - Accessibility for dynamically generated checkbox/radio labels
 **Learning:** When dynamically generating HTML form controls in JavaScript (such as lists of radio buttons using string concatenation), simple adjacent text strings fail to provide accessible names. Additionally, visually grouping labels with `for` tags that don't correspond to an `id` attribute on the target input breaks programmatic mapping for screen readers.
 **Action:** When dynamically building UI components in JavaScript, explicitly generate `<label for="...">` elements matching the unique `id` attribute of the generated `<input>` to ensure proper accessible names and click-to-focus functionality.
+## 2024-05-18 - Dynamically Generated Keyboard Accessibility & Destructive Confirm Flows
+**Learning:** Dynamically generated UI elements (like `div` cards displaying saved IP cameras) are often built with `onclick` handlers but omit native keyboard focus states. Additionally, custom local-storage clearing mechanisms often execute immediately without confirmation, deviating from expected app behaviors and causing accidental data loss.
+**Action:** When dynamically generating clickable elements via JavaScript, explicitly set `role="button"`, `tabindex="0"`, and an appropriate `aria-label`. For destructive actions (e.g., `clearLocalStorage()`), always wrap the logic in a `window.confirm()` dialog to match standard patterns.
