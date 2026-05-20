@@ -61,10 +61,16 @@ static bool searchJsonResponse(const char* keyName) {
   if (keyPtr == NULL) return false;
   char* startItem = keyPtr + strlen(keyName);
   char* endItem = strchr(startItem, ',');
+  if (endItem == NULL) {
+    endItem = strchr(startItem, '}');
+    if (endItem == NULL) {
+      endItem = startItem + strlen(startItem);
+    }
+  }
   int valSize = endItem - startItem;
   if (valSize > sizeof(keyValue) - 1) {
     LOG_WRN("Telegram JSON value too long %d", valSize); 
-    valSize = sizeof(keyValue - 1);
+    valSize = sizeof(keyValue) - 1;
   }
   strncpy(keyValue, startItem, valSize);
   keyValue[valSize] = 0;
