@@ -62,3 +62,7 @@
 ## 2024-05-24 - Avoid O(N) length recalculations and pointer extraction overhead in String comparisons
 **Learning:** Comparing `String` or `std::string` objects using `.c_str()` with `strcmp()`, `strlen()`, or `strstr()` bypasses the string object's cached length, introducing unnecessary O(N) length recalculations and pointer extraction overhead.
 **Action:** Use native string methods and operators (e.g. `==`, `.length()`, `.find()`, `.compare()`) instead of converting to C-strings for string operations and comparisons.
+
+## 2024-05-24 - Optimize Bilinear Interpolation Row Calculations
+**Learning:** Found that bilinear interpolation was repeatedly multiplying row indices inside the inner width loop, costing extra instructions on each pixel step.
+**Action:** Hoist the input row offset calculations (both low and high rows) out of the inner loop and access elements via pointer arithmetic (`rowL + offset`, `rowH + offset`) to significantly reduce loop instruction count.
