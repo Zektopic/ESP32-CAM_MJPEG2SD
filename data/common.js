@@ -1029,7 +1029,7 @@
 
       // Function to clear local storage
       function clearLocalStorage() {
-        if (window.confirm("Are you sure you want to delete all saved IP addresses?")) {
+        if (window.confirm("This will remove all saved cameras from the Hub. Are you sure?")) {
           localStorage.removeItem('enteredIPs');
           createImageElements([]); // Update images after clearing local storage
         }
