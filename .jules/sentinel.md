@@ -74,3 +74,7 @@
 **Vulnerability:** In `webServer.cpp` and `appSpecific.cpp`, the codebase extracted substrings by calling `strlen` on a buffer that just had a null-terminator inserted via `strchr` (`variable + strlen(variable) + 1`), and sometimes repeated this extraction redundantly after `extractQueryKeyVal` had already populated the output buffers.
 **Learning:** Using `variable + strlen(variable) + 1` requires O(N) traversal and is less robust than directly using `endPtr + 1` returned by `strchr`. Redundantly repeating this logic after a utility function has already completed the task introduces Out-of-Bounds (OOB) read risks and code duplication.
 **Prevention:** When splitting strings in-place with `strchr`, always use the resulting pointer (e.g., `endPtr + 1`) to calculate the remainder offset. Do not manually extract values immediately after calling utility functions like `extractQueryKeyVal` that already perform the extraction safely.
+## 2026-05-14 - Array Out-Of-Bounds in utilsFS.cpp
+**Vulnerability:** Array out-of-bounds read vulnerability when accessing `fsTypes` and `fsPaths` using `thisFS` when `thisFS` defaults to `TBD`.
+**Learning:** Hardcoded mapping arrays matching an enum need to be the same length as the enum values used to access them, including the default or error states.
+**Prevention:** Extend arrays to cover all enum variants, and use tools like `cppcheck` continuously.
