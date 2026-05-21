@@ -1286,9 +1286,9 @@
                   </div>
                   <br>
                   <section id="buttons">
-                    <button class="local" title="Download selected file from SD card" id="download" aria-label="Download selected file" style="float:right" value="1">Download</button>
-                    <button class="local" title="Upload selected file/folder to Fileserver" id="upload" aria-label="Upload selected file" style="float:left" value="1">File Upload</button>
-                    <button class="local" title="Delete selected file/folder from SD card" id="delete" aria-label="Delete selected file" style="float:right" value="1">Delete</button>
+                    <button class="local disabled" title="Download selected file from SD card" id="download" aria-label="Download selected file" style="float:right" value="1" disabled>Download</button>
+                    <button class="local disabled" title="Upload selected file/folder to Fileserver" id="upload" aria-label="Upload selected file" style="float:left" value="1" disabled>File Upload</button>
+                    <button class="local disabled" title="Delete selected file/folder from SD card" id="delete" aria-label="Delete selected file" style="float:right" value="1" disabled>Delete</button>
                   </section>
   <!--
                   <div class="input-group" id="auth-group">
@@ -2262,9 +2262,25 @@
           $('#delete').value = filePath; //Store file path for delete
           $('#upload').value = filePath; //Store file path for file server upload
           pathDir = filePath.substring(0, filePath.lastIndexOf("/"));
+
+          enable($('#upload'));
+          enable($('#delete'));
+          if (filePath.includes('.')) {
+            enable($('#download'));
+          } else {
+            disable($('#download'));
+          }
+        } else {
+          disable($('#download'));
+          disable($('#upload'));
+          disable($('#delete'));
         }
         if (pathDir == "") $$('#sfile option:not(:first-child)').forEach(el => { el.remove()});
-        if (filePath.substr(-4) === '.avi' && !isActive(playbackButton)) enable(playbackButton);
+        if (filePath.substr(-4) === '.avi') {
+          if (!isActive(playbackButton)) enable(playbackButton);
+        } else {
+          if (!isActive(playbackButton)) disable(playbackButton);
+        }
         if (fromUser) getFiles(filePath);
         return false;
       }

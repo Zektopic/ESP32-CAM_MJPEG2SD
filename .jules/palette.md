@@ -101,3 +101,6 @@
 ## 2025-02-12 - Inline Form Validation ARIA Feedback
 **Learning:** In `data/common.js`, dynamically generated error messages for inline form validation (`showInputError`) were missing crucial accessibility bindings, leaving screen reader users unaware of the specific input errors.
 **Action:** Always ensure that dynamic error message containers are assigned an ID and `aria-live="polite"`. The corresponding input fields must be dynamically updated with `aria-invalid="true"` and `aria-describedby="[error-id]"` when an error occurs, and these attributes must be removed when the error is resolved.
+## 2025-02-12 - File Transfer Button Disabled States
+**Learning:** In the MJPEG2SD interface, file transfer action buttons (Download, Upload, Delete) were previously left enabled even when no file was selected, leading to potential confusion or invalid actions. Furthermore, "Download" applies only to files (not folders).
+**Action:** Added default `disabled` attributes/classes to the HTML and hooked into the existing `selectFileOrFolder` JS function to dynamically toggle these states. When writing Playwright tests to verify this dynamic UI logic, elements inside inactive tabs (like `.tabcontent`) must be explicitly forced to `display: block` via JS evaluation before interaction, otherwise Playwright fails to compute their styles or interact with their children.
