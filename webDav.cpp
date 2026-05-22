@@ -322,6 +322,10 @@ bool handleWebDav(httpd_req_t* rreq) {
   if (pathName[strlen(pathName) - 1] == '/') pathName[strlen(pathName) - 1] = 0; // remove final / if present
   if (!strlen(pathName)) strcpy(pathName, "/"); // if pathname empty, use single /
   urlDecode(pathName);
+  if (strstr(pathName, "../")) {
+    httpd_resp_send_err(req, HTTPD_404_NOT_FOUND, "Path traversal not allowed");
+    return false;
+  }
   // common response header
   httpd_resp_set_hdr(req, "DAV", "1");
   httpd_resp_set_hdr(req, "Allow", ALLOW);
