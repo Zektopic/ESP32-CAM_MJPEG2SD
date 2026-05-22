@@ -239,6 +239,11 @@ static esp_err_t webHandler(httpd_req_t* req) {
   } else LOG_WRN("Unknown file type %s", variable);
   int dlen = snprintf(inFileName, IN_FILE_NAME_LEN - 1, "%s/%s", DATA_DIR, variable);
   if (dlen >= IN_FILE_NAME_LEN) LOG_WRN("file name truncated");
+  if (strstr(variable, "../")) {
+    LOG_WRN("Path traversal attempt detected in URL query: %s", variable);
+    httpd_resp_send_404(req);
+    return ESP_FAIL;
+  }
   return fileHandler(req);
 }
 
