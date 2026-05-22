@@ -737,17 +737,6 @@ bool checkAlarm() {
 
 /********************** misc functions ************************/
 
-bool changeExtension(char* fileName, const char* newExt) {
-  // replace original file extension with supplied extension (buffer must be large enough)
-  size_t inNamePtr = strlen(fileName);
-  // find '.' before extension text
-  while (inNamePtr > 0 && fileName[inNamePtr] != '.') inNamePtr--;
-  inNamePtr++;
-  size_t extLen = strlen(newExt);
-  memcpy(fileName + inNamePtr, newExt, extLen);
-  fileName[inNamePtr + extLen] = 0;
-  return (inNamePtr > 1) ? true : false;
-}
 
 void showProgress(const char* marker) {
   // show progess as dots or supplied marker

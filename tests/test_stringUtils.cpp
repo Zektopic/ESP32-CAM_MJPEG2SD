@@ -3,6 +3,17 @@
 #include <cassert>
 #include "../stringUtils.h"
 
+// Stub for removeChar since it's defined in utils.cpp which has ESP32 dependencies
+void removeChar(char* s, char c) {
+  // remove specified character from string
+  int writer = 0, reader = 0;
+  while (s[reader]) {
+    if (s[reader] != c) s[writer++] = s[reader];
+    reader++;
+  }
+  s[writer] = 0;
+}
+
 void test_removeChar() {
     // Test 1: Happy path - removing a character that is present
     char str1[] = "hello world";
@@ -62,8 +73,39 @@ void test_isPathTraversal() {
     std::cout << "All tests passed for isPathTraversal!" << std::endl;
 }
 
+void test_changeExtension_helper(const char* input, const char* newExt, bool expectedRes, const char* expectedOutput) {
+    char buffer[256];
+    strcpy(buffer, input);
+    bool res = changeExtension(buffer, newExt);
+    if (res != expectedRes || strcmp(buffer, expectedOutput) != 0) {
+        std::cerr << "Test failed!" << std::endl;
+        std::cerr << "Input:    " << input << std::endl;
+        std::cerr << "New Ext:  " << newExt << std::endl;
+        std::cerr << "Expected Res: " << expectedRes << ", Output: " << expectedOutput << std::endl;
+        std::cerr << "Got Res:      " << res << ", Output: " << buffer << std::endl;
+        exit(1);
+    }
+}
+
+void test_changeExtension() {
+    // Happy path: Normal file with extension
+    test_changeExtension_helper("image.jpg", "png", true, "image.png");
+
+    // File with multiple dots
+    test_changeExtension_helper("path.with.dots.jpg", "png", true, "path.with.dots.png");
+
+    // File without extension
+    test_changeExtension_helper("no_extension_file", "txt", false, "ntxt");
+
+    // File starting with a dot
+    test_changeExtension_helper(".hidden", "txt", false, ".txt");
+
+    std::cout << "All changeExtension tests passed!" << std::endl;
+}
+
 int main() {
     test_removeChar();
     test_isPathTraversal();
+    test_changeExtension();
     return 0;
 }
