@@ -183,7 +183,7 @@ void remoteServerClose(Client& client);
 bool remoteServerConnect(Client& client, const char* host, uint16_t port, uint8_t idx);
 bool remoteServerConnect(NetworkClientSecure& client, const char* host, uint16_t port, const char* cert, uint8_t idx);
 void remoteServerReset();
-void removeChar(char* s, char c);
+
 void replaceChar(char* s, char c, char r);
 void resetCrashLoop();
 void reset_log();

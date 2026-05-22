@@ -4,6 +4,7 @@
 
 #pragma once
 #include "globals.h"
+#include "stringUtils.h"
 
 /**************************************************************************
  Uncomment one only of the ESP32 or ESP32S3 camera models in the block below
