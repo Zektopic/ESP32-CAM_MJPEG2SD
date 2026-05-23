@@ -94,3 +94,7 @@
 **Vulnerability:** The WebDAV implementation in `webDav.cpp` copied `req->uri` directly to `pathName` and performed URL decoding, but did not check for path traversal sequences like `../`. This allowed an attacker to read, write, or delete files outside of the intended WebDAV root folder.
 **Learning:** Even when restricting root access physically, input URI strings for file handling protocols like WebDAV must always be sanitized against relative path escalation sequences like `../` to prevent arbitrary file system manipulation.
 **Prevention:** Explicitly validate URL-decoded input paths with `strstr(pathName, "../")` before using them in file system operations.
+## 2024-05-24 - Path Traversal Vulnerability in webServer.cpp
+**Vulnerability:** Path traversal possible by passing `../` in the `variable` parameter of `webServer.cpp`, bypassing intended directory scope after `snprintf` formatting.
+**Learning:** Checking for traversal *before* formatting might not be enough or was omitted at the specific usage site where `variable` was processed for static file responses. The requested fix specifically required a `strstr(variable, "../")` check after formatting.
+**Prevention:** Ensure explicit bounds and traversal checks (`strstr(..., "../")` or robust alternatives) are placed immediately before accessing files based on user-provided path segments.

@@ -80,7 +80,7 @@ static bool emailSend(const char* mimeType = MIME_TYPE, const char* fileName = A
     res = false;
     if (!sendSmtpCommand(client, "", "220")) break;
   
-    sprintf(content, "HELO %s: ", APP_NAME);
+    snprintf(content, sizeof(content), "HELO %s: ", APP_NAME);
     if (!sendSmtpCommand(client, content, "250")) break;
     
     if (!sendSmtpCommand(client, "AUTH LOGIN", "334")) break; 
@@ -88,25 +88,25 @@ static bool emailSend(const char* mimeType = MIME_TYPE, const char* fileName = A
     if (!sendSmtpCommand(client, encode64(SMTP_Pass), "235")) break;
   
     // send email header
-    sprintf(content, "MAIL FROM: <%s>", APP_NAME);
+    snprintf(content, sizeof(content), "MAIL FROM: <%s>", APP_NAME);
     if (!sendSmtpCommand(client, content, "250")) break;
-    sprintf(content, "RCPT TO: <%s>", smtp_email);
+    snprintf(content, sizeof(content), "RCPT TO: <%s>", smtp_email);
     if (!sendSmtpCommand(client, content, "250")) break;
   
     // send message body header
     if (!sendSmtpCommand(client, "DATA", "354")) break;
-    sprintf(content, "From: \"%s\" <%s>", APP_NAME, smtp_login);
+    snprintf(content, sizeof(content), "From: \"%s\" <%s>", APP_NAME, smtp_login);
     client.println(content);
-    sprintf(content, "To: <%s>", smtp_email);
+    snprintf(content, sizeof(content), "To: <%s>", smtp_email);
     client.println(content);
-    sprintf(content, "Subject: %s", subject);
+    snprintf(content, sizeof(content), "Subject: %s", subject);
     client.println(content);
   
     // send message
     client.println("MIME-Version: 1.0");
-    sprintf(content, "Content-Type: Multipart/mixed; boundary=%s", BOUNDARY_VAL);
+    snprintf(content, sizeof(content), "Content-Type: Multipart/mixed; boundary=%s", BOUNDARY_VAL);
     client.println(content);
-    sprintf(content, "--%s", BOUNDARY_VAL);
+    snprintf(content, sizeof(content), "--%s", BOUNDARY_VAL);
     client.println(content);
     client.println("Content-Type: text/plain; charset=UTF-8");
     client.println("Content-Transfer-Encoding: quoted-printable");
@@ -118,10 +118,10 @@ static bool emailSend(const char* mimeType = MIME_TYPE, const char* fileName = A
     if (alertBufferSize) {
       // send attachment
       client.println(content); // boundary
-      sprintf(content, "Content-Type: %s", mimeType); 
+      snprintf(content, sizeof(content), "Content-Type: %s", mimeType);
       client.println(content);
       client.println("Content-Transfer-Encoding: base64");
-      sprintf(content, "Content-Disposition: attachment; filename=\"%s\"; size=%d;", fileName, alertBufferSize); 
+      snprintf(content, sizeof(content), "Content-Disposition: attachment; filename=\"%s\"; size=%zu;", fileName, alertBufferSize);
       
       client.println(content); 
       // base64 encode attachment and buffer for output
