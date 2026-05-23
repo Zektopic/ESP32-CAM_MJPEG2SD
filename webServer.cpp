@@ -237,6 +237,13 @@ static esp_err_t webHandler(httpd_req_t* req) {
     // any svg file
     httpd_resp_set_type(req, "image/svg+xml");
   } else LOG_WRN("Unknown file type %s", variable);
+
+  if (isPathTraversal(variable)) {
+    LOG_WRN("Path traversal attempt detected before formatting: %s", variable);
+    httpd_resp_send_404(req);
+    return ESP_FAIL;
+  }
+
   int dlen = snprintf(inFileName, IN_FILE_NAME_LEN - 1, "%s/%s", DATA_DIR, variable);
   if (dlen >= IN_FILE_NAME_LEN) LOG_WRN("file name truncated");
   if (strstr(variable, "../")) {
