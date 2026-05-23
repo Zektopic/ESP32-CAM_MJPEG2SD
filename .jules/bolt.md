@@ -78,3 +78,7 @@
 ## 2024-05-03 - String Pointer Optimization
 **Learning:** In C/C++ applications on the ESP32, repeatedly calculating string offsets with `strlen()` during in-place string splitting loops introduces an unnecessary O(N) performance penalty.
 **Action:** When a pointer to a split character (e.g., via `strchr()`) is already computed and bounded, use pointer arithmetic (`endPtr + 1`) to advance to the remainder of the string instead of re-calculating the length (`variable + strlen(variable) + 1`).
+
+## 2024-05-23 - Optimize HTTP header construction by eliminating redundant strcat
+**Learning:** When building HTTP headers or payloads sequentially (e.g., in `telegram.cpp`), using multiple `strcat` and `strlen` calls forces redundant O(N) traversals of the entire buffer for every append operation, degrading performance linearly with buffer size.
+**Action:** Always maintain a dynamic pointer (`char* p`) and use `p += sprintf(p, ...)` or `p += snprintf(p, ...)` to track the current end of the string. This reduces concatenation time complexity to O(1) per append by eliminating string traversal overhead.
