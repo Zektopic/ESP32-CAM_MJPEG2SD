@@ -98,3 +98,8 @@
 **Vulnerability:** Path traversal possible by passing `../` in the `variable` parameter of `webServer.cpp`, bypassing intended directory scope after `snprintf` formatting.
 **Learning:** Checking for traversal *before* formatting might not be enough or was omitted at the specific usage site where `variable` was processed for static file responses. The requested fix specifically required a `strstr(variable, "../")` check after formatting.
 **Prevention:** Ensure explicit bounds and traversal checks (`strstr(..., "../")` or robust alternatives) are placed immediately before accessing files based on user-provided path segments.
+
+## 2024-05-18 - [WebDAV parsing Buffer Overflows]
+**Vulnerability:** Static buffer overflows in `webDav.cpp` where unbounded network input (like `req->uri`) or max-length variables were copied into small stack/BSS buffers via `sprintf`.
+**Learning:** `sprintf` with uncontrolled strings on the ESP32 can write into adjacent variables, causing memory corruption and remote crash/RCE potential. This is a common pattern in older C-style ESP strings.
+**Prevention:** Always use `snprintf` explicitly bound to the `sizeof()` the destination buffer instead of relying on `sprintf`, especially for HTTP request properties.
