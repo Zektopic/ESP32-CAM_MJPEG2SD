@@ -104,3 +104,6 @@
 ## 2025-02-12 - File Transfer Button Disabled States
 **Learning:** In the MJPEG2SD interface, file transfer action buttons (Download, Upload, Delete) were previously left enabled even when no file was selected, leading to potential confusion or invalid actions. Furthermore, "Download" applies only to files (not folders).
 **Action:** Added default `disabled` attributes/classes to the HTML and hooked into the existing `selectFileOrFolder` JS function to dynamically toggle these states. When writing Playwright tests to verify this dynamic UI logic, elements inside inactive tabs (like `.tabcontent`) must be explicitly forced to `display: block` via JS evaluation before interaction, otherwise Playwright fails to compute their styles or interact with their children.
+## 2026-05-24 - Focus States for Span Buttons
+**Learning:** Custom UI elements like `span` with `role="button"` require explicit CSS `:focus-visible` definitions to show focus rings. Unlike native `<button>` elements, they don't get browser default focus styles automatically even with `tabindex="0"`.
+**Action:** When adding or reviewing custom interactive components in ESP32 HTML templates (`MJPEG2SD.htm`, `Auxil.htm`), explicitly add them (e.g., `span[role="button"]:focus-visible`) to the global keyboard focus outline rules.
