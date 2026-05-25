@@ -78,3 +78,7 @@
 ## 2024-05-03 - String Pointer Optimization
 **Learning:** In C/C++ applications on the ESP32, repeatedly calculating string offsets with `strlen()` during in-place string splitting loops introduces an unnecessary O(N) performance penalty.
 **Action:** When a pointer to a split character (e.g., via `strchr()`) is already computed and bounded, use pointer arithmetic (`endPtr + 1`) to advance to the remainder of the string instead of re-calculating the length (`variable + strlen(variable) + 1`).
+
+## 2026-05-25 - Optimize File Reading in ESP32
+**Learning:** `file.readBytes` adds significant timer (`millis()`) overhead per byte because it uses `timedRead()` internally. Direct `file.read(buffer, size)` bulk reading is much faster and more efficient on the ESP32.
+**Action:** Replace `file.readBytes(buffer, size)` with `file.read((uint8_t*)buffer, size)` when loading files into memory buffers.
