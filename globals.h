@@ -138,7 +138,7 @@ const uint8_t* encode64chunk(const uint8_t* inp, int rem);
 const char* espErrMsg(esp_err_t errCode);
 void externalAlert(const char* subject, const char* message);
 bool externalPeripheral(byte pinNum, uint32_t outputData = 0);
-esp_err_t extractHeaderVal(httpd_req_t *req, const char* variable, char* value);
+esp_err_t extractHeaderVal(httpd_req_t *req, const char* variable, char* value, size_t valueSize);
 esp_err_t extractQueryKeyVal(httpd_req_t *req, char* variable, char* value, size_t valueSize = 64);
 esp_err_t fileHandler(httpd_req_t* req, bool download = false);
 void flush_log(bool andClose = false);
