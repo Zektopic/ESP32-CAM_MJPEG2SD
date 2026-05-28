@@ -98,3 +98,8 @@
 **Vulnerability:** Path traversal possible by passing `../` in the `variable` parameter of `webServer.cpp`, bypassing intended directory scope after `snprintf` formatting.
 **Learning:** Checking for traversal *before* formatting might not be enough or was omitted at the specific usage site where `variable` was processed for static file responses. The requested fix specifically required a `strstr(variable, "../")` check after formatting.
 **Prevention:** Ensure explicit bounds and traversal checks (`strstr(..., "../")` or robust alternatives) are placed immediately before accessing files based on user-provided path segments.
+
+## 2024-06-25 - [CRITICAL] Unbounded strcpy Buffer Overflow in appSpecificWebHandler
+**Vulnerability:** A critical buffer overflow risk was identified in `appSpecificWebHandler` (`appSpecific.cpp`), where `strcpy(inFileName, value);` was used to copy URL parameter values directly into a statically sized `inFileName` array (`IN_FILE_NAME_LEN`). Because `value` comes from untrusted HTTP queries, it could easily exceed the array bounds.
+**Learning:** Functions that parse untrusted input from HTTP queries or WebSocket payloads into fixed-size buffers must always use bounded copying operations like `strncpy` or `snprintf`.
+**Prevention:** Always use bounds checking when extracting input: `strncpy(dest, src, size - 1)` followed by explicit null termination `dest[size - 1] = 0`.

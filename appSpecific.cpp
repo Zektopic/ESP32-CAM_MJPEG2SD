@@ -316,7 +316,8 @@ esp_err_t appSpecificWebHandler(httpd_req_t *req, const char* variable, const ch
   // update handling requiring response specific to mjpeg2sd
   if (!strcmp(variable, "sfile")) {
     // get folders / files on SD, save received filename if has required extension
-    strcpy(inFileName, value);
+    strncpy(inFileName, value, IN_FILE_NAME_LEN - 1);
+    inFileName[IN_FILE_NAME_LEN - 1] = 0;
     if (!forceRecord) doPlayback = listDir(inFileName, jsonBuff, JSON_BUFF_LEN, AVI_EXT); // browser control
     else strcpy(jsonBuff, "{}");
     httpd_resp_set_type(req, "application/json");
@@ -787,8 +788,7 @@ void appSpecificTelegramTask(void* p) {
         deleteFolderOrFile(ramLogName);
       } else if (!strcmp(userCmd, "/extIP")) {
         char extIpPt[24];
-        strcpy(extIpPt, extIP);
-        if (strlen(portFwd)) strcat(extIpPt, portFwd);
+        snprintf(extIpPt, sizeof(extIpPt), "%s%s", extIP, strlen(portFwd) ? portFwd : "");
         sendTgramMessage("Ext IP: ", extIpPt, "");
       } else {
         // initially assume it is an avi file download request
