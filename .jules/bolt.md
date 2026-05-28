@@ -78,3 +78,7 @@
 ## 2024-05-03 - String Pointer Optimization
 **Learning:** In C/C++ applications on the ESP32, repeatedly calculating string offsets with `strlen()` during in-place string splitting loops introduces an unnecessary O(N) performance penalty.
 **Action:** When a pointer to a split character (e.g., via `strchr()`) is already computed and bounded, use pointer arithmetic (`endPtr + 1`) to advance to the remainder of the string instead of re-calculating the length (`variable + strlen(variable) + 1`).
+
+## 2024-05-24 - Avoid per-byte timeout overhead in Stream reads
+**Learning:** Using `Stream::readBytes(buf, len)` on Arduino/ESP32 environments falls back to a byte-by-byte read implementation that uses `timedRead()` internally. This invokes `millis()` and timeout-checking overhead for every single byte read, which is a significant performance bottleneck for bulk I/O operations (like fetching network data or reading large files).
+**Action:** Use the block-read method `read((uint8_t*)buf, len)` directly to read chunks of data at once. This bypasses the timeout-checking loop and makes data fetching measurably faster. When replacing `readBytes` with `read` for string buffers, ensure you explicitly add a null-terminator if the original logic relied on implicitly zeroed memory or string functions.
