@@ -78,3 +78,7 @@
 ## 2024-05-03 - String Pointer Optimization
 **Learning:** In C/C++ applications on the ESP32, repeatedly calculating string offsets with `strlen()` during in-place string splitting loops introduces an unnecessary O(N) performance penalty.
 **Action:** When a pointer to a split character (e.g., via `strchr()`) is already computed and bounded, use pointer arithmetic (`endPtr + 1`) to advance to the remainder of the string instead of re-calculating the length (`variable + strlen(variable) + 1`).
+
+## 2024-05-29 - Block reads bypass timedRead overhead
+**Learning:** In the ESP32/Arduino framework, `Stream::readBytes()` (used by `File` and `WiFiClientSecure`) incurs significant performance overhead due to per-byte timeout checks (`millis()` via `timedRead()`). This is essentially an O(N) overhead layer around what could be a block read.
+**Action:** When loading data into memory buffers where the size is known or we want to read everything available, prefer block reading via `read(uint8_t* buf, size_t size)` over `readBytes()` to bypass this timer overhead and drastically improve bulk I/O performance.
