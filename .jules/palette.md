@@ -104,3 +104,7 @@
 ## 2025-02-12 - File Transfer Button Disabled States
 **Learning:** In the MJPEG2SD interface, file transfer action buttons (Download, Upload, Delete) were previously left enabled even when no file was selected, leading to potential confusion or invalid actions. Furthermore, "Download" applies only to files (not folders).
 **Action:** Added default `disabled` attributes/classes to the HTML and hooked into the existing `selectFileOrFolder` JS function to dynamically toggle these states. When writing Playwright tests to verify this dynamic UI logic, elements inside inactive tabs (like `.tabcontent`) must be explicitly forced to `display: block` via JS evaluation before interaction, otherwise Playwright fails to compute their styles or interact with their children.
+## 2026-05-29 - Span focus styles
+
+**Learning:** When building custom interactive components with `span[role="button"]` in this app's vanilla CSS setup, they do not inherit default browser focus rings (like `<button>` or `<input>` elements do). The CSS only explicitly handled `div[role="button"]:focus-visible` or `button:focus-visible`. If a new inline component uses `span`, keyboard focus becomes invisible.
+**Action:** When creating inline, custom interactive components with `role="button"`, explicitly include `span[role="button"]` in the global `:focus-visible` CSS definitions to ensure keyboard navigation remains accessible.

@@ -171,13 +171,13 @@
         fill: var(--buttonActive);
         outline: none; /* Remove focus outline if not needed */
       }
-      div[role="button"]:focus {
+      div[role="button"]:focus, span[role="button"]:focus {
         outline: none;
       }
-      div[role="button"] {
+      div[role="button"], span[role="button"] {
         cursor: pointer;
       }
-      div[role="button"]:focus-visible, nav[role="button"]:focus-visible {
+      div[role="button"]:focus-visible, nav[role="button"]:focus-visible, span[role="button"]:focus-visible {
         outline: 2px solid var(--buttonActive);
         outline-offset: 2px;
       }
@@ -219,7 +219,7 @@
        background: var(--buttonActive);
       }
 
-      button:focus-visible, div[role="button"]:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+      button:focus-visible, div[role="button"]:focus-visible, span[role="button"]:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
         outline: 2px solid var(--buttonActive);
         outline-offset: 2px;
       }
