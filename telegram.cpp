@@ -115,7 +115,11 @@ static bool getTgramResponse() {
     while (contentLen - readLen > 0 && millis() - startTime < responseTimeoutSecs * 1000) {
       // retrieve response content
       size_t availLen = tclient.available();
-      if (availLen) readLen += tclient.readBytes((uint8_t*)tgramBuff + readLen, availLen);
+      // Use block read() instead of readBytes() to bypass per-byte millis() timeout overhead in Stream
+      if (availLen) {
+        int bytesRead = tclient.read((uint8_t*)tgramBuff + readLen, availLen);
+        if (bytesRead > 0) readLen += bytesRead;
+      }
       delay(50);
     }
     if (contentLen - readLen > 0) LOG_WRN("Timed out waiting for telegram response");

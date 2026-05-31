@@ -70,7 +70,9 @@ void loadCerts() {
         } else {
           // load contents
           serverCerts[i] = psramFound() ? (char*)ps_malloc(file.size() + 1) : (char*)malloc(file.size() + 1); 
-          size_t inBytes = file.readBytes(serverCerts[i], file.size());
+          // Use block read() instead of readBytes() to bypass per-byte millis() timeout overhead in Stream
+          size_t inBytes = file.read((uint8_t*)serverCerts[i], file.size());
+          serverCerts[i][inBytes] = 0; // Ensure null termination
           if (inBytes != file.size()) {
             LOG_WRN("File %s not correctly loaded", certFiles[i]);
             useHttps = false;

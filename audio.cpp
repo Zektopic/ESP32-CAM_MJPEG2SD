@@ -179,7 +179,8 @@ static size_t espMicInput() {
   // read esp mic
   size_t bytesRead = 0;
   if (micUse) {
-    bytesRead = I2Smic ? I2Sstd.readBytes((char*)sampleBuffer, sampleBytes) : I2Spdm.readBytes((char*)sampleBuffer, sampleBytes);
+    // Use block read() instead of readBytes() to bypass per-byte millis() timeout overhead in Stream
+    bytesRead = I2Smic ? I2Sstd.read((uint8_t*)sampleBuffer, sampleBytes) : I2Spdm.read((uint8_t*)sampleBuffer, sampleBytes);
     applyMicGain(bytesRead);
   }
   return bytesRead;
