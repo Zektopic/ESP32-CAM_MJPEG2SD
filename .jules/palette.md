@@ -104,3 +104,7 @@
 ## 2025-02-12 - File Transfer Button Disabled States
 **Learning:** In the MJPEG2SD interface, file transfer action buttons (Download, Upload, Delete) were previously left enabled even when no file was selected, leading to potential confusion or invalid actions. Furthermore, "Download" applies only to files (not folders).
 **Action:** Added default `disabled` attributes/classes to the HTML and hooked into the existing `selectFileOrFolder` JS function to dynamically toggle these states. When writing Playwright tests to verify this dynamic UI logic, elements inside inactive tabs (like `.tabcontent`) must be explicitly forced to `display: block` via JS evaluation before interaction, otherwise Playwright fails to compute their styles or interact with their children.
+## 2024-05-31 - Tabbed Interface Accessibility
+
+**Learning:** ARIA tab accessibility patterns (using `role="tablist"`, `role="tab"`, `role="tabpanel"`, `aria-controls`, `aria-selected`, and `aria-hidden`) were missing from the application's tabbed navigation. The native `<button>` element provides keyboard focusability, but lacks semantic meaning as a tab without ARIA roles. Furthermore, the tablist was invalid HTML, featuring `<button>` tags as direct children of a `<ul>`.
+**Action:** Replaced the `<ul>` with `<nav>` (preserving CSS classes), applied proper ARIA roles and properties, and updated `common.js` to dynamically synchronize `aria-selected` and `aria-hidden` when switching tabs. Next time, always check tabbed navigation structures for ARIA completeness.

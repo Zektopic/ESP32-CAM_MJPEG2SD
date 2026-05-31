@@ -203,11 +203,21 @@
         function openTab(e) {
           // control tab viewing
           if (!e.name) return;
-          $$('.tabcontent').forEach(el => { el.style.display = "none"; });
+          $$('.tabcontent').forEach(el => {
+            el.style.display = "none";
+            el.setAttribute("aria-hidden", "true");
+          });
           const targetPanel = $('#' + e.name);
-          if (targetPanel) targetPanel.style.display = "inherit";
-          $$('.tablinks').forEach(el => {el.classList.remove("active");});
+          if (targetPanel) {
+            targetPanel.style.display = "inherit";
+            targetPanel.setAttribute("aria-hidden", "false");
+          }
+          $$('.tablinks').forEach(el => {
+            el.classList.remove("active");
+            el.setAttribute("aria-selected", "false");
+          });
           e.classList.add("active");
+          e.setAttribute("aria-selected", "true");
           try {
             if (e.name == 'mainPage') show($('#main'));
             else hide($('#main'));

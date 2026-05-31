@@ -811,15 +811,15 @@
 
   <body>
     <div class="tab">
-      <ul class="navtop">
-        <button class="tablinks camTab active" name="mainPage">Auxil</button>
-        <button class="tablinks" name="ShowLog">Show Log</button>
-        <button class="tablinks" name="EditConfig">Edit Config</button>
-        <button class="tablinks" onclick="window.location.href='/web?OTA.htm'">OTA Upload</button>
-      </ul>
+      <nav class="navtop" role="tablist" aria-label="Main Navigation">
+        <button class="tablinks camTab active" name="mainPage" role="tab" aria-selected="true" aria-controls="mainPage">Auxil</button>
+        <button class="tablinks" name="ShowLog" role="tab" aria-selected="false" aria-controls="ShowLog">Show Log</button>
+        <button class="tablinks" name="EditConfig" role="tab" aria-selected="false" aria-controls="EditConfig">Edit Config</button>
+        <button class="tablinks" onclick="window.location.href='/web?OTA.htm'" role="tab" aria-selected="false">OTA Upload</button>
+      </nav>
     </div>
 
-    <div id="mainPage" class="tabcontent" style="display:block">
+    <div id="mainPage" class="tabcontent" role="tabpanel" aria-hidden="false" style="display:block">
       <div id="content">
         <div id="mainPageIcons">
           <div id="sidebar">
@@ -1012,7 +1012,7 @@
       </div>
     </div>
 
-    <div id="ShowLog" class="tabcontent">
+    <div id="ShowLog" class="tabcontent" role="tabpanel" aria-hidden="true">
       <br>
       <div class="grid-cols4">
         <div class="input-group" id="dbg-group" style="text-align: left">
@@ -1062,7 +1062,7 @@
       <br>
     </div>
 
-    <div id="EditConfig" class="tabcontent">
+    <div id="EditConfig" class="tabcontent" role="tabpanel" aria-hidden="true">
       <br>
       <div class="header">Control</div>
       <br>
