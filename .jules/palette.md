@@ -104,3 +104,7 @@
 ## 2025-02-12 - File Transfer Button Disabled States
 **Learning:** In the MJPEG2SD interface, file transfer action buttons (Download, Upload, Delete) were previously left enabled even when no file was selected, leading to potential confusion or invalid actions. Furthermore, "Download" applies only to files (not folders).
 **Action:** Added default `disabled` attributes/classes to the HTML and hooked into the existing `selectFileOrFolder` JS function to dynamically toggle these states. When writing Playwright tests to verify this dynamic UI logic, elements inside inactive tabs (like `.tabcontent`) must be explicitly forced to `display: block` via JS evaluation before interaction, otherwise Playwright fails to compute their styles or interact with their children.
+
+## 2024-05-24 - Generalized Accessibility Selectors for Custom Buttons
+**Learning:** Using element-specific CSS selectors like `div[role="button"]` for focus and cursor styling causes dynamic UI components (like `span.removeButton`) to miss critical accessibility feedback (focus rings, pointer cursor).
+**Action:** Always prefer the generic `[role="button"]` attribute selector in stylesheets to ensure any element acting as a custom button automatically receives the correct interaction and focus styles, regardless of its underlying HTML tag.
