@@ -104,3 +104,6 @@
 ## 2025-02-12 - File Transfer Button Disabled States
 **Learning:** In the MJPEG2SD interface, file transfer action buttons (Download, Upload, Delete) were previously left enabled even when no file was selected, leading to potential confusion or invalid actions. Furthermore, "Download" applies only to files (not folders).
 **Action:** Added default `disabled` attributes/classes to the HTML and hooked into the existing `selectFileOrFolder` JS function to dynamically toggle these states. When writing Playwright tests to verify this dynamic UI logic, elements inside inactive tabs (like `.tabcontent`) must be explicitly forced to `display: block` via JS evaluation before interaction, otherwise Playwright fails to compute their styles or interact with their children.
+## 2024-06-05 - Added Confirmation Dialogs for Destructive UI Actions
+**Learning:** Destructive actions in the UI (Reboot ESP, Clear NVS, Reload /data) were immediately triggered upon processing via `debounceSendControl` in `data/MJPEG2SD.htm` and `data/Auxil.htm`, causing potential accidental activations by users.
+**Action:** When implementing or modifying destructive UI actions in ESP32 HTML files, always wrap the action inside a `window.confirm()` dialog to ensure intentionality before dispatching the command via functions like `processStatus` or `debounceSendControl`.

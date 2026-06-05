@@ -1855,6 +1855,9 @@
           else if (key == "servoTiltPin") { value > 0 ? enableRangeSlider($('#camTilt')) : disableRangeSlider($('#camTilt')); }
           else if (key == "micSdPin") micState(value);
           else if (key == "mampSdIo") spkrState(value);
+          else if (key == "reset") { if (fromUser && !window.confirm("Are you sure you want to reboot the ESP?")) return; }
+          else if (key == "clear") { if (fromUser && !window.confirm("This will clear the NVS configuration. Are you sure?")) return; }
+          else if (key == "deldata") { if (fromUser && !window.confirm("This will reload /data folder. Are you sure?")) return; }
           else if (key == 'save') await sleep(600); // allow last input to debounce
           if (fromUser && !$('#'+key).classList.contains("local")) debounceSendControl(key, value);
         }
