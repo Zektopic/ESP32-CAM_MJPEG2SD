@@ -1856,7 +1856,12 @@
           else if (key == "micSdPin") micState(value);
           else if (key == "mampSdIo") spkrState(value);
           else if (key == 'save') await sleep(600); // allow last input to debounce
-          if (fromUser && !$('#'+key).classList.contains("local")) debounceSendControl(key, value);
+          if (fromUser && !$('#'+key).classList.contains("local")) {
+            if (key == "clear" && !confirm("Are you sure you want to clear NVS?")) return;
+            if (key == "deldata" && !confirm("Are you sure you want to reload /data?")) return;
+            if (key == "reset" && !confirm("Are you sure you want to reboot the ESP?")) return;
+            debounceSendControl(key, value);
+          }
         }
         else if (dest == CLASS) {
           // operations based on class
