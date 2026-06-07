@@ -929,13 +929,13 @@
 
   <body>
     <div class="tab">
-      <ul class="navtop">
-        <button class="tablinks camTab active" name="mainPage">Camera</button>
-        <button class="tablinks" name="ShowLog">Show Log</button>
-        <button class="tablinks" name="EditConfig">Edit Config</button>
-        <button class="tablinks" name="DeviceHub" style="display: none;">Camera Hub</button>
-        <button class="tablinks" onclick="window.location.href='/web?OTA.htm'">OTA Upload</button>
-      </ul>
+      <nav class="navtop" role="tablist" aria-label="Main Navigation">
+        <button class="tablinks camTab active" name="mainPage" role="tab" aria-selected="true" aria-controls="mainPage">Camera</button>
+        <button class="tablinks" name="ShowLog" role="tab" aria-selected="false" aria-controls="ShowLog">Show Log</button>
+        <button class="tablinks" name="EditConfig" role="tab" aria-selected="false" aria-controls="EditConfig">Edit Config</button>
+        <button class="tablinks" name="DeviceHub" style="display: none;" role="tab" aria-selected="false" aria-controls="DeviceHub">Camera Hub</button>
+        <button class="tablinks" onclick="window.location.href='/web?OTA.htm'" role="tab" aria-selected="false">OTA Upload</button>
+      </nav>
       <section id="main">
         <nav id="maintoolbar">
           <ul class="navtop">
@@ -951,7 +951,7 @@
       </section>
     </div>
 
-    <div id="mainPage" class="tabcontent" style="display:block">
+    <div id="mainPage" class="tabcontent" role="tabpanel" aria-hidden="false" style="display:block">
       <div id="content">
         <div id="mainPageIcons">
           <div id="sidebar">
@@ -1536,7 +1536,7 @@
       </div>
     </div>
 
-    <div id="ShowLog" class="tabcontent">
+    <div id="ShowLog" class="tabcontent" role="tabpanel" aria-hidden="true">
       <br>
       <div class="grid-cols4">
         <div class="input-group" style="grid-column: span 1; grid-row: span 3">
@@ -1607,7 +1607,7 @@
       <br>
     </div>
 
-    <div id="EditConfig" class="tabcontent">
+    <div id="EditConfig" class="tabcontent" role="tabpanel" aria-hidden="true">
       <br>
       <div class="header">Control</div>
       <br>
@@ -1709,7 +1709,7 @@
       </div>
     </div>
 
-    <div id="DeviceHub" class="tabcontent">
+    <div id="DeviceHub" class="tabcontent" role="tabpanel" aria-hidden="true">
       <div id="buttonContainer">
         <!-- Input field for users to enter individual IPs -->
         <label for="ipInput">Enter IP address:&nbsp;</label>
