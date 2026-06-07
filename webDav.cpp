@@ -81,7 +81,7 @@ static bool isFolder() {
 static void sendContentProp(const char* prop, const char* value) {
   // set individual XML properties in response
   char propStr[strlen(prop) * 2 + strlen(value) + 15];
-  sprintf(propStr, "<D:%s>%s</D:%s>", prop, value, prop);
+  snprintf(propStr, sizeof(propStr), "<D:%s>%s</D:%s>", prop, value, prop);
   httpd_resp_sendstr_chunk(req, propStr);
   LOG_VRB("propStr %s", propStr);
 }
@@ -102,7 +102,7 @@ static void sendPropResponse(File& file, const char* payload) {
   if (file.isDirectory()) sendContentProp("resourcetype", "<D:collection/>");
   else {
     char fsizeStr[15];
-    sprintf(fsizeStr, "%u", file.size());
+    snprintf(fsizeStr, sizeof(fsizeStr), "%u", file.size());
     sendContentProp("getcontentlength", fsizeStr);
     sendContentProp("getcontenttype", mimeTypes[getMimeType(file.path())]);
     httpd_resp_sendstr_chunk(req, "<resourcetype/>");
@@ -112,10 +112,10 @@ static void sendPropResponse(File& file, const char* payload) {
   if (strlen(payload)) {
     // return quota data if requested
     if (strstr(payload, "quota-available-bytes") != NULL || strstr(payload, "quota-used-bytes") != NULL) {
-      char numberStr[15];
-      sprintf(numberStr, "%llu", (uint64_t)STORAGE.totalBytes() - (uint64_t)STORAGE.usedBytes());
+      char numberStr[24];
+      snprintf(numberStr, sizeof(numberStr), "%llu", (uint64_t)STORAGE.totalBytes() - (uint64_t)STORAGE.usedBytes());
       sendContentProp("quota-available-bytes", numberStr);
-      sprintf(numberStr, "%llu", (uint64_t)STORAGE.usedBytes());
+      snprintf(numberStr, sizeof(numberStr), "%llu", (uint64_t)STORAGE.usedBytes());
       sendContentProp("quota-used-bytes", numberStr);
     }
   }
@@ -213,7 +213,7 @@ static bool handleLock() {
   const char* lockToken = "0123456789012345";
   httpd_resp_set_hdr(req, "Lock-Token", lockToken);
   char resp[strlen(XML5) + strlen(lockToken) + strlen(XML6) + 1];
-  sprintf(resp, "%s%s%s", XML5, lockToken, XML6);
+  snprintf(resp, sizeof(resp), "%s%s%s", XML5, lockToken, XML6);
   httpd_resp_set_type(req, "application/xml;charset=utf-8");
   httpd_resp_sendstr(req, resp);
   return true;
@@ -318,7 +318,7 @@ static bool handleCopy() {
 bool handleWebDav(httpd_req_t* rreq) {
   // extract method to determine which WebDAV action to take
   req = rreq;
-  sprintf(pathName, "%s", req->uri + strlen(WEBDAV)); // strip out "/webdav"
+  snprintf(pathName, sizeof(pathName), "%s", req->uri + strlen(WEBDAV)); // strip out "/webdav"
   if (pathName[strlen(pathName) - 1] == '/') pathName[strlen(pathName) - 1] = 0; // remove final / if present
   if (!strlen(pathName)) strcpy(pathName, "/"); // if pathname empty, use single /
   urlDecode(pathName);
