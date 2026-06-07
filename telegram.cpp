@@ -161,9 +161,11 @@ static bool sendTgramHeader(const char* tmethod, const char* contentType, const 
     p = tgramBuff;
     if (isFile) fileSize += formLen + strlen(END_BOUNDARY);
     p += sprintf(p, POST_HDR, tgramToken, tmethod, fileSize);
-    isFile ? strcat(p, MULTI_TYPE) : strcat(p, JSON_TYPE);
-    strcat(p, "\r\n\r\n");
-    size_t reqLen = strlen(tgramBuff);
+
+    // PERFORMANCE OPTIMIZATION: Combine string appends using sprintf on the tracked
+    // pointer to avoid multiple O(N) strcat and strlen calculations.
+    p += sprintf(p, "%s\r\n\r\n", isFile ? MULTI_TYPE : JSON_TYPE);
+    size_t reqLen = p - tgramBuff;
     // concatenate request and form data
     if (formLen) {
       memmove(tgramBuff + reqLen, tgramBuff + FORM_OFFSET, formLen);
