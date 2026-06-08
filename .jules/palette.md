@@ -107,3 +107,6 @@
 ## 2026-06-03 - Confirming Destructive Settings Actions
 **Learning:** Destructive application controls within `data/MJPEG2SD.htm` and `data/Auxil.htm` like clearing NVS (`clear`), reloading `/data` (`deldata`), and rebooting the ESP (`reset`) were being sent immediately upon clicking the corresponding SVG tiles, without any user confirmation, leading to potential accidental data loss or disruption.
 **Action:** When handling commands mapped from user interactions inside central processing functions (like `processStatus`), explicitly check for disruptive command keys (e.g., `clear`, `deldata`, `reset`) and wrap them in a `confirm()` dialog before invoking the final dispatch logic (`debounceSendControl`).
+## 2026-06-03 - Empty State Action Buttons UX
+**Learning:** In the `DeviceHub` interface, the "Delete All" and "Refresh" action buttons were previously left enabled even when the camera list was completely empty, allowing users to interact with buttons that had no effect.
+**Action:** Always dynamically disable action buttons associated with lists or datasets when those datasets are empty. Provide clear visual feedback by applying the native `disabled` attribute and custom disabled CSS classes, and ensure to re-enable them when data is populated.
