@@ -914,10 +914,16 @@
         const container = document.getElementById('imageContainer');
         container.innerHTML = ''; // Clear existing content
 
+        const clearBtn = document.getElementById('clearStorageButton');
+        const refreshBtn = document.getElementById('refreshAllButton');
         if (ipAddresses.length === 0) {
           container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--itemInactive); font-style: italic;">No cameras added yet. Enter an IP address above to add your first camera.</div>';
+          if (clearBtn) disable(clearBtn);
+          if (refreshBtn) disable(refreshBtn);
           return;
         }
+        if (clearBtn) enable(clearBtn);
+        if (refreshBtn) enable(refreshBtn);
 
         // Convert the array of IP addresses into individual IPs
         for (const ip of ipAddresses) {
