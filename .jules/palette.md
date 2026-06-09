@@ -110,3 +110,6 @@
 ## 2026-06-03 - Empty State Action Buttons UX
 **Learning:** In the `DeviceHub` interface, the "Delete All" and "Refresh" action buttons were previously left enabled even when the camera list was completely empty, allowing users to interact with buttons that had no effect.
 **Action:** Always dynamically disable action buttons associated with lists or datasets when those datasets are empty. Provide clear visual feedback by applying the native `disabled` attribute and custom disabled CSS classes, and ensure to re-enable them when data is populated.
+## 2024-06-09 - Password Visibility Toggles in IoT Configuration
+**Learning:** Complex IoT device configurations with multiple password fields (WiFi, FTP, SMTP) need password visibility toggles. This prevents users from locking themselves out of the device after rebooting due to simple typos, which is a critical UX friction point for headless devices.
+**Action:** Always provide a way to verify password inputs via a toggle before saving and rebooting device configurations, making sure the toggle is keyboard accessible.

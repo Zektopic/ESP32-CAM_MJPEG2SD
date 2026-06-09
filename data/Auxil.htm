@@ -852,7 +852,10 @@
                   </div>
                   <div class="input-group wifi-only" id="wifi-group">
                     <label for="ST_Pass">Password</label>
-                    <input type="password" id="ST_Pass" name="ST_Pass" maxlength=64 placeholder="Router password">
+                    <div class="password-wrapper">
+                      <input type="password" id="ST_Pass" name="ST_Pass" maxlength=64 placeholder="Router password" style="padding-right:30px; width:100%">
+                      <span class="password-toggle local" onclick="const p=document.getElementById('ST_Pass'); if(p.type==='password'){p.type='text';this.innerText='🙈';}else{p.type='password';this.innerText='👁️';}" role="button" tabindex="0" aria-label="Toggle password visibility for ST_Pass" title="Show password">👁️</span>
+                    </div>
                   </div>
                   <div class="input-group">
                       <label for="extIP">External&nbsp;IP</label>
@@ -892,7 +895,10 @@
                   </div>
                   <div class="input-group" id="ftp-group">
                     <label for="FS_Pass">FS password</label>
-                    <input type="password" id="FS_Pass" name="FS_Pass" maxlength=32 placeholder="File server password">
+                    <div class="password-wrapper">
+                      <input type="password" id="FS_Pass" name="FS_Pass" maxlength=32 placeholder="File server password" style="padding-right:30px; width:100%">
+                      <span class="password-toggle local" onclick="const p=document.getElementById('FS_Pass'); if(p.type==='password'){p.type='text';this.innerText='🙈';}else{p.type='password';this.innerText='👁️';}" role="button" tabindex="0" aria-label="Toggle password visibility for FS_Pass" title="Show password">👁️</span>
+                    </div>
                   </div>
                   <div class="input-group" id="ftp-group">
                     <label for="fsWd">FS root dir</label>
@@ -921,7 +927,10 @@
                   </div>
                   <div class="input-group" id="smtp-group">
                     <label for="SMTP_Pass">SMTP password</label>
-                    <input type="password" id="SMTP_Pass" name="SMTP_Pass" maxlength=32 placeholder="smtp password">
+                    <div class="password-wrapper">
+                      <input type="password" id="SMTP_Pass" name="SMTP_Pass" maxlength=32 placeholder="smtp password" style="padding-right:30px; width:100%">
+                      <span class="password-toggle local" onclick="const p=document.getElementById('SMTP_Pass'); if(p.type==='password'){p.type='text';this.innerText='🙈';}else{p.type='password';this.innerText='👁️';}" role="button" tabindex="0" aria-label="Toggle password visibility for SMTP_Pass" title="Show password">👁️</span>
+                    </div>
                   </div>
                   <div class="input-group" id="ftp-group">
                     <label for="smtp_email">SMTP email</label>
@@ -935,7 +944,10 @@
                   </div>
                   <div class="input-group" id="auth-group">
                       <label for="Auth_Pass">Web password</label>
-                      <input type="password" id="Auth_Pass" name="Auth_Pass" maxlength=32 placeholder="Authentication password">
+                      <div class="password-wrapper">
+                      <input type="password" id="Auth_Pass" name="Auth_Pass" maxlength=32 placeholder="Authentication password" style="padding-right:30px; width:100%">
+                      <span class="password-toggle local" onclick="const p=document.getElementById('Auth_Pass'); if(p.type==='password'){p.type='text';this.innerText='🙈';}else{p.type='password';this.innerText='👁️';}" role="button" tabindex="0" aria-label="Toggle password visibility for Auth_Pass" title="Show password">👁️</span>
+                    </div>
                   </div>
                   <div class="input-group" id="auth-group">
                     <label for="useHttps">Use HTTPS</label>
