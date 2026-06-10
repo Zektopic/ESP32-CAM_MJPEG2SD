@@ -110,3 +110,6 @@
 ## 2026-06-03 - Empty State Action Buttons UX
 **Learning:** In the `DeviceHub` interface, the "Delete All" and "Refresh" action buttons were previously left enabled even when the camera list was completely empty, allowing users to interact with buttons that had no effect.
 **Action:** Always dynamically disable action buttons associated with lists or datasets when those datasets are empty. Provide clear visual feedback by applying the native `disabled` attribute and custom disabled CSS classes, and ensure to re-enable them when data is populated.
+## 2026-06-10 - Programmatic clicks on SVG elements
+**Learning:** SVG elements (like `<rect>`) do not uniformly support the standard `.click()` method that HTMLElement objects do across all browsers. Calling `.click()` on an SVG rect inside an Enter/Space key handler fails.
+**Action:** Always use `dispatchEvent(new MouseEvent('click', { bubbles: true }))` when you need to programmatically trigger a click event on an SVG element to ensure compatibility and proper event bubbling.
