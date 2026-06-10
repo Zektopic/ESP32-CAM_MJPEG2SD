@@ -663,7 +663,7 @@
                 event.preventDefault(); // prevent scrolling for Space
                 if (e.nodeName === 'DIV') {
                   const rect = e.querySelector('rect');
-                  if (rect) rect.click();
+                  if (rect) rect.dispatchEvent(new MouseEvent('click', { bubbles: true }));
                   else e.click();
                 } else e.click();
               }
