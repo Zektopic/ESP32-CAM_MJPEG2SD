@@ -726,11 +726,9 @@ void tgramAlert(const char* subject, const char* message) {
   const char* pos1 = strchr(subject + 1, '/'); // extract filename
   const char* pos2 = strrchr(subject + 1, '.'); // remove extension
   // make filename into command
-  if (pos1 != NULL && pos2 != NULL) {
-    strncpy(alertCaption, pos1, pos2 - pos1);
-    alertCaption[pos2 - pos1] = 0;
-    strcat(alertCaption, " from ");
-    strncat(alertCaption, hostName, sizeof(alertCaption) - strlen(alertCaption) - 1);
+  if (pos1 != NULL && pos2 != NULL && pos2 > pos1) {
+    size_t len = pos2 - pos1;
+    snprintf(alertCaption, sizeof(alertCaption), "%.*s from %s", (int)len, pos1, hostName);
     if (alertBufferSize) alertReady = true; // return image
   } else LOG_WRN("Unable to send motion alert");
 }
