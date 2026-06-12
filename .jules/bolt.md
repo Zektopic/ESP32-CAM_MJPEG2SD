@@ -82,3 +82,6 @@
 ## 2024-05-29 - Block reads bypass timedRead overhead
 **Learning:** In the ESP32/Arduino framework, `Stream::readBytes()` (used by `File` and `WiFiClientSecure`) incurs significant performance overhead due to per-byte timeout checks (`millis()` via `timedRead()`). This is essentially an O(N) overhead layer around what could be a block read.
 **Action:** When loading data into memory buffers where the size is known or we want to read everything available, prefer block reading via `read(uint8_t* buf, size_t size)` over `readBytes()` to bypass this timer overhead and drastically improve bulk I/O performance.
+## 2024-11-25 - Frontend DOM Layout Thrashing in Log Rendering
+**Learning:** Using `log.innerHTML += ...` inside a recursive `setTimeout` loop recalculates and appends to the DOM sequentially. For large log texts containing thousands of lines, this causes severe layout thrashing and an $O(N^2)$ string concatenation overhead that blocks the frontend.
+**Action:** When rendering large arrays of structured text sequentially into the DOM on the frontend, accumulate the transformed strings into an array (`htmlLines`), `join('')` them into a single blob, and update the DOM in one synchronous assignment (`log.innerHTML = ...`).

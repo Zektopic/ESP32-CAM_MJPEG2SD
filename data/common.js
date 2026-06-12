@@ -553,21 +553,16 @@
           const response = await fetch(encodeURI(requestURL));
           if (response.ok) {
             const logData = await response.text();
+            let htmlLines = [];
             let start = 0;
-            const loadNextLine = () => {
+            while (true) {
               const index = logData.indexOf("\n", start);
-              if (index !== -1) {
-                log.innerHTML += colorise(logData.substring(start, index)) + '<br>';
-                start = index + 1;
-                // auto scroll log as loaded
-                const bottom = 2 * baseFontSize;// 2 lines
-                const pos = Math.abs(log.scrollHeight - log.clientHeight - log.scrollTop);
-                if (pos < bottom) log.scrollTop = log.scrollHeight;
-                // stop browser hanging while log is loaded
-                setTimeout(loadNextLine, 1);
-              }
-            };
-            loadNextLine();
+              if (index === -1) break;
+              htmlLines.push(colorise(logData.substring(start, index)) + '<br>');
+              start = index + 1;
+            }
+            log.innerHTML = htmlLines.join('');
+            log.scrollTop = log.scrollHeight;
           } else showAlert("getLog - " + response.status + ": " + response.statusText);
         }
 
