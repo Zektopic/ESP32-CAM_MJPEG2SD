@@ -46,7 +46,6 @@
 ## 2025-04-21 - [Fix Accordion Menu Toggling]
 **Learning:** [In `data/MJPEG2SD.htm` and `data/Auxil.htm`, `.menu-action` checkboxes are separated from their `.nav-toggle` labels by a `.pin-menu` div. While CSS rules linking checkbox focus state to the label should use `~` (e.g., `.menu-action:focus-visible ~ .nav-toggle`), rules targeting the content div for visibility toggling must use the explicit adjacent chain (e.g., `.menu-action + .pin-menu + label + div`) rather than `~ label + div` to avoid inadvertently hiding subsequent unrelated menu sections.]
 **Action:** [When modifying UI templates with custom checkbox-based accordions or menus, strictly verify adjacent vs general sibling CSS selectors to ensure intermediate injected DOM elements (like pins or icons) don't silently break expand/collapse functionality.]
-<<<<<<< HEAD
 
 ## 2024-05-20 - Confirmations for Destructive Actions
 **Learning:** Found that a destructive action (clearing all saved IP addresses from the Camera Hub's local storage) was performed immediately upon clicking a "Delete All" button without any confirmation dialog. This can lead to accidental data loss.
@@ -71,7 +70,6 @@
 ## 2024-05-12 - Disabled Cursor Visibility
 **Learning:** `pointer-events: none` completely blocks mouse interactions, which inherently prevents the `cursor: not-allowed` style from rendering when a user hovers over a disabled element. Using this CSS approach alone fails to provide clear visual feedback to mouse users.
 **Action:** Always combine the native HTML `disabled` attribute (managed via JavaScript) with CSS pseudo-selectors (`:disabled` or `.disabled`) containing `cursor: not-allowed`, and explicitly avoid `pointer-events: none` on interactive elements where hover feedback is desired.
-<<<<<<< HEAD
 ## 2024-05-18 - Dynamically Link Error Messages to Inputs
 **Learning:** Screen readers need explicit linking (`aria-describedby`) and live regions (`aria-live`) to properly associate dynamically inserted validation error text with the form inputs causing them. Just appending a red text div next to the input is only visual, leaving screen-reader users uninformed of validation failures.
 **Action:** Always add unique IDs to dynamic error elements, set `aria-live="polite"` on them, and tie them to their input fields via `aria-describedby` and `aria-invalid="true"`.
@@ -110,6 +108,9 @@
 ## 2026-06-03 - Empty State Action Buttons UX
 **Learning:** In the `DeviceHub` interface, the "Delete All" and "Refresh" action buttons were previously left enabled even when the camera list was completely empty, allowing users to interact with buttons that had no effect.
 **Action:** Always dynamically disable action buttons associated with lists or datasets when those datasets are empty. Provide clear visual feedback by applying the native `disabled` attribute and custom disabled CSS classes, and ensure to re-enable them when data is populated.
+## 2024-06-09 - Password Visibility Toggles in IoT Configuration
+**Learning:** Complex IoT device configurations with multiple password fields (WiFi, FTP, SMTP) need password visibility toggles. This prevents users from locking themselves out of the device after rebooting due to simple typos, which is a critical UX friction point for headless devices.
+**Action:** Always provide a way to verify password inputs via a toggle before saving and rebooting device configurations, making sure the toggle is keyboard accessible.
 ## 2026-06-10 - Programmatic clicks on SVG elements
 **Learning:** SVG elements (like `<rect>`) do not uniformly support the standard `.click()` method that HTMLElement objects do across all browsers. Calling `.click()` on an SVG rect inside an Enter/Space key handler fails.
 **Action:** Always use `dispatchEvent(new MouseEvent('click', { bubbles: true }))` when you need to programmatically trigger a click event on an SVG element to ensure compatibility and proper event bubbling.
