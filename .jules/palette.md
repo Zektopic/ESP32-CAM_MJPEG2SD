@@ -113,3 +113,6 @@
 ## 2026-06-10 - Programmatic clicks on SVG elements
 **Learning:** SVG elements (like `<rect>`) do not uniformly support the standard `.click()` method that HTMLElement objects do across all browsers. Calling `.click()` on an SVG rect inside an Enter/Space key handler fails.
 **Action:** Always use `dispatchEvent(new MouseEvent('click', { bubbles: true }))` when you need to programmatically trigger a click event on an SVG element to ensure compatibility and proper event bubbling.
+## 2026-06-11 - Enforce aria-disabled for Dynamic UI Elements
+**Learning:** While native HTML elements like `<button>` implicitly expose their `disabled` state to accessibility APIs when the `disabled` property is set, explicitly adding `aria-disabled="true"` guarantees the state is broadcast reliably across a wider array of assistive technologies. More critically, when building custom interactive elements (like `div[role="button"]`), they do not natively support the `disabled` state. Therefore, dynamically toggling `aria-disabled="true"` in utility functions like `disable()` and `enable()` is essential to ensure custom UI components remain accessible.
+**Action:** When creating utility functions to disable UI elements, always explicitly set `el.setAttribute('aria-disabled', 'true')` and remove it when enabling, rather than relying solely on CSS classes or native properties.

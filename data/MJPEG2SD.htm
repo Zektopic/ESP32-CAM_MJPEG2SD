@@ -945,7 +945,7 @@
             <li><button id="forceStream" aria-label="Start Stream" class="local" style="float:right;">➤&nbsp;Start Stream</button></li>
             <li><button id="get-still" class="local" style="float:right;" title="Capture a still image" aria-label="Capture a still image">Get Still</button></li>
             <li><div class="sep"></div></li>
-            <li><button id="forcePlayback" aria-label="Start Playback" class="local disabled" style="float:right;" title="Select a video in 'Playback & File Transfers' to activate playback." disabled>➤&nbsp;Start Playback</button></li>
+            <li><button id="forcePlayback" aria-label="Start Playback" class="local disabled" style="float:right;" title="Select a video in 'Playback & File Transfers' to activate playback." disabled aria-disabled="true">➤&nbsp;Start Playback</button></li>
           </ul>
         </nav>
       </section>
@@ -963,11 +963,11 @@
                 <nav class="quick-nav" id="picSettings" name="picture-settings" title="Picture Settings" aria-label="Picture Settings" role="button" tabindex="0">📺</nav>
                 <nav class="quick-nav" id="accSettings" name="access-settings" title="Access Settings" aria-label="Access Settings" role="button" tabindex="0">🔧</nav>
                 <div class="micContainer">
-                  <button class="quick-nav audButtons disabled" id="micRem" title="Microphone Control" aria-label="Microphone Control" disabled>🎤</button>
+                  <button class="quick-nav audButtons disabled" id="micRem" title="Microphone Control" aria-label="Microphone Control" disabled aria-disabled="true">🎤</button>
                   <canvas id="micLevel" role="meter" aria-label="Microphone volume level"></canvas>
                 </div>
                 <div class="spkrContainer">
-                  <button class="quick-nav audButtons disabled" id="spkrRem" title="Speaker Control" aria-label="Speaker Control" disabled>🔈</button>
+                  <button class="quick-nav audButtons disabled" id="spkrRem" title="Speaker Control" aria-label="Speaker Control" disabled aria-disabled="true">🔈</button>
                   <canvas id="spkrLevel" role="meter" aria-label="Speaker volume level"></canvas>
                 </div>
               </nav>
@@ -1286,9 +1286,9 @@
                   </div>
                   <br>
                   <section id="buttons">
-                    <button class="local disabled" title="Download selected file from SD card" id="download" aria-label="Download selected file" style="float:right" value="1" disabled>Download</button>
-                    <button class="local disabled" title="Upload selected file/folder to Fileserver" id="upload" aria-label="Upload selected file" style="float:left" value="1" disabled>File Upload</button>
-                    <button class="local disabled" title="Delete selected file/folder from SD card" id="delete" aria-label="Delete selected file" style="float:right" value="1" disabled>Delete</button>
+                    <button class="local disabled" title="Download selected file from SD card" id="download" aria-label="Download selected file" style="float:right" value="1" disabled aria-disabled="true">Download</button>
+                    <button class="local disabled" title="Upload selected file/folder to Fileserver" id="upload" aria-label="Upload selected file" style="float:left" value="1" disabled aria-disabled="true">File Upload</button>
+                    <button class="local disabled" title="Delete selected file/folder from SD card" id="delete" aria-label="Delete selected file" style="float:right" value="1" disabled aria-disabled="true">Delete</button>
                   </section>
   <!--
                   <div class="input-group" id="auth-group">

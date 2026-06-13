@@ -468,11 +468,13 @@
         function disable(el) {
           el.classList.add('disabled');
           el.disabled = true;
+          el.setAttribute('aria-disabled', 'true');
         }
 
         function enable(el) {
           el.classList.remove('disabled');
           el.disabled = false;
+          el.removeAttribute('aria-disabled');
         }
 
         function disableRangeSlider(el) {
@@ -481,6 +483,7 @@
           rangeVal.style.background = itemInactiveColor;
           el.classList.add('disabled');
           el.disabled = true;
+          el.setAttribute('aria-disabled', 'true');
         }
 
         function enableRangeSlider(el) {
@@ -489,6 +492,7 @@
           rangeVal.style.background = itemInactiveColor;
           el.classList.remove('disabled');
           el.disabled = false;
+          el.removeAttribute('aria-disabled');
         }
 
         function isActive(el) {
