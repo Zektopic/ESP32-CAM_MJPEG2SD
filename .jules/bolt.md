@@ -82,3 +82,6 @@
 ## 2024-05-29 - Block reads bypass timedRead overhead
 **Learning:** In the ESP32/Arduino framework, `Stream::readBytes()` (used by `File` and `WiFiClientSecure`) incurs significant performance overhead due to per-byte timeout checks (`millis()` via `timedRead()`). This is essentially an O(N) overhead layer around what could be a block read.
 **Action:** When loading data into memory buffers where the size is known or we want to read everything available, prefer block reading via `read(uint8_t* buf, size_t size)` over `readBytes()` to bypass this timer overhead and drastically improve bulk I/O performance.
+## 2024-05-30 - Avoid O(N^2) strlen overhead in format loops (Schlemiel the Painter's Algorithm)
+**Learning:** Found a loop in `motionDetect.cpp` repeatedly calling `sprintf(outcome + strlen(outcome), "%s: %.2f, ", ...)` to append strings. This creates an O(N^2) time complexity because `strlen()` must recount the entire string from the beginning on every single iteration just to find the end pointer.
+**Action:** Always use pointer tracking (`char* p = outcome; p += sprintf(p, ...);`) or an offset variable (`offset += snprintf(outcome + offset, ...);`) to concatenate strings in O(1) time per iteration, completely eliminating the redundant length calculation overhead.
