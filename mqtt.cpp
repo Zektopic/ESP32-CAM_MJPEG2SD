@@ -106,7 +106,7 @@ static void mqtt_data_handler(void *handler_args, esp_event_base_t base, int32_t
   }
 #endif
   if(strncmp(event->topic, cmd_topic, event->topic_len) == 0){
-    if (strlen(remoteQuery) == 0) sprintf(remoteQuery, "%.*s", event->data_len, (char*)event->data);            
+    if (strlen(remoteQuery) == 0) snprintf(remoteQuery, sizeof(remoteQuery), "%.*s", event->data_len, (char*)event->data);
     mqttConnected = true;
     LOG_VRB("Resuming mqtt thread..");
     xTaskNotifyGive(mqttTaskHandle);
