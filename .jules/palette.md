@@ -114,3 +114,6 @@
 ## 2026-06-10 - Programmatic clicks on SVG elements
 **Learning:** SVG elements (like `<rect>`) do not uniformly support the standard `.click()` method that HTMLElement objects do across all browsers. Calling `.click()` on an SVG rect inside an Enter/Space key handler fails.
 **Action:** Always use `dispatchEvent(new MouseEvent('click', { bubbles: true }))` when you need to programmatically trigger a click event on an SVG element to ensure compatibility and proper event bubbling.
+## 2025-02-20 - Add async loading and empty states to Log viewer
+**Learning:** For components that fetch data asynchronously (like logs), users may mistake an empty or slow-to-load container for a broken feature if there's no visual feedback.
+**Action:** Always provide explicit "Loading..." and "Empty" states to clearly communicate application status during asynchronous fetches.

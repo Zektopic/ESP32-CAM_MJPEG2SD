@@ -540,7 +540,7 @@
 
         function clearLog() {
           if (window.confirm('This will delete all log entries. Are you sure ?')) {
-            $('#appLog').innerHTML = "";
+            $('#appLog').innerHTML = '<div style="text-align:center; padding:2rem; color:var(--itemInactive); font-style:italic;">Log is currently empty</div>';
             sendControl("resetLog", "1");
           }
         }
@@ -548,7 +548,7 @@
         async function getLog() {
           // request display of stored log file
           const log = $('#appLog');
-          log.innerHTML = "";
+          log.innerHTML = '<div style="text-align:center; padding:2rem; color:var(--itemInactive); font-style:italic;">Loading log...</div>';
           const requestURL = logType == 0 ? '/control?displayLog=1' : '/web?log.txt';
           const response = await fetch(encodeURI(requestURL));
           if (response.ok) {
@@ -561,9 +561,16 @@
               htmlLines.push(colorise(logData.substring(start, index)) + '<br>');
               start = index + 1;
             }
-            log.innerHTML = htmlLines.join('');
-            log.scrollTop = log.scrollHeight;
-          } else showAlert("getLog - " + response.status + ": " + response.statusText);
+            if (htmlLines.length === 0) {
+              log.innerHTML = '<div style="text-align:center; padding:2rem; color:var(--itemInactive); font-style:italic;">Log is currently empty</div>';
+            } else {
+              log.innerHTML = htmlLines.join('');
+              log.scrollTop = log.scrollHeight;
+            }
+          } else {
+            log.innerHTML = '<div style="text-align:center; padding:2rem; color:var(--errColor); font-style:italic;">Failed to load log</div>';
+            showAlert("getLog - " + response.status + ": " + response.statusText);
+          }
         }
 
         function checkTime(value) {
