@@ -189,8 +189,10 @@ static bool tinyMLclassify(size_t (RESIZE_DIM) {
         LOG_VRB("Prob: %0.2f, Timing: DSP %d ms, inference %d ms, anomaly %d ms", 
         result.classification[0].value, result.timing.dsp, result.timing.classification, result.timing.anomaly);
         char outcome[200] = {0};
-        for (uint16_t i = 0; i < EI_CLASSIFIER_LABEL_COUNT; i++)
-          sprintf(outcome + strlen(outcome), "%s: %.2f, ", ei_classifier_inferencing_categories[i], result.classification[i].value);
+        for (uint16_t i = 0; i < EI_CLASSIFIER_LABEL_COUNT; i++) {
+          size_t rem = sizeof(outcome) - strlen(outcome);
+          snprintf(outcome + strlen(outcome), rem, "%s: %.2f, ", ei_classifier_inferencing_categories[i], result.classification[i].value);
+        }
         LOG_VRB("Predictions - %s in %ums", outcome, millis() - dTime);
       } 
     } 
