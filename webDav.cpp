@@ -29,6 +29,7 @@
 */
 
 #include "appGlobals.h"
+#include "stringUtils.h"
 
 #if INCLUDE_WEBDAV
 #define ALLOW "PROPPATCH,PROPFIND,OPTIONS,DELETE,MOVE,COPY,HEAD,POST,PUT,GET"
@@ -287,6 +288,10 @@ static bool handleMove() {
     // obtain destination filename
     res = true;
     urlDecode(dest);
+    if (isPathTraversal(dest)) {
+      httpd_resp_send_404(req);
+      return false;
+    }
     char* pos = strstr(dest, WEBDAV);
     if (!pos) {
       httpd_resp_send_404(req);
@@ -322,7 +327,7 @@ bool handleWebDav(httpd_req_t* rreq) {
   if (pathName[strlen(pathName) - 1] == '/') pathName[strlen(pathName) - 1] = 0; // remove final / if present
   if (!strlen(pathName)) strcpy(pathName, "/"); // if pathname empty, use single /
   urlDecode(pathName);
-  if (strstr(pathName, "../")) {
+  if (isPathTraversal(pathName)) {
     httpd_resp_send_err(req, HTTPD_404_NOT_FOUND, "Path traversal not allowed");
     return false;
   }
