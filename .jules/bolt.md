@@ -78,3 +78,6 @@
 ## 2024-05-03 - String Pointer Optimization
 **Learning:** In C/C++ applications on the ESP32, repeatedly calculating string offsets with `strlen()` during in-place string splitting loops introduces an unnecessary O(N) performance penalty.
 **Action:** When a pointer to a split character (e.g., via `strchr()`) is already computed and bounded, use pointer arithmetic (`endPtr + 1`) to advance to the remainder of the string instead of re-calculating the length (`variable + strlen(variable) + 1`).
+## 2025-02-13 - Avoid O(N^2) strlen overhead in classification loop
+**Learning:** In `motionDetect.cpp`, calling `strlen()` inside the loop used to format the classification outcome (`sprintf(outcome + strlen(outcome), ...)`) recalculates the string length on every iteration, leading to O(N^2) Schlemiel the Painter's Algorithm performance.
+**Action:** Replaced the loop `strlen` and `sprintf` with an explicit `offset` tracker and `snprintf`.
