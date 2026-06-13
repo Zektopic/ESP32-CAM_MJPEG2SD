@@ -239,7 +239,7 @@ static bool ftpStoreFile(File &fh) {
   if (!strstr(fh.name(), FILE_EXT)) return false; 
 #endif
   char ftpSaveName[FILE_NAME_LEN];
-  strcpy(ftpSaveName, fh.name());
+  snprintf(ftpSaveName, sizeof(ftpSaveName), "%s", fh.name());
   size_t fileSize = fh.size();
   LOG_INF("Upload file: %s, size: %s", ftpSaveName, fmtSize(fileSize));    
 
@@ -305,7 +305,7 @@ static bool uploadFolderOrFileFs(const char* fileOrFolder) {
   if (!root.isDirectory()) {
     // Upload a single file 
     char fsSaveName[FILE_NAME_LEN];
-    strcpy(fsSaveName, root.path());
+    snprintf(fsSaveName, sizeof(fsSaveName), "%s", root.path());
     if (getFolderName(root.path())) res = fsUse ? hfsStoreFile(root) : ftpStoreFile(root); 
 #ifdef ISCAM
     // upload corresponding csv and srt files if exist

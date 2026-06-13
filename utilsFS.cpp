@@ -204,13 +204,13 @@ bool checkFreeStorage() {
   return res;
 } 
 
-void setFolderName(const char* fname, char* fileName) {
+void setFolderName(const char* fname, char* fileName, size_t fileNameSize) {
   // set current or previous folder 
   char partName[FILE_NAME_LEN];
   if (strchr(fname, '~') != NULL) {
     if (!strcmp(fname, currentDir)) {
       dateFormat(partName, sizeof(partName), true);
-      strcpy(fileName, partName);
+      snprintf(fileName, fileNameSize, "%s", partName);
       LOG_INF("Current directory set to %s", fileName);
     }
     else if (!strcmp(fname, previousDir)) {
@@ -220,10 +220,10 @@ void setFolderName(const char* fname, char* fileName) {
       tm->tm_mday -= 1;
       time_t prev = mktime(tm);
       strftime(partName, sizeof(partName), "/%Y%m%d", localtime(&prev));
-      strcpy(fileName, partName);
+      snprintf(fileName, fileNameSize, "%s", partName);
       LOG_INF("Previous directory set to %s", fileName);
-    } else strcpy(fileName, ""); 
-  } else strcpy(fileName, fname);
+    } else fileName[0] = 0;
+  } else snprintf(fileName, fileNameSize, "%s", fname);
 }
 
 bool listDir(const char* fname, char* jsonBuff, size_t jsonBuffLen, const char* extension) {
@@ -232,7 +232,7 @@ bool listDir(const char* fname, char* jsonBuff, size_t jsonBuffLen, const char* 
   char partJson[200]; // used to build SD page json buffer
   bool noEntries = true;
   char fileName[FILE_NAME_LEN];
-  setFolderName(fname, fileName);
+  setFolderName(fname, fileName, sizeof(fileName));
 
   // check if folder or file
   if (strstr(fileName, extension) != NULL) {
@@ -311,7 +311,7 @@ static void deleteOthers(const char* baseFile) {
 void deleteFolderOrFile(const char* deleteThis) {
   // delete supplied file or folder, unless it is a reserved folder
   char fileName[FILE_NAME_LEN];
-  setFolderName(deleteThis, fileName);
+  setFolderName(deleteThis, fileName, sizeof(fileName));
   File df = STORAGE.open(fileName);
   if (!df) {
     LOG_WRN("Failed to open %s", fileName);
