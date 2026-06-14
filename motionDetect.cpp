@@ -189,8 +189,16 @@ static bool tinyMLclassify(size_t (RESIZE_DIM) {
         LOG_VRB("Prob: %0.2f, Timing: DSP %d ms, inference %d ms, anomaly %d ms", 
         result.classification[0].value, result.timing.dsp, result.timing.classification, result.timing.anomaly);
         char outcome[200] = {0};
-        for (uint16_t i = 0; i < EI_CLASSIFIER_LABEL_COUNT; i++)
-          sprintf(outcome + strlen(outcome), "%s: %.2f, ", ei_classifier_inferencing_categories[i], result.classification[i].value);
+        int offset = 0;
+        for (uint16_t i = 0; i < EI_CLASSIFIER_LABEL_COUNT; i++) {
+          // ⚡ Bolt: Use snprintf with offset tracker to prevent O(N^2) strlen overhead (Schlemiel the Painter's Algorithm)
+          int written = snprintf(outcome + offset, sizeof(outcome) - offset, "%s: %.2f, ", ei_classifier_inferencing_categories[i], result.classification[i].value);
+          if (written > 0 && written < (int)(sizeof(outcome) - offset)) {
+            offset += written;
+          } else {
+            break; // buffer full or error
+          }
+        }
         LOG_VRB("Predictions - %s in %ums", outcome, millis() - dTime);
       } 
     } 
