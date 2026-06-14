@@ -33,6 +33,7 @@
         let pageVisible = true;
         let logType = 0;
         let isBuilt = false; // for one off build of Main tab
+        let alertTimer = null;
 
         async function initialise() {
           try {
@@ -505,8 +506,10 @@
 
         async function showAlert(value) {
           $('#alertText').innerHTML = value;
-          await sleep(5000);
-          $('#alertText').innerHTML = "";
+          if (alertTimer) clearTimeout(alertTimer);
+          alertTimer = setTimeout(() => {
+            $('#alertText').innerHTML = "";
+          }, 5000);
         }
 
         async function saveChanges(resetMsg = "User requested restart") {
@@ -521,9 +524,11 @@
             }
           }
           // save change and reboot
+          showAlert('Saving settings...');
           await sleep(100);
           sendControl('save', 1);
           await sleep(1000);
+          showAlert('Rebooting device...');
           sendControl('reset', resetMsg);
         }
 

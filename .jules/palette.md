@@ -117,3 +117,6 @@
 ## 2025-02-20 - Add async loading and empty states to Log viewer
 **Learning:** For components that fetch data asynchronously (like logs), users may mistake an empty or slow-to-load container for a broken feature if there's no visual feedback.
 **Action:** Always provide explicit "Loading..." and "Empty" states to clearly communicate application status during asynchronous fetches.
+## 2026-06-14 - Alert Text Race Conditions and Visual Feedback
+**Learning:** `showAlert` functions using async `await sleep(x)` calls without tracking timers will cause later alerts to be prematurely cleared by the timer of a previous alert. Also, important setup actions like Reset, Save, and Clear NVS often complete their JS logic instantly, leaving the UI state ambiguous before a device reboot.
+**Action:** When creating UI alerts, manage setTimeout handles (e.g. `clearTimeout(alertTimer)`) so multiple invocations don't clash. Always provide immediate UI feedback (like `showAlert('Saving...')`) when a critical configuration action begins.
