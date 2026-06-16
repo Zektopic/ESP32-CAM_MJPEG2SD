@@ -117,3 +117,6 @@
 ## 2025-02-20 - Add async loading and empty states to Log viewer
 **Learning:** For components that fetch data asynchronously (like logs), users may mistake an empty or slow-to-load container for a broken feature if there's no visual feedback.
 **Action:** Always provide explicit "Loading..." and "Empty" states to clearly communicate application status during asynchronous fetches.
+## 2026-06-16 - Ensure custom elements correctly announce disabled state
+**Learning:** In the ESP32 HTML files (`MJPEG2SD.htm`, `Auxil.htm`) and JavaScript (`common.js`), when programmatically disabling custom interactive elements (like `<div role="button">` or `<nav>`), relying solely on the native `disabled` property or CSS classes is insufficient for screen readers.
+**Action:** Always explicitly toggle the `aria-disabled="true"` attribute via Javascript (`el.setAttribute('aria-disabled', 'true');` and `el.removeAttribute('aria-disabled');`) when custom UI elements are disabled or enabled to ensure proper screen reader announcements.
