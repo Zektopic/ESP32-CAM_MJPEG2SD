@@ -85,3 +85,6 @@
 ## 2024-11-25 - Frontend DOM Layout Thrashing in Log Rendering
 **Learning:** Using `log.innerHTML += ...` inside a recursive `setTimeout` loop recalculates and appends to the DOM sequentially. For large log texts containing thousands of lines, this causes severe layout thrashing and an $O(N^2)$ string concatenation overhead that blocks the frontend.
 **Action:** When rendering large arrays of structured text sequentially into the DOM on the frontend, accumulate the transformed strings into an array (`htmlLines`), `join('')` them into a single blob, and update the DOM in one synchronous assignment (`log.innerHTML = ...`).
+## 2024-05-31 - Compile-Time String Literal Lengths
+**Learning:** In C/C++, when comparing or checking lengths of string literals defined via macros (e.g., `#define HTML_EXT ".htm"`), using `strlen(HTML_EXT)` incurs a runtime cost as the compiler may emit code to traverse the string to determine its length, especially in lower optimization levels or complex `if/else` chains.
+**Action:** Replace `strlen(MACRO)` with `(sizeof(MACRO) - 1)` for string literals. This guarantees compile-time evaluation, replacing the function call and traversal with a hardcoded constant integer, eliminating runtime overhead.
