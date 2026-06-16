@@ -112,3 +112,7 @@
 **Vulnerability:** A critical buffer overflow risk was identified in `mqtt.cpp` where `sprintf(remoteQuery, "%.*s", event->data_len, (char*)event->data)` was used to copy an incoming MQTT payload into a statically sized array `remoteQuery` (`FILE_NAME_LEN * 2`). Because the payload length (`event->data_len`) is controlled by the external MQTT broker and could exceed the buffer bounds, a buffer overflow could occur.
 **Learning:** External inputs like MQTT payloads should never be copied into bounded arrays without proper length checks. Using `sprintf` for dynamically sized external data is unsafe and allows buffer overflow vulnerabilities.
 **Prevention:** Always use safe bounded string functions like `snprintf` when copying dynamically sized inputs into static buffers, passing the buffer's size explicitly using `sizeof(buffer)`.
+## 2024-06-16 - Path Traversal via WebDAV Destination Header
+**Vulnerability:** In `webDav.cpp`, the `handleMove` function extracted the `Destination` header, decoded it, and used it directly in a `STORAGE.rename` call without checking for path traversal sequences like `../`.
+**Learning:** Any input derived from HTTP headers that will be used in filesystem operations must be validated against directory traversal, especially after URL decoding, as it provides an alternative vector to URI-based parameters.
+**Prevention:** Always validate extracted header values that represent file paths using `isPathTraversal` (after calling `urlDecode`) before performing any storage operations (like rename/move/copy).
