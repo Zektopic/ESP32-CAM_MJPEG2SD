@@ -85,3 +85,6 @@
 ## 2024-11-25 - Frontend DOM Layout Thrashing in Log Rendering
 **Learning:** Using `log.innerHTML += ...` inside a recursive `setTimeout` loop recalculates and appends to the DOM sequentially. For large log texts containing thousands of lines, this causes severe layout thrashing and an $O(N^2)$ string concatenation overhead that blocks the frontend.
 **Action:** When rendering large arrays of structured text sequentially into the DOM on the frontend, accumulate the transformed strings into an array (`htmlLines`), `join('')` them into a single blob, and update the DOM in one synchronous assignment (`log.innerHTML = ...`).
+## 2026-05-20 - Zero-Copy JSON Parsing
+**Learning:** In the ESP32 codebase, the `jsonParser.cpp` implementation of `getJsonValue` creates full `std::string` copies of the input JSON payload and recursively returns deep copies. Passing large payloads (e.g., full HTTP responses) to this function causes massive allocation and deallocation performance bottlenecks.
+**Action:** Refactor large string processing pathways to use `std::string_view` for zero-copy reference handling, passing pointers and length bounds without instantiating backing heap storage.

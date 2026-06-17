@@ -11,13 +11,16 @@ Usage:
 
 #include "appGlobals.h"
 
-static std::string extractNestedValue(const std::string& jsonObject, const std::string& nestedKey);
+#include <string_view>
+#include <algorithm>
 
-static void skipWhitespace(const std::string& json, size_t& pos) {
+static std::string_view extractNestedValue(std::string_view jsonObject, std::string_view nestedKey);
+
+static void skipWhitespace(std::string_view json, size_t& pos) {
   while (pos < json.length() && std::isspace(json[pos])) pos++;
 }
 
-static std::string parseString(const std::string& json, size_t& pos) {
+static std::string_view parseString(std::string_view json, size_t& pos) {
   if (json[pos] != '"') return "";
   pos++; // Skip opening quote
   
@@ -25,7 +28,7 @@ static std::string parseString(const std::string& json, size_t& pos) {
   while (pos < json.length()) {
     if (json[pos] == '\\') pos += 2; // Skip escaped character
     else if (json[pos] == '"') {
-      std::string result = json.substr(start, pos - start);
+      std::string_view result = json.substr(start, pos - start);
       pos++; // Skip closing quote
       return result;
     } else pos++;
@@ -33,7 +36,7 @@ static std::string parseString(const std::string& json, size_t& pos) {
   return "";
 }
 
-static void skipValue(const std::string& json, size_t& pos) {
+static void skipValue(std::string_view json, size_t& pos) {
   if (json[pos] == '"') parseString(json, pos);
   else if (json[pos] == '{') {
     int depth = 1;
@@ -72,7 +75,7 @@ static void skipValue(const std::string& json, size_t& pos) {
   }
 }
 
-static std::string parseValue(const std::string& json, size_t& pos) {
+static std::string_view parseValue(std::string_view json, size_t& pos) {
   size_t start = pos;
   if (json[pos] == '"') return parseString(json, pos);
   else if (json[pos] == '{' || json[pos] == '[') {
@@ -83,14 +86,14 @@ static std::string parseValue(const std::string& json, size_t& pos) {
     while (pos < json.length() && json[pos] != ',' 
       && json[pos] != '}' && json[pos] != ']' && !std::isspace(json[pos])) pos++;
   }
-  std::string result = json.substr(start, pos - start);
+  std::string_view result = json.substr(start, pos - start);
   // Trim trailing whitespace
   size_t end = result.find_last_not_of(" \t\n\r");
-  return (end != std::string::npos) ? result.substr(0, end + 1) : result;
+  return (end != std::string_view::npos) ? result.substr(0, end + 1) : result;
 }
 
 // Recursively search through entire JSON structure for nth occurrence
-static std::string findNthOccurrence(const std::string& json, size_t& pos, const std::string& key, int& occurrence, int targetOccurrence, bool extractNested = false, const std::string& nestedKey = "") {
+static std::string_view findNthOccurrence(std::string_view json, size_t& pos, std::string_view key, int& occurrence, int targetOccurrence, bool extractNested = false, std::string_view nestedKey = "") {
   skipWhitespace(json, pos);
   if (pos >= json.length()) return "";
   if (json[pos] == '{') {
@@ -105,7 +108,7 @@ static std::string findNthOccurrence(const std::string& json, size_t& pos, const
       }
       
       // Parse key
-      std::string currentKey = parseString(json, pos);
+      std::string_view currentKey = parseString(json, pos);
       skipWhitespace(json, pos);
       
       if (pos >= json.length() || json[pos] != ':') return "";
@@ -116,7 +119,7 @@ static std::string findNthOccurrence(const std::string& json, size_t& pos, const
       if (currentKey == key) {
         occurrence++;
         if (occurrence == targetOccurrence) {
-          std::string value = parseValue(json, pos);
+          std::string_view value = parseValue(json, pos);
           // If we need to extract a nested value from the object
           if (extractNested && !nestedKey.empty() && !value.empty() && value[0] == '{') {
             return extractNestedValue(value, nestedKey);
@@ -126,7 +129,7 @@ static std::string findNthOccurrence(const std::string& json, size_t& pos, const
       } else {
         // Recursively search in nested structures
         if (json[pos] == '{' || json[pos] == '[') {
-          std::string result = findNthOccurrence(json, pos, key, occurrence, targetOccurrence, extractNested, nestedKey);
+          std::string_view result = findNthOccurrence(json, pos, key, occurrence, targetOccurrence, extractNested, nestedKey);
           if (!result.empty()) return result;
         } else skipValue(json, pos);
       }
@@ -147,7 +150,7 @@ static std::string findNthOccurrence(const std::string& json, size_t& pos, const
       
       // Recursively search array elements
       if (json[pos] == '{' || json[pos] == '[') {
-        std::string result = findNthOccurrence(json, pos, key, occurrence, targetOccurrence, extractNested, nestedKey);
+        std::string_view result = findNthOccurrence(json, pos, key, occurrence, targetOccurrence, extractNested, nestedKey);
         if (!result.empty()) return result;
       } else skipValue(json, pos);
 
@@ -159,7 +162,7 @@ static std::string findNthOccurrence(const std::string& json, size_t& pos, const
 }
 
 // New helper function to extract a nested value
-static std::string extractNestedValue(const std::string& jsonObject, const std::string& nestedKey) {
+static std::string_view extractNestedValue(std::string_view jsonObject, std::string_view nestedKey) {
   size_t pos = 0;
   int count = 0;
   return findNthOccurrence(jsonObject, pos, nestedKey, count, 1);
@@ -169,17 +172,23 @@ static std::string extractNestedValue(const std::string& jsonObject, const std::
 bool getJsonValue(const char* json, const char* key, char* value, const char* nestedKey, int occurrence) {
   // Returns nth occurrence (1-indexed, default is 1)
   // If nestedKey is provided, extracts that field from the object value
-  std::string jsonStr = json;
-  std::string keyStr = key;
+  // ⚡ Bolt optimization: Use string_view instead of string copies for zero-copy string references
+  std::string_view jsonStr(json);
+  std::string_view keyStr(key);
   if (occurrence < 1) occurrence = 1;
   size_t pos = 0;
   int count = 0;
   
   bool extractNested = (nestedKey != nullptr && strlen(nestedKey) > 0);
-  std::string nestedKeyStr = extractNested ? nestedKey : "";
+  std::string_view nestedKeyStr = extractNested ? std::string_view(nestedKey) : std::string_view("");
   
-  std::string retvalue = findNthOccurrence(jsonStr, pos, keyStr, count, occurrence, extractNested, nestedKeyStr);
-  strncpy(value, retvalue.c_str(), FILE_NAME_LEN - 1);
-  value[FILE_NAME_LEN - 1] = '\0';
-  return retvalue.length() ? true : false;
+  std::string_view retvalue = findNthOccurrence(jsonStr, pos, keyStr, count, occurrence, extractNested, nestedKeyStr);
+  value[0] = '\0';
+  if (!retvalue.empty()) {
+      size_t copy_len = std::min(retvalue.length(), (size_t)(FILE_NAME_LEN - 1));
+      memcpy(value, retvalue.data(), copy_len);
+      value[copy_len] = '\0';
+      return true;
+  }
+  return false;
 }
