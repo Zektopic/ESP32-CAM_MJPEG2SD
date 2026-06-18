@@ -521,6 +521,7 @@
             }
           }
           // save change and reboot
+          showAlert('Saving changes and rebooting...');
           await sleep(100);
           sendControl('save', 1);
           await sleep(1000);

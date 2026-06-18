@@ -117,3 +117,7 @@
 ## 2025-02-20 - Add async loading and empty states to Log viewer
 **Learning:** For components that fetch data asynchronously (like logs), users may mistake an empty or slow-to-load container for a broken feature if there's no visual feedback.
 **Action:** Always provide explicit "Loading..." and "Empty" states to clearly communicate application status during asynchronous fetches.
+
+## 2024-06-18 - Add instant visual feedback for device actions
+**Learning:** In the ESP32 app, long-running actions (Reset, Clear NVS, Reload /data) will make the interface appear unresponsive before the backend completes or reboots. The UI provides `showAlert()` but we need to use it right when an action is confirmed to assure users something is happening.
+**Action:** Always invoke `showAlert()` immediately before dispatching long-running backend calls like `sendControl` for disruptive actions.

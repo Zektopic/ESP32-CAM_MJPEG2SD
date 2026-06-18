@@ -1212,14 +1212,11 @@
           else if (key == "AtakePhotos") { if (fromUser) wsAuxSend("G1", wsInd); }
           else if (key == "BabortPhotos") { if (fromUser) wsAuxSend("G0", wsInd); }
           else if (key == "AuxIP") return; // ignored
-          else if (key == "reset") { if (fromUser && !window.confirm("Are you sure you want to reboot the ESP?")) return; }
-          else if (key == "clear") { if (fromUser && !window.confirm("This will clear the NVS configuration. Are you sure?")) return; }
-          else if (key == "deldata") { if (fromUser && !window.confirm("This will reload /data folder. Are you sure?")) return; }
-          else if (key == 'save') await sleep(600); // allow last input to debounce
+          else if (key == "reset") { if (fromUser && !window.confirm("Are you sure you want to reboot the ESP?")) return; showAlert("Rebooting ESP..."); }
+          else if (key == "clear") { if (fromUser && !window.confirm("This will clear the NVS configuration. Are you sure?")) return; showAlert("Clearing NVS..."); }
+          else if (key == "deldata") { if (fromUser && !window.confirm("This will reload /data folder. Are you sure?")) return; showAlert("Reloading /data..."); }
+          else if (key == 'save') { showAlert("Saving..."); await sleep(600); } // allow last input to debounce
           if (fromUser && !$('#'+key).classList.contains("local")) {
-            if (key == "clear" && !confirm("Are you sure you want to clear NVS?")) return;
-            if (key == "deldata" && !confirm("Are you sure you want to reload /data?")) return;
-            if (key == "reset" && !confirm("Are you sure you want to reboot the ESP?")) return;
             debounceSendControl(key, value);
           }
         }
