@@ -29,6 +29,7 @@
 */
 
 #include "appGlobals.h"
+#include "stringUtils.h"
 
 #if INCLUDE_WEBDAV
 #define ALLOW "PROPPATCH,PROPFIND,OPTIONS,DELETE,MOVE,COPY,HEAD,POST,PUT,GET"
@@ -282,11 +283,15 @@ static bool checkSamePath(const char *source_path, const char *dest_path) {
 static bool handleMove() {
   // rename file or folder, or change file location
   bool res = false;
-  char dest[100];
+  char dest[IN_FILE_NAME_LEN];
   if (extractHeaderVal(req, "Destination", dest, sizeof(dest)) == ESP_OK) {
     // obtain destination filename
     res = true;
     urlDecode(dest);
+    if (isPathTraversal(dest)) {
+      httpd_resp_send_err(req, HTTPD_403_FORBIDDEN, "Path traversal not allowed");
+      return false;
+    }
     char* pos = strstr(dest, WEBDAV);
     if (!pos) {
       httpd_resp_send_404(req);
