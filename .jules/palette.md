@@ -117,3 +117,6 @@
 ## 2025-02-20 - Add async loading and empty states to Log viewer
 **Learning:** For components that fetch data asynchronously (like logs), users may mistake an empty or slow-to-load container for a broken feature if there's no visual feedback.
 **Action:** Always provide explicit "Loading..." and "Empty" states to clearly communicate application status during asynchronous fetches.
+## 2026-06-19 - Ensure Custom Elements Communicate Disabled State to Screen Readers
+**Learning:** When programmatically disabling or enabling custom interactive elements (like UI components acting as buttons or sliders) in the UI by adding or removing a `disabled` class or setting `el.disabled = true`, these native mechanisms do not automatically communicate the disabled state to screen readers unless the elements are natively disableable (like `<button>` or `<input>`).
+**Action:** When creating or modifying `disable` and `enable` JavaScript utility functions for custom interactive elements, always explicitly toggle the `aria-disabled` attribute (e.g., `el.setAttribute('aria-disabled', 'true')`) to ensure the accessibility tree is correctly updated and screen readers properly announce the element's disabled state.
