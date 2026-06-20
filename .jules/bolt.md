@@ -82,12 +82,9 @@
 ## 2024-05-29 - Block reads bypass timedRead overhead
 **Learning:** In the ESP32/Arduino framework, `Stream::readBytes()` (used by `File` and `WiFiClientSecure`) incurs significant performance overhead due to per-byte timeout checks (`millis()` via `timedRead()`). This is essentially an O(N) overhead layer around what could be a block read.
 **Action:** When loading data into memory buffers where the size is known or we want to read everything available, prefer block reading via `read(uint8_t* buf, size_t size)` over `readBytes()` to bypass this timer overhead and drastically improve bulk I/O performance.
-<<<<<<< HEAD
 ## 2024-11-25 - Frontend DOM Layout Thrashing in Log Rendering
 **Learning:** Using `log.innerHTML += ...` inside a recursive `setTimeout` loop recalculates and appends to the DOM sequentially. For large log texts containing thousands of lines, this causes severe layout thrashing and an $O(N^2)$ string concatenation overhead that blocks the frontend.
 **Action:** When rendering large arrays of structured text sequentially into the DOM on the frontend, accumulate the transformed strings into an array (`htmlLines`), `join('')` them into a single blob, and update the DOM in one synchronous assignment (`log.innerHTML = ...`).
-=======
 ## 2026-05-21 - O(N^2) strlen overhead in tight inner formatting loops
 **Learning:** Found a performance bottleneck inside `checkMotion` in `motionDetect.cpp` where `strlen()` was being called repeatedly inside an inner loop iterating over the `EI_CLASSIFIER_LABEL_COUNT`. `sprintf(outcome + strlen(outcome), ...)` forces the string to be traversed completely on every single append, yielding an O(N^2) complexity that unnecessarily wastes CPU cycles in a tight ML processing path.
 **Action:** Replaced the `strlen(outcome)` with a managed `offset` variable, transforming the loop concatenation to `snprintf(outcome + offset, remaining, ...)`, making the operation O(1) per iteration while simultaneously preventing potential buffer overflows.
->>>>>>> pr-188
