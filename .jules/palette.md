@@ -117,3 +117,7 @@
 ## 2025-02-20 - Add async loading and empty states to Log viewer
 **Learning:** For components that fetch data asynchronously (like logs), users may mistake an empty or slow-to-load container for a broken feature if there's no visual feedback.
 **Action:** Always provide explicit "Loading..." and "Empty" states to clearly communicate application status during asynchronous fetches.
+## 2024-05-19 - Improved long-running action feedback and fixed alert overlap
+
+**Learning:** When using asynchronous `await sleep()` within a global notification function like `showAlert`, concurrent triggers can cause timers to overlap, resulting in one alert prematurely clearing the text of another. Additionally, removing double-confirm prompts relies on ensuring the initial call handles the explicit intent correctly before moving to backend commands or visual feedback.
+**Action:** Always use `setTimeout` with a tracked handle (e.g., `alertTimer`) to `clearTimeout` on subsequent calls for global UI notifications, ensuring only the most recent alert controls the disappearing act. When adding feedback to long-running actions, place the alert immediately before dispatching the actual backend request to provide instant confirmation.
