@@ -283,7 +283,11 @@ static bool checkSamePath(const char *source_path, const char *dest_path) {
 static bool handleMove() {
   // rename file or folder, or change file location
   bool res = false;
+<<<<<<< HEAD
   char dest[IN_FILE_NAME_LEN];
+=======
+  char dest[100];
+>>>>>>> pr-186
   if (extractHeaderVal(req, "Destination", dest, sizeof(dest)) == ESP_OK) {
     // obtain destination filename
     res = true;

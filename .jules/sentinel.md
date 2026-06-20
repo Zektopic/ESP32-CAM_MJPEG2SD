@@ -98,6 +98,7 @@
 **Vulnerability:** Path traversal possible by passing `../` in the `variable` parameter of `webServer.cpp`, bypassing intended directory scope after `snprintf` formatting.
 **Learning:** Checking for traversal *before* formatting might not be enough or was omitted at the specific usage site where `variable` was processed for static file responses. The requested fix specifically required a `strstr(variable, "../")` check after formatting.
 **Prevention:** Ensure explicit bounds and traversal checks (`strstr(..., "../")` or robust alternatives) are placed immediately before accessing files based on user-provided path segments.
+<<<<<<< HEAD
 
 ## 2024-06-25 - [CRITICAL] Unbounded strcpy Buffer Overflow in appSpecificWebHandler
 **Vulnerability:** A critical buffer overflow risk was identified in `appSpecificWebHandler` (`appSpecific.cpp`), where `strcpy(inFileName, value);` was used to copy URL parameter values directly into a statically sized `inFileName` array (`IN_FILE_NAME_LEN`). Because `value` comes from untrusted HTTP queries, it could easily exceed the array bounds.
@@ -124,3 +125,9 @@
 **Learning:** `sprintf` inherently lacks bounds checking on the destination buffer. This vulnerability is especially prominent in loops mapping elements (e.g., categories to probabilities) or when parsing dynamic runtime values like SD card directory names.
 **Prevention:** In C/C++, `sprintf` should be aggressively deprecated in favor of `snprintf` which guarantees bounds are respected. When dealing with loops appending to a buffer, track remaining space using `sizeof(buffer) - strlen(buffer)` as the size limit for subsequent `snprintf` calls to prevent silent overflows across multiple iterations.
 >>>>>>> pr-185
+=======
+## 2026-06-03 - [CRITICAL] Stack Buffer Overflow in Header Extraction
+**Vulnerability:** A local stack buffer `char value[10]` in `webDav.cpp` was used to store the parsed value of the `Depth` HTTP header using `extractHeaderVal`. However, `extractHeaderVal` expected a destination buffer of size `IN_FILE_NAME_LEN` (128 bytes) and lacked a `valueSize` parameter, extracting up to `IN_FILE_NAME_LEN - 1` bytes without checking the actual destination buffer size. This led to a stack-based buffer overflow if an oversized `Depth` or `Destination` header was provided by a client.
+**Learning:** Functions that parse untrusted external inputs like HTTP headers into dynamically sized or stack-allocated buffers must always accept the destination buffer's maximum capacity as an explicit argument. Mismatched buffer assumptions between a generic utility function and its callers are a primary source of stack buffer overflows.
+**Prevention:** Always update generic utility functions (e.g., `extractHeaderVal`, `extractQueryKeyVal`) to mandate a `size_t bufferSize` parameter. Ensure all call sites explicitly pass `sizeof(dest_buffer)` to guarantee memory safety.
+>>>>>>> pr-186
