@@ -1,4 +1,3 @@
-
 /* 
  Detect movement in sequential images using background subtraction.
  
@@ -625,4 +624,3 @@ static bool jpg2rgb(const uint8_t* src, size_t src_len, uint8_t* out, uint8_t sc
 bool isNight(uint8_t nightSwitch) {return false;}
 
 #endif // AUXILIARY
-
