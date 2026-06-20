@@ -218,22 +218,23 @@ static esp_err_t webHandler(httpd_req_t* req) {
     // request for built in OTA page, if index html defective
     httpd_resp_set_type(req, "text/html");
     return httpd_resp_sendstr(req, otaPage_html);
-  } else if (varLen >= strlen(HTML_EXT) && !strcmp(HTML_EXT, variable+(varLen-strlen(HTML_EXT)))) {
+  // ⚡ Bolt optimization: Use compile-time `sizeof(EXT) - 1` instead of `strlen` to avoid repeated string traversal overhead.
+  } else if (varLen >= (sizeof(HTML_EXT) - 1) && !strcmp(HTML_EXT, variable+(varLen-(sizeof(HTML_EXT) - 1)))) {
     // any other html file
     httpd_resp_set_type(req, "text/html");
-  } else if (varLen >= strlen(JS_EXT) && !strcmp(JS_EXT, variable+(varLen-strlen(JS_EXT)))) {
+  } else if (varLen >= (sizeof(JS_EXT) - 1) && !strcmp(JS_EXT, variable+(varLen-(sizeof(JS_EXT) - 1)))) {
     // any js file
     httpd_resp_set_type(req, "text/javascript");
-  } else if (varLen >= strlen(CSS_EXT) && !strcmp(CSS_EXT, variable+(varLen-strlen(CSS_EXT)))) {
+  } else if (varLen >= (sizeof(CSS_EXT) - 1) && !strcmp(CSS_EXT, variable+(varLen-(sizeof(CSS_EXT) - 1)))) {
     // any css file
     httpd_resp_set_type(req, "text/css");
-  } else if (varLen >= strlen(TEXT_EXT) && !strcmp(TEXT_EXT, variable+(varLen-strlen(TEXT_EXT)))) {
+  } else if (varLen >= (sizeof(TEXT_EXT) - 1) && !strcmp(TEXT_EXT, variable+(varLen-(sizeof(TEXT_EXT) - 1)))) {
     // any text file
     httpd_resp_set_type(req, "text/plain");
-  } else if (varLen >= strlen(ICO_EXT) && !strcmp(ICO_EXT, variable+(varLen-strlen(ICO_EXT)))) {
+  } else if (varLen >= (sizeof(ICO_EXT) - 1) && !strcmp(ICO_EXT, variable+(varLen-(sizeof(ICO_EXT) - 1)))) {
     // any icon file
     httpd_resp_set_type(req, "image/x-icon");
-  } else if (varLen >= strlen(SVG_EXT) && !strcmp(SVG_EXT, variable+(varLen-strlen(SVG_EXT)))) {
+  } else if (varLen >= (sizeof(SVG_EXT) - 1) && !strcmp(SVG_EXT, variable+(varLen-(sizeof(SVG_EXT) - 1)))) {
     // any svg file
     httpd_resp_set_type(req, "image/svg+xml");
   } else LOG_WRN("Unknown file type %s", variable);
