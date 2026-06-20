@@ -377,11 +377,11 @@ esp_err_t downloadFile(File& df, httpd_req_t* req) {
   // setup download header, create zip file if required, and download file
   esp_err_t res = ESP_OK;
   bool needZip = false;
-  char downloadName[FILE_NAME_LEN];
-  strcpy(downloadName, df.name());
+  char downloadName[IN_FILE_NAME_LEN];
+  snprintf(downloadName, sizeof(downloadName), "%s", df.name());
   size_t downloadSize = df.size();
-  char fsSavePath[FILE_NAME_LEN];
-  strcpy(fsSavePath, inFileName);
+  char fsSavePath[IN_FILE_NAME_LEN];
+  snprintf(fsSavePath, sizeof(fsSavePath), "%s", inFileName);
 #ifdef ISCAM
   changeExtension(fsSavePath, CSV_EXT);
   
@@ -397,7 +397,7 @@ esp_err_t downloadFile(File& df, httpd_req_t* req) {
       if (inFile) {
         // round up file size to 512 byte boundary and add header size
         downloadSize += (((inFile.size() + BLOCKSIZE - 1) / BLOCKSIZE) * BLOCKSIZE) + BLOCKSIZE;
-        strcpy(downloadName, inFile.name());
+        snprintf(downloadName, sizeof(downloadName), "%s", inFile.name());
         inFile.close();
       }
     }
