@@ -267,7 +267,7 @@ static float getSeaLevelPressure() {
     HTTPClient http;
     int httpCode = HTTP_CODE_NOT_FOUND;
     char extMslPath[100];
-    sprintf(extMslPath, EXT_MSL_PATH, latLon[0], latLon[1]);
+    snprintf(extMslPath, sizeof(extMslPath), EXT_MSL_PATH, latLon[0], latLon[1]);
     if (http.begin(hclient, EXT_MSL_HOST, HTTP_PORT, extMslPath)) {
       httpCode = http.GET();
       if (httpCode == HTTP_CODE_OK) {
@@ -457,7 +457,7 @@ static float getMagneticDeclination() {
     HTTPClient http;
     int httpCode = HTTP_CODE_NOT_FOUND;
     char extMagPath[100];
-    sprintf(extMagPath, EXT_MAG_PATH, latLon[0], latLon[1]);
+    snprintf(extMagPath, sizeof(extMagPath), EXT_MAG_PATH, latLon[0], latLon[1]);
     if (http.begin(hclient, EXT_MAG_HOST, HTTP_PORT, extMagPath)) {
       httpCode = http.GET();
       if (httpCode == HTTP_CODE_OK) {

@@ -659,7 +659,7 @@ void getNocturnal() {
       HTTPClient http;
       int httpCode = HTTP_CODE_NOT_FOUND;
       char extNoctPath[100];
-      sprintf(extNoctPath, EXT_NOCT_PATH, latLon[0], latLon[1]);
+      snprintf(extNoctPath, sizeof(extNoctPath), EXT_NOCT_PATH, latLon[0], latLon[1]);
       if (http.begin(hclient, EXT_NOCT_HOST, HTTPS_PORT, extNoctPath)) {
         httpCode = http.GET();
         if (httpCode == HTTP_CODE_OK) {

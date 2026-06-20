@@ -358,8 +358,8 @@ void deleteFolderOrFile(const char* deleteThis) {
 static esp_err_t writeHeader(File& inFile, httpd_req_t* req) {  
   char tarHeader[BLOCKSIZE] = {0}; // 512 bytes tar header
   strncpy(tarHeader, inFile.name(), 99); // name of file
-  sprintf(tarHeader + 100, "0000666"); // file permissions stored as ascii octal number
-  sprintf(tarHeader + 124, "%011o", inFile.size()); // length of file in bytes as 6 digit ascii octal number
+  snprintf(tarHeader + 100, 8, "0000666"); // file permissions stored as ascii octal number
+  snprintf(tarHeader + 124, 12, "%011o", inFile.size()); // length of file in bytes as 6 digit ascii octal number
   memcpy(tarHeader + 148, "        ", 8); // init as 8 spaces to calc checksum
   tarHeader[156] = '0'; // type of entry - 0 for ordinary file
   strcpy(tarHeader + 257, "ustar"); // magic
@@ -368,7 +368,7 @@ static esp_err_t writeHeader(File& inFile, httpd_req_t* req) {
   // Calculate and set the checksum
   uint32_t checksum = 0;
   for (const auto& ch : tarHeader) checksum += ch;
-  sprintf(tarHeader + 148, "%06lo ", checksum); // six digit octal number with leading zeroes followed by a NUL and then a space.
+  snprintf(tarHeader + 148, 8, "%06lo ", checksum); // six digit octal number with leading zeroes followed by a NUL and then a space.
   return httpd_resp_send_chunk(req, tarHeader, BLOCKSIZE);
 }
 

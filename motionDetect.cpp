@@ -190,8 +190,11 @@ static bool tinyMLclassify(size_t (RESIZE_DIM) {
         result.classification[0].value, result.timing.dsp, result.timing.classification, result.timing.anomaly);
         char outcome[200] = {0};
         char* outPtr = outcome; // ⚡ Bolt optimization: track pointer to prevent O(N^2) strlen overhead
-        for (uint16_t i = 0; i < EI_CLASSIFIER_LABEL_COUNT; i++)
-          outPtr += sprintf(outPtr, "%s: %.2f, ", ei_classifier_inferencing_categories[i], result.classification[i].value);
+        size_t rem = sizeof(outcome);
+        for (uint16_t i = 0; i < EI_CLASSIFIER_LABEL_COUNT; i++) {
+          int n = snprintf(outPtr, rem, "%s: %.2f, ", ei_classifier_inferencing_categories[i], result.classification[i].value);
+          if (n > 0 && (size_t)n < rem) { outPtr += n; rem -= n; } else break;
+        }
         LOG_VRB("Predictions - %s in %ums", outcome, millis() - dTime);
       } 
     } 
