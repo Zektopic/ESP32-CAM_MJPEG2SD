@@ -474,7 +474,7 @@
         function enable(el) {
           el.classList.remove('disabled');
           el.disabled = false;
-          el.setAttribute('aria-disabled', 'false');
+          el.removeAttribute('aria-disabled');
         }
 
         function disableRangeSlider(el) {
@@ -492,7 +492,7 @@
           rangeVal.style.background = itemInactiveColor;
           el.classList.remove('disabled');
           el.disabled = false;
-          el.setAttribute('aria-disabled', 'false');
+          el.removeAttribute('aria-disabled');
         }
 
         function isActive(el) {
