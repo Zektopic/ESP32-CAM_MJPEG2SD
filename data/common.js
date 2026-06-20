@@ -507,10 +507,13 @@
           return (typeof variable === 'undefined' || variable === null ) ? false : true;
         }
 
+        let alertTimer = null;
         async function showAlert(value) {
           $('#alertText').innerHTML = value;
-          await sleep(5000);
-          $('#alertText').innerHTML = "";
+          if (alertTimer) clearTimeout(alertTimer);
+          alertTimer = setTimeout(() => {
+            $('#alertText').innerHTML = "";
+          }, 5000);
         }
 
         async function saveChanges(resetMsg = "User requested restart") {
