@@ -33,6 +33,7 @@
         let pageVisible = true;
         let logType = 0;
         let isBuilt = false; // for one off build of Main tab
+        let alertTimer = null;
 
         async function initialise() {
           try {
@@ -528,9 +529,11 @@
             }
           }
           // save change and reboot
+          showAlert('Saving settings...');
           await sleep(100);
           sendControl('save', 1);
           await sleep(1000);
+          showAlert('Rebooting device...');
           sendControl('reset', resetMsg);
         }
 
