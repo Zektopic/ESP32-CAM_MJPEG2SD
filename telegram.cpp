@@ -87,7 +87,6 @@ size_t getResponseHeader(NetworkClientSecure& sclient, const char* host, int wai
   while (!endOfHeader && millis() - startTime < waitSecs * 1000) {
     if (sclient.available()) { 
       String tline = sclient.readStringUntil('\n');
-      //printf("Res: %s\n", tline.c_str());
       endOfHeader = tline.length() > 1 ? false : true; // blank line ends header
       if (!httpCode) sscanf(tline.c_str(), HTTP_CODE, &httpCode);  
       // get contentLength from header
@@ -138,7 +137,6 @@ static bool getTgramResponse() {
         }
       } 
     }
-    //printf("Cnt: %s\n", tgramBuff);
     remoteServerClose(tclient); // end of transaction 
   } // else nothing received, so leave connection open
   return haveResponse;
@@ -172,7 +170,6 @@ static bool sendTgramHeader(const char* tmethod, const char* contentType, const 
       tgramBuff[reqLen + formLen] = 0;
     }
     tclient.print(tgramBuff); // http header
-    //printf("header:\n%s\n", tgramBuff);
     return true;
   }
   return false;
