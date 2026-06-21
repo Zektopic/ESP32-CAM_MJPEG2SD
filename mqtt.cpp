@@ -118,9 +118,6 @@ static void mqtt_error_handler(void *handler_args, esp_event_base_t base, int32_
   esp_mqtt_event_handle_t event = (esp_mqtt_event_handle_t)event_data;
   LOG_VRB("Mqtt event error %i", event->msg_id);    
   if (event->error_handle->error_type == MQTT_ERROR_TYPE_TCP_TRANSPORT) {
-    // log_error_if_nonzero("reported from esp-tls", event->error_handle->esp_tls_last_esp_err);
-    // log_error_if_nonzero("reported from tls stack", event->error_handle->esp_tls_stack_err);
-    // log_error_if_nonzero("captured as transport's socket errno", event->error_handle->esp_transport_sock_errno);
     LOG_WRN("Last err string (%s)", strerror(event->error_handle->esp_transport_sock_errno));
     mqttConnected = false;
   }
