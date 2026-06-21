@@ -30,7 +30,7 @@
 /******************** Libraries *******************/
 
 #include "Arduino.h"
-#include <ESPmDNS.h> 
+#include <ESPmDNS.h>
 #include "lwip/sockets.h"
 #include <vector>
 #include "ping/ping_sock.h"
@@ -47,8 +47,8 @@
 #include <esp_bt.h>
 #endif
 #include <HTTPClient.h>
-#include <NetworkClient.h> 
-#include <NetworkClientSecure.h> 
+#include <NetworkClient.h>
+#include <NetworkClientSecure.h>
 #include <WiFiClientSecure.h>
 #include <esp_http_server.h>
 #include <esp_https_server.h>
@@ -63,7 +63,7 @@
 #define ADC_BITS 12
 #define MAX_ADC 4095 // maximum ADC value at given resolution
 #endif
-#define CENTER_ADC (MAX_ADC / 2) 
+#define CENTER_ADC (MAX_ADC / 2)
 
 // data folder defs
 #define DATA_DIR "/data"
@@ -77,7 +77,7 @@
 #define CONFIG_FILE_PATH DATA_DIR "/configs" TEXT_EXT
 #define LOG_FILE_PATH DATA_DIR "/log" TEXT_EXT
 #define OTA_FILE_PATH DATA_DIR "/OTA" HTML_EXT
-#define COMMON_JS_PATH DATA_DIR "/common" JS_EXT 
+#define COMMON_JS_PATH DATA_DIR "/common" JS_EXT
 #define WEBDAV "/webdav"
 #define GITHUB_HOST "raw.githubusercontent.com"
 #define FILLSTAR "****************************************************************"
@@ -103,7 +103,7 @@
 #define PANIC_DELAY 5 // seconds before restart after panic
 #define DAY_LENGTH (24 * 60 * 60) // in secs
 
-// global mandatory app specific functions, in appSpecific.cpp 
+// global mandatory app specific functions, in appSpecific.cpp
 bool appDataFiles();
 esp_err_t appSpecificSustainHandler(httpd_req_t* req);
 esp_err_t appSpecificWebHandler(httpd_req_t *req, const char* variable, const char* value);
@@ -159,7 +159,7 @@ bool handleWebDav(httpd_req_t* rreq);
 void initStatus(int cfgGroup, int delayVal);
 void killSocket(int skt = -99);
 bool getJsonValue(const char* json, const char* key, char* value, const char* nestedKey = nullptr, int occurrence = 1);
-void listBuff(const uint8_t* b, size_t len); 
+void listBuff(const uint8_t* b, size_t len);
 bool listDir(const char* fname, char* jsonBuff, size_t jsonBuffLen, const char* extension);
 void loadCerts();
 bool loadConfig();
@@ -212,7 +212,6 @@ bool updateConfigVect(const char* variable, const char* value);
 void updateStatus(const char* variable, const char* _value, bool fromUser = true);
 esp_err_t uploadHandler(httpd_req_t *req);
 void urlDecode(char* inVal);
-bool urlEncode(const char* inVal, char* encoded, size_t maxSize);
 uint32_t usePeripheral(const byte pinNum, const uint32_t receivedData);
 bool utilsStartup();
 esp_sleep_wakeup_cause_t wakeupResetReason();
@@ -225,8 +224,8 @@ String netMacAddress();
 int netRSSI();
 bool netIsConnected();
 // mqtt.cpp
-void startMqttClient();  
-void stopMqttClient();  
+void startMqttClient();
+void stopMqttClient();
 void mqttPublish(const char* payload);
 void mqttPublishPath(const char* suffix, const char* payload, const char *device = "sensor");
 // telegram.cpp
@@ -268,7 +267,7 @@ extern int ethSclk; // SPI clock
 extern int ethMiso; // SPI data pin
 extern int ethMosi; // SPI data pin
 
-extern char Auth_Name[]; 
+extern char Auth_Name[];
 extern char Auth_Pass[];
 
 extern int responseTimeoutSecs; // how long to wait for remote server in secs
@@ -313,9 +312,9 @@ extern char mqtt_broker[];
 extern char mqtt_port[];
 extern char mqtt_user[];
 extern char mqtt_user_Pass[];
-extern char mqtt_topic_prefix[];  
+extern char mqtt_topic_prefix[];
 
-// control sending alerts 
+// control sending alerts
 extern size_t alertBufferSize;
 extern size_t maxAlertBuffSize;
 extern byte* alertBuffer;
@@ -346,14 +345,14 @@ extern char startupFailure[];
 
 // app status
 extern uint8_t alarmHour;
-extern char* jsonBuff; 
+extern char* jsonBuff;
 extern bool dbgVerbose;
 extern bool sdLog;
 extern int logType;
 extern char messageLog[];
 extern uint16_t mlogEnd;
 extern bool timeSynchronized;
-extern bool monitorOpen; 
+extern bool monitorOpen;
 extern time_t currEpoch;
 extern bool RCactive;
 extern int wakePin;
@@ -363,7 +362,7 @@ extern UBaseType_t STACK_MEM;
 
 // SD storage
 extern int sdMinCardFreeSpace; // Minimum amount of card free Megabytes before freeSpaceMode action is enabled
-extern int sdFreeSpaceMode; // 0 - No Check, 1 - Delete oldest dir, 2 - Upload to ftp and then delete folder on SD 
+extern int sdFreeSpaceMode; // 0 - No Check, 1 - Delete oldest dir, 2 - Upload to ftp and then delete folder on SD
 extern bool formatIfMountFailed ; // Auto format the file system if mount failed. Set to false to not auto format.
 
 // I2C pins
@@ -417,20 +416,20 @@ extern QueueHandle_t logQueue;
 void logIncrementDropCount();
 
 //#define USE_LOG_COLORS  // uncomment to colorise log messages (eg if using idf.py, but not arduino)
-#ifdef USE_LOG_COLORS 
+#ifdef USE_LOG_COLORS
 // ANSI color codes
 #define LOG_COLOR_ERR  "\033[0;31m" // red
 #define LOG_COLOR_WRN  "\033[0;33m" // yellow
 #define LOG_COLOR_VRB  "\033[0;36m" // cyan
 #define LOG_COLOR_DBG  "\033[0;34m" // blue
-#define LOG_NO_COLOR   
+#define LOG_NO_COLOR
 #else
 #define LOG_COLOR_ERR
 #define LOG_COLOR_WRN
 #define LOG_COLOR_VRB
 #define LOG_COLOR_DBG
 #define LOG_NO_COLOR
-#endif 
+#endif
 
 #define LOG_SEND(formatted_str, ...) do { \
   char *_buf; \

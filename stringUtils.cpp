@@ -1,4 +1,5 @@
 #include "stringUtils.h"
+#include <ctype.h>
 #include <string.h>
 
 bool isPathTraversal(const char* path) {
@@ -19,4 +20,26 @@ bool changeExtension(char* fileName, const char* newExt) {
   memcpy(fileName + inNamePtr, newExt, extLen);
   fileName[inNamePtr + extLen] = 0;
   return (inNamePtr > 1) ? true : false;
+}
+
+bool urlEncode(const char* inVal, char* encoded, size_t maxSize) {
+  int encodedLen = 0;
+  char hexTable[] = "0123456789ABCDEF";
+  while (*inVal) {
+    if (isalnum((unsigned char)*inVal) || strchr("$-_.+!*'(),:@~#", *inVal)) {
+      encodedLen++;
+      // Check considering null terminator
+      if (encodedLen + 1 > maxSize) return false;
+      *encoded++ = *inVal;
+    } else {
+      encodedLen += 3;
+      if (encodedLen + 1 > maxSize) return false;  // Buffer overflow
+      *encoded++ = '%';
+      *encoded++ = hexTable[((unsigned char)*inVal) >> 4];
+      *encoded++ = hexTable[((unsigned char)*inVal) & 0xf];
+    }
+    inVal++;
+  }
+  *encoded = 0;
+  return true;
 }

@@ -103,9 +103,52 @@ void test_changeExtension() {
     std::cout << "All changeExtension tests passed!" << std::endl;
 }
 
+
+void test_urlEncode_helper(const char* input, const char* expected, size_t maxSize, bool expectedReturn) {
+    char buffer[1024];
+    bool res = urlEncode(input, buffer, maxSize);
+    if (res != expectedReturn) {
+        std::cerr << "Test failed (Return value mismatch)!" << std::endl;
+        std::cerr << "Input:    " << input << std::endl;
+        std::cerr << "Expected Return: " << expectedReturn << ", Got: " << res << std::endl;
+        exit(1);
+    }
+    if (expectedReturn && strcmp(buffer, expected) != 0) {
+        std::cerr << "Test failed (Output mismatch)!" << std::endl;
+        std::cerr << "Input:    " << input << std::endl;
+        std::cerr << "Expected Output: " << expected << std::endl;
+        std::cerr << "Got Output:      " << buffer << std::endl;
+        exit(1);
+    }
+}
+
+void test_urlEncode() {
+    // Normal cases
+    test_urlEncode_helper("hello world", "hello%20world", 1024, true);
+    test_urlEncode_helper("my/path/to/file.txt", "my%2Fpath%2Fto%2Ffile.txt", 1024, true);
+    test_urlEncode_helper("✔", "%E2%9C%94", 1024, true); // Check multi-byte UTF-8
+    test_urlEncode_helper("no_encoding", "no_encoding", 1024, true);
+    test_urlEncode_helper("%", "%25", 1024, true);
+
+    // Buffer limit checks
+    // "hello" needs 5 chars + null terminator = 6 bytes max.
+    test_urlEncode_helper("hello", "hello", 6, true);
+    // Supplying exactly 5 bytes for "hello" should return false because of null terminator
+    test_urlEncode_helper("hello", "", 5, false);
+    // "h w" encodes to "h%20w" which needs 5 chars + null terminator = 6 bytes
+    test_urlEncode_helper("h w", "h%20w", 6, true);
+    test_urlEncode_helper("h w", "", 5, false);
+
+    // Test supported unencoded characters
+    test_urlEncode_helper("$-_.+!*'(),:@~#", "$-_.+!*'(),:@~#", 1024, true);
+
+    std::cout << "All urlEncode tests passed!" << std::endl;
+}
+
 int main() {
     test_removeChar();
     test_isPathTraversal();
     test_changeExtension();
+    test_urlEncode();
     return 0;
 }
