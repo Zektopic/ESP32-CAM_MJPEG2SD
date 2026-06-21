@@ -436,8 +436,6 @@ static void statusCheck() {
 }
 
 static void pingSuccess(esp_ping_handle_t hdl, void *args) {
-  //uint32_t elapsed_time;
-  //esp_ping_get_profile(hdl, ESP_PING_PROF_TIMEGAP, &elapsed_time, sizeof(elapsed_time));
   if (DEBUG_MEM) {
     static uint32_t minStack = UINT32_MAX;
     uint32_t freeStack = (uint32_t)uxTaskGetStackHighWaterMark(NULL);
