@@ -49,13 +49,6 @@ static bool getNextKeyVal() {
   return false;
 }
 
-void showConfigVect() {
-  for (const std::vector<std::string>& innerVector : configs) {
-    // Print each element of the inner vector
-    for (const std::string& element : innerVector) printf("%s,", element.c_str());
-    printf("\n"); // Add a newline after each inner vector
-  }
-}
 
 void reloadConfigs() {
   while (getNextKeyVal()) updateStatus(variable, value, false);
@@ -571,7 +564,6 @@ bool loadConfig() {
   if (!res) res = checkConfigFile(); // to recreate file if deleted on first call
   if (res) {
     loadConfigVect();
-    //showConfigVect();
     loadPrefs(); // overwrites any corresponding entries in config
     // load variables from stored config vector
     reloadConfigs();
