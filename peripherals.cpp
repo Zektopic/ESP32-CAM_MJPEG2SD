@@ -148,25 +148,55 @@ static int dutyCycle (int angle) {
   return pow(2, DUTY_BIT_DEPTH) * pulseWidth * PWM_FREQ / USECS;
 }
 
-static int changeAngle(uint8_t servoPin, int newVal, int oldVal, bool useDelay = true) {
+static int changeAngle(uint8_t servoPin, int newVal, int oldVal, bool useDelay, uint32_t& lastTime) {
   // change angle of given servo
   if (newVal != oldVal) {
-    int incr = newVal - oldVal > 0 ? 1 : -1;
-    for (int angle = oldVal; angle != newVal + incr; angle += incr) {
-      ledcWrite(servoPin, dutyCycle(angle));
-      if (useDelay) delay(servoDelay); // set rate of change
+    uint32_t now = millis();
+    if (!useDelay || servoDelay == 0 || (now - lastTime >= servoDelay)) {
+      int incr = newVal - oldVal > 0 ? 1 : -1;
+      oldVal += incr;
+      ledcWrite(servoPin, dutyCycle(oldVal));
+      if (useDelay) lastTime = now;
     }
   }
-  return newVal;
+  return oldVal;
 }
 
 static void servoTask(void* pvParameters) {
   // update servo position from user input
+  uint32_t lastPanTime = 0;
+  uint32_t lastTiltTime = 0;
   while (true) {
-    ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-    if (newSteerVal != oldSteerVal) oldSteerVal = changeAngle(servoSteerPin, newSteerVal, oldSteerVal, false);
-    if (newPanVal != oldPanVal) oldPanVal = changeAngle(servoPanPin, newPanVal, oldPanVal);
-    if (newTiltVal != oldTiltVal) oldTiltVal = changeAngle(servoTiltPin, newTiltVal, oldTiltVal);
+    TickType_t waitTicks = portMAX_DELAY;
+    uint32_t now = millis();
+    if (newSteerVal != oldSteerVal) {
+      waitTicks = 0;
+    } else {
+      if (newPanVal != oldPanVal) {
+        if (servoDelay > 0) {
+          uint32_t elapsed = now - lastPanTime;
+          if (elapsed >= servoDelay) waitTicks = 0;
+          else {
+            TickType_t t = pdMS_TO_TICKS(servoDelay - elapsed);
+            if (t < waitTicks) waitTicks = t;
+          }
+        } else waitTicks = 0;
+      }
+      if (newTiltVal != oldTiltVal) {
+        if (servoDelay > 0) {
+          uint32_t elapsed = now - lastTiltTime;
+          if (elapsed >= servoDelay) waitTicks = 0;
+          else {
+            TickType_t t = pdMS_TO_TICKS(servoDelay - elapsed);
+            if (t < waitTicks) waitTicks = t;
+          }
+        } else waitTicks = 0;
+      }
+    }
+    ulTaskNotifyTake(pdTRUE, waitTicks);
+    oldSteerVal = changeAngle(servoSteerPin, newSteerVal, oldSteerVal, false, lastPanTime);
+    oldPanVal = changeAngle(servoPanPin, newPanVal, oldPanVal, true, lastPanTime);
+    oldTiltVal = changeAngle(servoTiltPin, newTiltVal, oldTiltVal, true, lastTiltTime);
   }
 }
 
