@@ -14,6 +14,60 @@ void removeChar(char* s, char c) {
   s[writer] = 0;
 }
 
+// Stub for replaceChar since it's defined in utils.cpp which has ESP32 dependencies
+void replaceChar(char* s, char c, char r) {
+  // replace specified character in string
+  int reader = 0;
+  while (s[reader]) {
+    if (s[reader] == c) s[reader] = r;
+    reader++;
+  }
+}
+
+void test_replaceChar() {
+    // Test 1: Happy path - replacing a character that is present
+    char str1[] = "hello world";
+    replaceChar(str1, 'o', 'a');
+    assert(strcmp(str1, "hella warld") == 0);
+
+    // Test 2: Happy path - replacing multiple instances of a character
+    char str2[] = "hello world";
+    replaceChar(str2, 'l', 'x');
+    assert(strcmp(str2, "hexxo worxd") == 0);
+
+    // Test 3: Edge case - replacing a character at the beginning
+    char str3[] = "hello world";
+    replaceChar(str3, 'h', 'j');
+    assert(strcmp(str3, "jello world") == 0);
+
+    // Test 4: Edge case - replacing a character at the end
+    char str4[] = "hello world";
+    replaceChar(str4, 'd', 'k');
+    assert(strcmp(str4, "hello worlk") == 0);
+
+    // Test 5: Edge case - character not present
+    char str5[] = "hello world";
+    replaceChar(str5, 'z', 'a');
+    assert(strcmp(str5, "hello world") == 0);
+
+    // Test 6: Edge case - string entirely composed of target character
+    char str6[] = "ooooo";
+    replaceChar(str6, 'o', 'a');
+    assert(strcmp(str6, "aaaaa") == 0);
+
+    // Test 7: Edge case - empty string
+    char str7[] = "";
+    replaceChar(str7, 'o', 'a');
+    assert(strcmp(str7, "") == 0);
+
+    // Test 8: Edge case - replacing character with itself
+    char str8[] = "hello world";
+    replaceChar(str8, 'o', 'o');
+    assert(strcmp(str8, "hello world") == 0);
+
+    std::cout << "All tests passed for replaceChar!" << std::endl;
+}
+
 void test_removeChar() {
     // Test 1: Happy path - removing a character that is present
     char str1[] = "hello world";
@@ -104,6 +158,7 @@ void test_changeExtension() {
 }
 
 int main() {
+    test_replaceChar();
     test_removeChar();
     test_isPathTraversal();
     test_changeExtension();
