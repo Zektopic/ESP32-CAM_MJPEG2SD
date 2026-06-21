@@ -151,20 +151,33 @@ static bool sendTgramHeader(const char* tmethod, const char* contentType, const 
     char* p = tgramBuff + FORM_OFFSET; // leave space for http request data
     bool isFile = dataType != NULL ? true : false; 
     if (isFile) {
-      p += sprintf(p, FORM_DATA "chat_id\"\r\n\r\n%s", tgramChatId);
-      if (caption != NULL) p += sprintf(p, "\r\n" FORM_DATA "caption\"\r\n\r\n%s", caption);
-      p += sprintf(p, "\r\n" FORM_DATA "%s", dataType);
-      p += sprintf(p, CONTENT_TYPE, fileName, contentType);
+      size_t rem = MAX_HTTP_MSG - FORM_OFFSET;
+      int written = snprintf(p, rem, FORM_DATA "chat_id\"\r\n\r\n%s", tgramChatId);
+      if (written > 0 && written < (int)rem) { p += written; rem -= written; }
+
+      if (caption != NULL) {
+        written = snprintf(p, rem, "\r\n" FORM_DATA "caption\"\r\n\r\n%s", caption);
+        if (written > 0 && written < (int)rem) { p += written; rem -= written; }
+      }
+
+      written = snprintf(p, rem, "\r\n" FORM_DATA "%s", dataType);
+      if (written > 0 && written < (int)rem) { p += written; rem -= written; }
+
+      written = snprintf(p, rem, CONTENT_TYPE, fileName, contentType);
+      if (written > 0 && written < (int)rem) { p += written; rem -= written; }
     } // else JSON data already loaded by sendTgramMessage
     size_t formLen = strlen(tgramBuff + FORM_OFFSET);
     // create http request header
     p = tgramBuff;
+    size_t rem = FORM_OFFSET;
     if (isFile) fileSize += formLen + strlen(END_BOUNDARY);
-    p += sprintf(p, POST_HDR, tgramToken, tmethod, fileSize);
+    int written = snprintf(p, rem, POST_HDR, tgramToken, tmethod, fileSize);
+    if (written > 0 && written < (int)rem) { p += written; rem -= written; }
 
     // PERFORMANCE OPTIMIZATION: Combine string appends using sprintf on the tracked
     // pointer to avoid multiple O(N) strcat and strlen calculations.
-    p += sprintf(p, "%s\r\n\r\n", isFile ? MULTI_TYPE : JSON_TYPE);
+    written = snprintf(p, rem, "%s\r\n\r\n", isFile ? MULTI_TYPE : JSON_TYPE);
+    if (written > 0 && written < (int)rem) { p += written; rem -= written; }
     size_t reqLen = p - tgramBuff;
     // concatenate request and form data
     if (formLen) {
@@ -241,7 +254,9 @@ bool getTgramUpdate(char* responseText) {
   } else {
     // send getUpdates request as not connected
     char* t = tgramBuff + FORM_OFFSET;
-    t += sprintf(t, GETUP_JSON, LONG_POLL, lastUpdate + 1);
+    size_t rem = MAX_HTTP_MSG - FORM_OFFSET;
+    int written = snprintf(t, rem, GETUP_JSON, LONG_POLL, lastUpdate + 1);
+    if (written > 0 && written < (int)rem) { t += written; rem -= written; }
     sendTgramHeader("getUpdates", NULL, NULL, strlen(tgramBuff + FORM_OFFSET), NULL, NULL);
   }
   return false; // no response for app to process
@@ -250,8 +265,13 @@ bool getTgramUpdate(char* responseText) {
 bool sendTgramMessage(const char* info, const char* item, const char* parseMode) {
   // format message data as json, append to http header (buff overflow unlikely)
   char* t = tgramBuff + FORM_OFFSET;
-  t += sprintf(t, POST_JSON, tgramChatId, tgramHdr, info, item);
-  if (strlen(parseMode)) t += sprintf(t - 1, PARSE_MODE, parseMode); // overwrite previous '}'
+  size_t rem = MAX_HTTP_MSG - FORM_OFFSET;
+  int written = snprintf(t, rem, POST_JSON, tgramChatId, tgramHdr, info, item);
+  if (written > 0 && written < (int)rem) { t += written; rem -= written; }
+  if (strlen(parseMode) && rem + 1 > 0) {
+    written = snprintf(t - 1, rem + 1, PARSE_MODE, parseMode); // overwrite previous '}'
+    if (written > 0 && written < (int)(rem + 1)) { t += written - 1; rem -= written - 1; }
+  }
   return sendTgramHeader("sendMessage", NULL, NULL, strlen(tgramBuff + FORM_OFFSET), NULL, NULL);
 }
 
