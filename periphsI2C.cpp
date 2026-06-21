@@ -902,13 +902,6 @@ void lcdAutoScroll(bool autoScroll) {
 
 void lcdLoadCustom(uint8_t charLoc, uint8_t charmap[]) {
   // Load custom character
-  // To create, see https://maxpromer.github.io/LCD-Character-Creator/
-  // array of 8 lines of 5 bits, where bits represent pixel on / off
-  // eg define & load custom char (degrees celsius symbol)
-  // uint8_t celsius[] = {B01000, B10100, B01011, B00100, B00100, B00100, B00011, B00000};
-  // enum customChar {CELSIUS, CC1, CC2, CC3, CC4, CC5, CC6, CC7};
-  // lcdLoadCustom(CELSIUS, celsius);
-  // lcdWriteCustom(CELSIUS);
   if (charLoc > 7) LOG_WRN("custom char number %u out of range", charLoc);
   else {
   	charLoc &= 0x7; // CGRAM location to load 0 - 7

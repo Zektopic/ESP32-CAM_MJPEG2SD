@@ -88,3 +88,6 @@
 ## 2026-05-21 - O(N^2) strlen overhead in tight inner formatting loops
 **Learning:** Found a performance bottleneck inside `checkMotion` in `motionDetect.cpp` where `strlen()` was being called repeatedly inside an inner loop iterating over the `EI_CLASSIFIER_LABEL_COUNT`. `sprintf(outcome + strlen(outcome), ...)` forces the string to be traversed completely on every single append, yielding an O(N^2) complexity that unnecessarily wastes CPU cycles in a tight ML processing path.
 **Action:** Replaced the `strlen(outcome)` with a managed `offset` variable, transforming the loop concatenation to `snprintf(outcome + offset, remaining, ...)`, making the operation O(1) per iteration while simultaneously preventing potential buffer overflows.
+## 2024-06-19 - Non-blocking servo sweeps
+**Learning:** The servo control task blocked the RTOS task thread while sweeping due to `delay()` inside a loop. This prevented the task from processing new pan/tilt notifications instantly and forced sequential panning.
+**Action:** Replaced the loop with stateful non-blocking time checks using `millis()` and computed an appropriate `waitTicks` dynamically to use with `ulTaskNotifyTake`. This completely decoupled the sweeps from task execution, halving benchmark sweep time by allowing concurrent sweeps.

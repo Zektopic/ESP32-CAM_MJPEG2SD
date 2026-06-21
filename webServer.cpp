@@ -171,13 +171,14 @@ esp_err_t extractQueryKeyVal(httpd_req_t *req, char* variable, char* value, size
     return ESP_FAIL;
   }
   httpd_req_get_url_query_str(req, variable, queryLen);
-  urlDecode(variable);
   // extract key
   char* endPtr = strchr(variable, '=');
   if (endPtr != NULL) {
     *endPtr = 0; // split variable into 2 strings, first is key name
     strncpy(value, endPtr + 1, valueSize - 1); // value is now second part of string, avoiding redundant strlen
     value[valueSize - 1] = 0; // ensure null termination
+    urlDecode(variable);
+    urlDecode(value);
     if (isPathTraversal(variable) || isPathTraversal(value)) {
       LOG_WRN("Path traversal attempt detected in query string");
       httpd_resp_set_status(req, "400 Bad Request");
@@ -185,6 +186,7 @@ esp_err_t extractQueryKeyVal(httpd_req_t *req, char* variable, char* value, size
       return ESP_FAIL;
     }
   } else {
+    urlDecode(variable);
     LOG_ERR("Invalid query string %s", variable);
     httpd_resp_set_status(req, "400 Invalid query string");
     httpd_resp_sendstr(req, NULL);
@@ -532,10 +534,21 @@ bool wsAsyncSendText(const char* wsData) {
 }
 
 bool wsAsyncSendJson(const char* dataType, const char* wsData) {
-  // build json to send
-  char wsJson[strlen(dataType) + strlen(wsData) + 30];
-  sprintf(wsJson, "{\"type\":\"%s\",\"payload\":{%s}}", dataType, wsData);
-  return wsAsyncSendText(wsJson);
+  if (!dataType || !wsData) return false;
+  // calculate exact size needed
+  int reqLen = snprintf(NULL, 0, "{\"type\":\"%s\",\"payload\":{%s}}", dataType, wsData);
+  if (reqLen < 0) return false;
+
+  char* wsJson = (char*)malloc(reqLen + 1);
+  if (!wsJson) {
+    LOG_WRN("Failed to allocate memory for wsJson");
+    return false;
+  }
+
+  snprintf(wsJson, reqLen + 1, "{\"type\":\"%s\",\"payload\":{%s}}", dataType, wsData);
+  bool res = wsAsyncSendText(wsJson);
+  free(wsJson);
+  return res;
 }
 
 void wsAsyncSendBinary(uint8_t* data, size_t len) {
@@ -642,7 +655,6 @@ bool startWebServer() {
     config.httpd.max_uri_handlers = MAX_HANDLERS;
     config.httpd.max_open_sockets = HTTP_CLIENTS + MAX_STREAMS;
     config.httpd.task_priority = HTTP_PRI;
-    //config.httpd.uri_match_fn = httpd_uri_match_wildcard;
     res = httpd_ssl_start(&httpServer, &config);
   } else {
 #else
@@ -658,7 +670,6 @@ bool startWebServer() {
     config.max_uri_handlers = MAX_HANDLERS;
     config.max_open_sockets = HTTP_CLIENTS + MAX_STREAMS;
     config.task_priority = HTTP_PRI;
-    //config.uri_match_fn = httpd_uri_match_wildcard;
     res = httpd_start(&httpServer, &config);
   }
   httpd_uri_t indexUri = {.uri = "/", .method = HTTP_GET, .handler = indexHandler, .user_ctx = NULL};
