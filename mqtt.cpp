@@ -304,57 +304,73 @@ void sendHasEntities (const char *name, const char *displayName, const char *uni
                       const char *icon = "", const char *category = "", const char *topic = "",
                       const char *payload_on = "",const char *payload_off = ""){
   char* p = jsonBuff;
-  *p++ = '{';
-  p += sprintf(p, "\"name\":\"%s\",", displayName);
-  p += sprintf(p, "\"uniq_id\":\"%s_%012llX\",", name, ESP.getEfuseMac() );
-  //p += sprintf(p, "\"obj_id\":\"%s %s\",", hostName, name);
+  size_t rem = JSON_BUFF_LEN;
+  int w = 0;
+
+  #define JSON_APPEND(...) \
+    do { \
+      w = snprintf(p, rem, __VA_ARGS__); \
+      if (w > 0 && w < (int)rem) { \
+        p += w; \
+        rem -= w; \
+      } else { \
+        LOG_ERR("jsonBuff overrun in sendHasEntities"); \
+        return; \
+      } \
+    } while (0)
+
+  JSON_APPEND("{");
+  JSON_APPEND("\"name\":\"%s\",", displayName);
+  JSON_APPEND("\"uniq_id\":\"%s_%012llX\",", name, ESP.getEfuseMac() );
+  //JSON_APPEND("\"obj_id\":\"%s %s\",", hostName, name);
   if(strlen(units)>0)
-    p += sprintf(p, "\"unit_of_meas\":\"%s\",", units);
+    JSON_APPEND("\"unit_of_meas\":\"%s\",", units);
   if(strlen(icon)>0)
-    p += sprintf(p, "\"ic\":\"%s\",", icon);
+    JSON_APPEND("\"ic\":\"%s\",", icon);
   
   if(strcmp(category, "camera") == 0 ){
-    p += sprintf(p, "\"t\":\"%ssensor/%s/%s\",", mqtt_topic_prefix, hostName, topic);
+    JSON_APPEND("\"t\":\"%ssensor/%s/%s\",", mqtt_topic_prefix, hostName, topic);
   
   }else{
     if(strlen(category)>0){  
-      p += sprintf(p, "\"ent_cat\":\"%s\",", category);  
+      JSON_APPEND("\"ent_cat\":\"%s\",", category);
     }
     if(strlen(topic))
-      p += sprintf(p, "\"stat_t\":\"%ssensor/%s/%s\",", mqtt_topic_prefix, hostName, topic);  
+      JSON_APPEND("\"stat_t\":\"%ssensor/%s/%s\",", mqtt_topic_prefix, hostName, topic);
     else
-      p += sprintf(p, "\"stat_t\":\"%ssensor/%s/%s\",", mqtt_topic_prefix, hostName, name);  
+      JSON_APPEND("\"stat_t\":\"%ssensor/%s/%s\",", mqtt_topic_prefix, hostName, name);
   
     if(strlen(payload_on) && strlen(payload_off) ){  
-      p += sprintf(p, "\"pl_on\":\"%s\",", payload_on);
-      p += sprintf(p, "\"pl_off\":\"%s\",", payload_off);
-      p += sprintf(p, "\"cmd_t\":\"%ssensor/%s/%s\",", mqtt_topic_prefix, hostName, "cmd");  
+      JSON_APPEND("\"pl_on\":\"%s\",", payload_on);
+      JSON_APPEND("\"pl_off\":\"%s\",", payload_off);
+      JSON_APPEND("\"cmd_t\":\"%ssensor/%s/%s\",", mqtt_topic_prefix, hostName, "cmd");
     }else if(strlen(payload_on) && !strlen(payload_off) ){
-      p += sprintf(p, "\"pl_prs\":\"%s\",", payload_on);
-      p += sprintf(p, "\"cmd_t\":\"%ssensor/%s/%s\",", mqtt_topic_prefix, hostName, "cmd");  
+      JSON_APPEND("\"pl_prs\":\"%s\",", payload_on);
+      JSON_APPEND("\"cmd_t\":\"%ssensor/%s/%s\",", mqtt_topic_prefix, hostName, "cmd");
     }
   }
   
   if(strcmp(category, "diagnostic") != 0 && strlen(payload_on) == 0){
-    p += sprintf(p, "\"avty_t\":\"%ssensor/%s/%s\",", mqtt_topic_prefix, hostName, "lwt");    
-    p += sprintf(p, "\"pl_avail\":\"%s\",", "online");
-    p += sprintf(p, "\"pl_not_avail\":\"%s\",", "offline");
+    JSON_APPEND("\"avty_t\":\"%ssensor/%s/%s\",", mqtt_topic_prefix, hostName, "lwt");
+    JSON_APPEND("\"pl_avail\":\"%s\",", "online");
+    JSON_APPEND("\"pl_not_avail\":\"%s\",", "offline");
   }
-  p += sprintf(p, "\"device\":");
-    *p++ = '{';
-      p += sprintf(p, "\"name\":\"%s\",", hostName);
-      p += sprintf(p, "\"ids\":[\"%s-%s\"],", hostName, ESP.getChipModel());
-      p += sprintf(p, "\"sw\":\"%s\",", APP_VER);
-      p += sprintf(p, "\"cns\":[[ \"mac\",\"%s\"]],", netMacAddress().c_str() );
-      p += sprintf(p, "\"mdl\":\"%s-%i\",", ESP.getChipModel(), ESP.getChipRevision());
-      p += sprintf(p, "\"cu\":\"http://%s/\",", formatIPstr());
-      p += sprintf(p, "\"mf\":\"%s\"", "esp32cam");
-    *p++ = '}';
-  *p++ = '}';
-  *p = 0;
+  JSON_APPEND("\"device\":");
+  JSON_APPEND("{");
+  JSON_APPEND("\"name\":\"%s\",", hostName);
+  JSON_APPEND("\"ids\":[\"%s-%s\"],", hostName, ESP.getChipModel());
+  JSON_APPEND("\"sw\":\"%s\",", APP_VER);
+  JSON_APPEND("\"cns\":[[ \"mac\",\"%s\"]],", netMacAddress().c_str() );
+  JSON_APPEND("\"mdl\":\"%s-%i\",", ESP.getChipModel(), ESP.getChipRevision());
+  JSON_APPEND("\"cu\":\"http://%s/\",", formatIPstr());
+  JSON_APPEND("\"mf\":\"%s\"", "esp32cam");
+  JSON_APPEND("}");
+  JSON_APPEND("}");
+
+  #undef JSON_APPEND
 
   char suffix[FILE_NAME_LEN] = "";  
-  sprintf(suffix, "%s/config", name);
+  snprintf(suffix, sizeof(suffix), "%s/config", name);
   if(strlen(payload_on) && strlen(payload_off) )
     mqttPublishPath(suffix, jsonBuff, "switch");
   else if(strlen(payload_on) && !strlen(payload_off))
@@ -395,6 +411,7 @@ void sendMqttHasDiscovery(){
 }
 void sendMqttHasState(){  
   char* p = jsonBuff;
+  size_t rem = JSON_BUFF_LEN;
   char timeBuff[20];
   strftime(timeBuff, 20, "%Y-%m-%d %H:%M:%S", localtime(&currEpoch));
   mqttPublishPath("clock", timeBuff);
@@ -402,18 +419,18 @@ void sendMqttHasState(){
   mqttPublishPath("up_time", timeBuff);
   float aTemp = readTemperature(true);
   if (aTemp > -127.0){    
-    sprintf(p, "%0.1f", aTemp);
+    snprintf(p, rem, "%0.1f", aTemp);
     mqttPublishPath("atemp", p);
   }
-  sprintf(p, "%i", netRSSI());
+  snprintf(p, rem, "%i", netRSSI());
   mqttPublishPath("wifi_rssi", p);
-  sprintf(p, "%s", formatIPstr());
+  snprintf(p, rem, "%s", formatIPstr());
   mqttPublishPath("wifi_ip", p);
-  sprintf(p, "%s", fmtSize(ESP.getFreeHeap()) );
+  snprintf(p, rem, "%s", fmtSize(ESP.getFreeHeap()) );
   mqttPublishPath("free_heap", p);
-  sprintf(p, "%s", fmtSize(ESP.getFreePsram()) );
+  snprintf(p, rem, "%s", fmtSize(ESP.getFreePsram()) );
   mqttPublishPath("free_psram", p);
-  sprintf(p, "%s", fmtSize(STORAGE.totalBytes() - STORAGE.usedBytes()) );
+  snprintf(p, rem, "%s", fmtSize(STORAGE.totalBytes() - STORAGE.usedBytes()) );
   mqttPublishPath("free_bytes", p);
 }
 #endif // INCLUDE_HASIO
