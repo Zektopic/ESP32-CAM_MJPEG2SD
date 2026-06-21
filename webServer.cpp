@@ -532,10 +532,21 @@ bool wsAsyncSendText(const char* wsData) {
 }
 
 bool wsAsyncSendJson(const char* dataType, const char* wsData) {
-  // build json to send
-  char wsJson[strlen(dataType) + strlen(wsData) + 30];
-  sprintf(wsJson, "{\"type\":\"%s\",\"payload\":{%s}}", dataType, wsData);
-  return wsAsyncSendText(wsJson);
+  if (!dataType || !wsData) return false;
+  // calculate exact size needed
+  int reqLen = snprintf(NULL, 0, "{\"type\":\"%s\",\"payload\":{%s}}", dataType, wsData);
+  if (reqLen < 0) return false;
+
+  char* wsJson = (char*)malloc(reqLen + 1);
+  if (!wsJson) {
+    LOG_WRN("Failed to allocate memory for wsJson");
+    return false;
+  }
+
+  snprintf(wsJson, reqLen + 1, "{\"type\":\"%s\",\"payload\":{%s}}", dataType, wsData);
+  bool res = wsAsyncSendText(wsJson);
+  free(wsJson);
+  return res;
 }
 
 void wsAsyncSendBinary(uint8_t* data, size_t len) {
