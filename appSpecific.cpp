@@ -308,7 +308,7 @@ static bool extractKeyVal(const char* wsMsg) {
     strncpy(value, endPtr + 1, FILE_NAME_LEN - 1); // value is now second part of string
     value[FILE_NAME_LEN - 1] = 0; // ensure null termination
     return true;
-  } else LOG_ERR("Invalid query string: %s", wsMsg);
+  } else LOG_ERR("Invalid query string: %s", (char*)wsMsg);
   return false;
 }
 
