@@ -116,7 +116,7 @@ void controlFrameTimer(bool restartTimer) {
     frameTimer = timerBegin(OneMHz);
     if (frameTimer) {
       frameInterval = OneMHz / FPS; // in units of us
-      LOG_VRB("Frame timer interval %lums for FPS %u", frameInterval / 1000, FPS);
+      LOG_VRB("Frame timer interval %lums for FPS %u", (unsigned long)(frameInterval / 1000), FPS);
       timerAttachInterrupt(frameTimer, &frameISR);
       timerAlarm(frameTimer, frameInterval, true, 0); // micro seconds
     } else LOG_ERR("Failed to setup frameTimer");
