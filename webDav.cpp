@@ -196,7 +196,8 @@ static bool handleGet() {
     return false;
   } else {
     httpd_resp_set_type(req, mimeTypes[getMimeType(pathName)]);
-    strcpy(inFileName, pathName);
+    strncpy(inFileName, pathName, IN_FILE_NAME_LEN - 1);
+    inFileName[IN_FILE_NAME_LEN - 1] = '\0';
     esp_err_t res = fileHandler(req); // file content
     return res == ESP_OK ? true : false;
   }
@@ -239,7 +240,8 @@ static bool handlePut() {
   }
   if (req->content_len) {
     // transfer file content to SD
-    strcpy(inFileName, pathName);
+    strncpy(inFileName, pathName, IN_FILE_NAME_LEN - 1);
+    inFileName[IN_FILE_NAME_LEN - 1] = '\0';
     esp_err_t res = uploadHandler(req);
     return res == ESP_OK ? true : false;
   }
