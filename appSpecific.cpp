@@ -695,7 +695,9 @@ void doAppPing(bool timeSynced) {
   if (external_heartbeat_active) sendExternalHeartbeat();
 #endif
   // check for night time actions
+#if INCLUDE_PERIPH
   static bool atNight = false;
+#endif
   if (wakeUse && wakePin < 0 && deepSleepTimer == 0 && timeSynced) getNocturnal();
   if (isNight(nightSwitch)) {
     if (wakeUse) {
