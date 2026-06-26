@@ -31,7 +31,6 @@ bool updateAppStatus(const char* variable, const char* value, bool fromUser) {
   sensor_t* s = esp_camera_sensor_get();
 #endif
   int intVal = atoi(value);
-  float fltVal = atof(value);
   if (!strcmp(variable, "custom")) return true;
 #ifndef AUXILIARY
   else if (!strcmp(variable, "stopStream")) stopSustainTask(intVal);
@@ -48,7 +47,7 @@ bool updateAppStatus(const char* variable, const char* value, bool fromUser) {
   else if (!strcmp(variable, "detectEndBand")) detectEndBand = intVal;
   else if (!strcmp(variable, "detectChangeThreshold")) detectChangeThreshold = intVal;
   else if (!strcmp(variable, "mlUse")) mlUse = (bool)intVal;
-  else if (!strcmp(variable, "mlProbability")) mlProbability = fltVal < 0 ? 0.0 : (fltVal > 1.0 ? 1.0 : fltVal);
+  else if (!strcmp(variable, "mlProbability")) { float val = atof(value); mlProbability = val < 0 ? 0.0 : (val > 1.0 ? 1.0 : val); }
   else if (!strcmp(variable, "depthColor")) {
     depthColor = (bool)intVal;
     colorDepth = depthColor ? RGB888_BYTES : GRAYSCALE_BYTES;
@@ -120,7 +119,7 @@ bool updateAppStatus(const char* variable, const char* value, bool fromUser) {
   else if (!strcmp(variable, "servoMaxPulseWidth")) servoMaxPulseWidth = intVal;
   else if (!strcmp(variable, "servoCenter")) servoCenter = intVal;
   else if (!strcmp(variable, "voltDivider")) voltDivider = intVal;
-  else if (!strcmp(variable, "voltLow")) voltLow = fltVal;
+  else if (!strcmp(variable, "voltLow")) voltLow = atof(value);
   else if (!strcmp(variable, "voltInterval")) voltInterval = intVal;
   else if (!strcmp(variable, "buzzerUse")) buzzerUse = (bool)intVal;
   else if (!strcmp(variable, "buzzerPin")) buzzerPin = intVal;
@@ -209,7 +208,7 @@ bool updateAppStatus(const char* variable, const char* value, bool fromUser) {
     if (PGactive) setLamp(0);
   }
   else if (!strcmp(variable, "numberOfPhotos")) numberOfPhotos = intVal;
-  else if (!strcmp(variable, "gearing")) gearing = fltVal;
+  else if (!strcmp(variable, "gearing")) gearing = atof(value);
   else if (!strcmp(variable, "RPM")) tRPM = intVal;
   else if (!strcmp(variable, "clockwise")) clockWise = (bool)intVal;
   else if (!strcmp(variable, "timeForPhoto")) timeForPhoto = intVal;
