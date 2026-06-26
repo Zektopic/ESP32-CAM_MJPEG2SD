@@ -135,7 +135,7 @@ static void openAvi() {
   // open avi file with temporary name
   aviFile = STORAGE.open(AVITEMP, FILE_WRITE);
   oTime = millis() - oTime;
-  LOG_VRB("File opening time: %lums", oTime);
+  LOG_VRB("File opening time: %ums", oTime);
 #if INCLUDE_AUDIO
   startAudioRecord();
 #endif
