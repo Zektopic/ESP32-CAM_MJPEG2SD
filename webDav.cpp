@@ -335,6 +335,8 @@ bool handleWebDav(httpd_req_t* rreq) {
   httpd_resp_set_hdr(req, "DAV", "1");
   httpd_resp_set_hdr(req, "Allow", ALLOW);
 
+  if (req->method != HTTP_OPTIONS && !checkAuth(req)) return false;
+
   switch(req->method) {
     case HTTP_PUT: return handlePut(); // file create/uploads
     case HTTP_PROPFIND: return handleProp(); // get file or directory properties
