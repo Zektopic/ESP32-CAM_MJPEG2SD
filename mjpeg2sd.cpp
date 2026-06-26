@@ -178,20 +178,20 @@ static void timeLapse(camera_fb_t* fb, bool tlStop = false) {
         // initialise time lapse avi
         requiredFrames = tlDurationMins * 60 / tlSecsBetweenFrames;
         if (requiredFrames > maxFrames) {
-          LOG_WRN("Frames required for timelapse %u reduced to max frame limit %u", requiredFrames, maxFrames);
+          LOG_WRN("Frames required for timelapse %d reduced to max frame limit %d", requiredFrames, maxFrames);
           requiredFrames = maxFrames;
         }
         dateFormat(partName, sizeof(partName), true);
         STORAGE.mkdir(partName); // make date folder if not present
         dateFormat(partName, sizeof(partName), false);
-        int tlen = snprintf(TLname, FILE_NAME_LEN - 1, "%s_%s_%u_%u_T.%s",
+        int tlen = snprintf(TLname, FILE_NAME_LEN - 1, "%s_%s_%d_%d_T.%s",
                             partName, frameData[fsizePtr].frameSizeStr, tlPlaybackFPS, tlDurationMins, AVI_EXT);
         if (tlen > FILE_NAME_LEN - 1) LOG_WRN("file name truncated");
         if (STORAGE.exists(TLTEMP)) STORAGE.remove(TLTEMP);
         tlFile = STORAGE.open(TLTEMP, FILE_WRITE);
         tlFile.write(aviHeader, AVI_HEADER_LEN); // space for header
         prepAviIndex(true);
-        LOG_INF("Started time lapse file %s, duration %u mins, for %u frames",  TLname, tlDurationMins, requiredFrames);
+        LOG_INF("Started time lapse file %s, duration %d mins, for %d frames",  TLname, tlDurationMins, requiredFrames);
         frameCntTL++; // to stop re-entering
       }
       // switch on light before capture frame if nightTime
