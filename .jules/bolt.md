@@ -91,3 +91,6 @@
 ## 2024-06-19 - Non-blocking servo sweeps
 **Learning:** The servo control task blocked the RTOS task thread while sweeping due to `delay()` inside a loop. This prevented the task from processing new pan/tilt notifications instantly and forced sequential panning.
 **Action:** Replaced the loop with stateful non-blocking time checks using `millis()` and computed an appropriate `waitTicks` dynamically to use with `ulTaskNotifyTake`. This completely decoupled the sweeps from task execution, halving benchmark sweep time by allowing concurrent sweeps.
+## 2024-06-24 - [Optimize strlen on string literals and identical strings]
+**Learning:** Calling `strlen` on string literal macros (like `WEBDAV`) forces potential O(N) runtime evaluation instead of compile-time constants. Additionally, repeatedly calling `strlen` on the same dynamic string without modifying it causes redundant O(N) traversals.
+**Action:** When evaluating the length of string literals or macros, use `sizeof(MACRO) - 1` instead of `strlen`. When evaluating the length of the same dynamic string multiple times in a function block, cache the length into a variable (e.g., `size_t pathLen = strlen(pathName);`).

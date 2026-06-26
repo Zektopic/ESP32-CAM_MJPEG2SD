@@ -297,7 +297,7 @@ static bool handleMove() {
       httpd_resp_send_404(req);
       return false;
     }
-    memmove(dest, pos + strlen(WEBDAV), strlen(pos + strlen(WEBDAV)) + 1);
+    memmove(dest, pos + (sizeof(WEBDAV) - 1), strlen(pos + (sizeof(WEBDAV) - 1)) + 1);
 
     // only allow renaming if a folder
     if (isFolder()) res = checkSamePath(pathName, dest);
@@ -338,6 +338,8 @@ bool handleWebDav(httpd_req_t* rreq) {
     httpd_resp_send_err(req, HTTPD_404_NOT_FOUND, "Path traversal not allowed");
     return false;
   }
+
+  if (req->method != HTTP_OPTIONS && !checkAuth(req)) return false;
 
   switch(req->method) {
     case HTTP_PUT: return handlePut(); // file create/uploads
