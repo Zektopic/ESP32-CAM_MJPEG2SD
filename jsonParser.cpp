@@ -9,7 +9,12 @@ Usage:
   s60sc 2026
 */
 
+#ifndef TEST_ENV
 #include "appGlobals.h"
+#else
+#define FILE_NAME_LEN 64
+#include <cstring>
+#endif
 
 #include <string_view>
 #include <algorithm>
