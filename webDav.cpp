@@ -323,21 +323,21 @@ static bool handleCopy() {
 bool handleWebDav(httpd_req_t* rreq) {
   // extract method to determine which WebDAV action to take
   req = rreq;
-  snprintf(pathName, sizeof(pathName), "%s", req->uri + (sizeof(WEBDAV) - 1)); // strip out "/webdav"
-  size_t pathLen = strlen(pathName); // ⚡ Bolt optimization: Cache strlen to prevent multiple O(N) traversals
-  if (pathLen > 0 && pathName[pathLen - 1] == '/') {
-    pathName[pathLen - 1] = 0; // remove final / if present
-    pathLen--;
-  }
-  if (!pathLen) strcpy(pathName, "/"); // if pathname empty, use single /
+  // common response header
+  httpd_resp_set_hdr(req, "DAV", "1");
+  httpd_resp_set_hdr(req, "Allow", ALLOW);
+
+  if (req->method == HTTP_OPTIONS) return handleOptions(); // supported options
+  if (!checkAuth(req)) return false;
+
+  snprintf(pathName, sizeof(pathName), "%s", req->uri + strlen(WEBDAV)); // strip out "/webdav"
+  if (strlen(pathName) > 0 && pathName[strlen(pathName) - 1] == '/') pathName[strlen(pathName) - 1] = 0; // remove final / if present
+  if (!strlen(pathName)) strcpy(pathName, "/"); // if pathname empty, use single /
   urlDecode(pathName);
   if (isPathTraversal(pathName)) {
     httpd_resp_send_err(req, HTTPD_404_NOT_FOUND, "Path traversal not allowed");
     return false;
   }
-  // common response header
-  httpd_resp_set_hdr(req, "DAV", "1");
-  httpd_resp_set_hdr(req, "Allow", ALLOW);
 
   if (req->method != HTTP_OPTIONS && !checkAuth(req)) return false;
 
@@ -347,7 +347,6 @@ bool handleWebDav(httpd_req_t* rreq) {
     case HTTP_PROPPATCH: return handleProp(); // set file or directory properties
     case HTTP_GET: return handleGet(); // file downloads
     case HTTP_HEAD: return handleHead(); // file properties
-    case HTTP_OPTIONS: return handleOptions(); // supported options
     case HTTP_LOCK: return handleLock(); // open file lock
     case HTTP_UNLOCK: return handleUnlock(); // close file lock
     case HTTP_MKCOL: return handleMkdir(); // folder creation
