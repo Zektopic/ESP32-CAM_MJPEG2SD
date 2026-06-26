@@ -583,7 +583,8 @@ void openSDfile(const char* streamFile) {
   if (stopPlayback) LOG_WRN("Playback refused - capture in progress");
   else {
     stopPlaying(); // in case already running
-    strcpy(aviFileName, streamFile);
+    strncpy(aviFileName, streamFile, FILE_NAME_LEN - 1);
+    aviFileName[FILE_NAME_LEN - 1] = '\0';
     LOG_INF("Playing %s", aviFileName);
     playbackFile = STORAGE.open(aviFileName, FILE_READ);
     playbackFile.seek(AVI_HEADER_LEN, SeekSet); // skip over header
