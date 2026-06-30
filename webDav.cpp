@@ -332,9 +332,14 @@ bool handleWebDav(httpd_req_t* rreq) {
   if (req->method == HTTP_OPTIONS) return handleOptions(); // supported options
   if (!checkAuth(req)) return false;
 
-  snprintf(pathName, sizeof(pathName), "%s", req->uri + strlen(WEBDAV)); // strip out "/webdav"
-  if (strlen(pathName) > 0 && pathName[strlen(pathName) - 1] == '/') pathName[strlen(pathName) - 1] = 0; // remove final / if present
-  if (!strlen(pathName)) strcpy(pathName, "/"); // if pathname empty, use single /
+  // ⚡ Bolt optimization: Use sizeof on literal macro and cache path length to prevent redundant O(N) traversals
+  snprintf(pathName, sizeof(pathName), "%s", req->uri + (sizeof(WEBDAV) - 1)); // strip out "/webdav"
+  size_t pathLen = strlen(pathName);
+  if (pathLen > 0 && pathName[pathLen - 1] == '/') {
+    pathName[pathLen - 1] = 0; // remove final / if present
+    pathLen--;
+  }
+  if (!pathLen) strcpy(pathName, "/"); // if pathname empty, use single /
   urlDecode(pathName);
   if (isPathTraversal(pathName)) {
     httpd_resp_send_err(req, HTTPD_404_NOT_FOUND, "Path traversal not allowed");
