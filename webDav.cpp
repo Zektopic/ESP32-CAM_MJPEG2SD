@@ -90,7 +90,7 @@ static void sendContentProp(const char* prop, const char* value) {
 static void sendPropResponse(File& file, const char* payload) {
   // send SD properties details to PC
   size_t encodeLen = 3 + strlen(file.path()) * 2;
-  size_t maxLen = strlen(XML2) + encodeLen + strlen(XML3);
+  size_t maxLen = (sizeof(XML2) - 1) + encodeLen + (sizeof(XML3) - 1);
   char resp[maxLen + 1];
   snprintf(resp, maxLen, "%s%s%s", XML2, file.path(), XML3);
   httpd_resp_sendstr_chunk(req, resp);
@@ -214,7 +214,7 @@ static bool handleLock() {
   // provide (dummy) lock while file open
   const char* lockToken = "0123456789012345";
   httpd_resp_set_hdr(req, "Lock-Token", lockToken);
-  char resp[strlen(XML5) + strlen(lockToken) + strlen(XML6) + 1];
+  char resp[(sizeof(XML5) - 1) + strlen(lockToken) + (sizeof(XML6) - 1) + 1];
   snprintf(resp, sizeof(resp), "%s%s%s", XML5, lockToken, XML6);
   httpd_resp_set_type(req, "application/xml;charset=utf-8");
   httpd_resp_sendstr(req, resp);
@@ -278,7 +278,7 @@ static bool checkSamePath(const char *source_path, const char *dest_path) {
   size_t src_len = src_slash - source_path;
   size_t dest_len = dest_slash - dest_path;
   if (src_len != dest_len) return false;
-  
+
   return strncmp(source_path, dest_path, src_len) == 0;
 }
 
@@ -332,7 +332,7 @@ bool handleWebDav(httpd_req_t* rreq) {
   if (req->method == HTTP_OPTIONS) return handleOptions(); // supported options
   if (!checkAuth(req)) return false;
 
-  snprintf(pathName, sizeof(pathName), "%s", req->uri + strlen(WEBDAV)); // strip out "/webdav"
+  snprintf(pathName, sizeof(pathName), "%s", req->uri + (sizeof(WEBDAV) - 1)); // strip out "/webdav"
   if (strlen(pathName) > 0 && pathName[strlen(pathName) - 1] == '/') pathName[strlen(pathName) - 1] = 0; // remove final / if present
   if (!strlen(pathName)) strcpy(pathName, "/"); // if pathname empty, use single /
   urlDecode(pathName);

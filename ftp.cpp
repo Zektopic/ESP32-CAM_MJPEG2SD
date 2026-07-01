@@ -1,5 +1,5 @@
 // Upload SD card or SPIFFS content to a remote server using FTP or HTTPS
-// 
+//
 // s60sc 2022, 2023
 
 #include "appGlobals.h"
@@ -14,7 +14,7 @@ const char* ftps_rootCACertificate = "";
 char fsServer[MAX_HOST_LEN];
 uint16_t fsPort = 21;
 char FS_Pass[MAX_PWD_LEN]; // FTP password or HTTPS passcode
-char fsWd[FILE_NAME_LEN]; 
+char fsWd[FILE_NAME_LEN];
 
 static bool uploadInProgress = false;
 uint8_t percentLoaded = 0;
@@ -31,7 +31,7 @@ bool fsUse = false; // FTP if false, HTTPS if true
 
 // Upload file of folder of files from local storage to remote HTTPS file server
 // Requires significant heap space due to TLS.
-// Each file POST has following format, where the following values are derived 
+// Each file POST has following format, where the following values are derived
 // from the web page:
 //   Host: FS Server
 //   port: FS port
@@ -61,7 +61,7 @@ Content-Type: "application/octet-stream"
 #define MULTI_TYPE "multipart/form-data; boundary=" BOUNDARY_VAL
 #define JSON_TYPE "application/json"
 #define BIN_TYPE "application/octet-stream"
-#define FORM_DATA "--" BOUNDARY_VAL "\r\nContent-disposition: form-data; name=\"%s%s\"\r\n" CONTENT_TYPE 
+#define FORM_DATA "--" BOUNDARY_VAL "\r\nContent-disposition: form-data; name=\"%s%s\"\r\n" CONTENT_TYPE
 #define END_BOUNDARY "\r\n--" BOUNDARY_VAL "--\r\n"
 #define FILE_NAME "file\"; filename=\""
 #define JSON_DATA "{\"pathname\":\"%s%s/%s\",\"passcode\":\"%s\"}"
@@ -70,7 +70,7 @@ Content-Type: "application/octet-stream"
 NetworkClientSecure hclient;
 char* fsBuff;
 
-static void postHeader(const char* tmethod, const char* contentType, bool isFile, 
+static void postHeader(const char* tmethod, const char* contentType, bool isFile,
   size_t fileSize, const char* fileName) {
   // create http post header
   char* p = fsBuff + FORM_OFFSET; // leave space for http request data
@@ -78,12 +78,12 @@ static void postHeader(const char* tmethod, const char* contentType, bool isFile
     p += sprintf(p, FORM_DATA, "json", "", JSON_TYPE);
     // fsBuff initially contains folder name
     p += sprintf(p, JSON_DATA, fsWd, folderPath, fileName, FS_Pass);
-    p += sprintf(p, "\r\n" FORM_DATA, FILE_NAME, fileName, BIN_TYPE); 
+    p += sprintf(p, "\r\n" FORM_DATA, FILE_NAME, fileName, BIN_TYPE);
   } // else JSON data already loaded by hfsCreateFolder()
   size_t formLen = strlen(fsBuff + FORM_OFFSET);
   // create http request header
   p = fsBuff;
-  if (isFile) fileSize += formLen + strlen(END_BOUNDARY);
+  if (isFile) fileSize += formLen + (sizeof(END_BOUNDARY) - 1);
   p += sprintf(p, POST_HDR, tmethod, fsServer, fileSize, isFile ? MULTI_TYPE : JSON_TYPE);
   size_t reqLen = strlen(fsBuff);
   // concatenate request and form data
@@ -98,11 +98,11 @@ static bool hfsStoreFile(File &fh) {
   // Upload individual file to HTTPS server
   // reject if folder or not valid file type
 #ifdef ISCAM
-  if (!strstr(fh.name(), AVI_EXT) && !strstr(fh.name(), CSV_EXT) && !strstr(fh.name(), SRT_EXT)) return false; 
+  if (!strstr(fh.name(), AVI_EXT) && !strstr(fh.name(), CSV_EXT) && !strstr(fh.name(), SRT_EXT)) return false;
 #else
-  if (!strstr(fh.name(), FILE_EXT)) return false; 
+  if (!strstr(fh.name(), FILE_EXT)) return false;
 #endif
-  LOG_INF("Upload file: %s, size: %s", fh.name(), fmtSize(fh.size()));    
+  LOG_INF("Upload file: %s, size: %s", fh.name(), fmtSize(fh.size()));
 
   // prep POST header and send file to HTTPS server
   postHeader("upload", BIN_TYPE, true, fh.size(), fh.name());
@@ -112,7 +112,7 @@ static bool hfsStoreFile(File &fh) {
   while ((chunksize = fh.read((uint8_t*)fsChunk, CHUNKSIZE))) {
     hclient.write((uint8_t*)fsChunk, chunksize);
     totalSent += chunksize;
-    if (calcProgress(totalSent, fh.size(), 5, percentLoaded)) LOG_INF("Uploaded %u%%", percentLoaded); 
+    if (calcProgress(totalSent, fh.size(), 5, percentLoaded)) LOG_INF("Uploaded %u%%", percentLoaded);
   }
   percentLoaded = 100;
   hclient.println(END_BOUNDARY);
@@ -139,7 +139,7 @@ static bool sendFtpCommand(const char* cmd, const char* param, const char* respC
     rclient.println(param);
   }
   LOG_VRB("Sent cmd: %s%s", cmd, param);
-  
+
   // wait for ftp server response
   uint32_t start = millis();
   while (!rclient.available() && millis() < start + (responseTimeoutSecs * 1000)) delay(1);
@@ -148,7 +148,7 @@ static bool sendFtpCommand(const char* cmd, const char* param, const char* respC
     return false;
   }
   // read in response code and message
-  rclient.read((uint8_t*)respCodeRx, 3); 
+  rclient.read((uint8_t*)respCodeRx, 3);
   respCodeRx[3] = 0; // terminator
   int readLen = rclient.read((uint8_t*)rspBuf, 255);
   if (readLen >= 0) rspBuf[readLen] = 0;
@@ -198,12 +198,12 @@ static void ftpDisconnect() {
 static bool ftpCreateFolder(const char* folderName) {
   // create folder if non existent then change to it
   LOG_VRB("Check for folder %s", folderName);
-  sendFtpCommand("CWD ", folderName, NO_CHECK); 
+  sendFtpCommand("CWD ", folderName, NO_CHECK);
   if (strcmp(respCodeRx, "550") == 0) {
     // non existent folder, create it
     if (!sendFtpCommand("MKD ", folderName, "257")) return false;
     //sendFtpCommand("SITE CHMOD 755 ", folderName, "200", "550"); // unix only
-    if (!sendFtpCommand("CWD ", folderName, "250")) return false;         
+    if (!sendFtpCommand("CWD ", folderName, "250")) return false;
   }
   return true;
 }
@@ -213,45 +213,45 @@ static bool openDataPort() {
   if (!sendFtpCommand("PASV", "", "227")) return false;
   // derive data port number
   char* p = strchr(rspBuf, '('); // skip over initial text
-  int p1, p2;   
+  int p1, p2;
   int items = sscanf(p, "(%*d,%*d,%*d,%*d,%d,%d)", &p1, &p2);
   if (items != 2) {
     LOG_ERR("Failed to parse data port");
     return false;
   }
   int dataPort = (p1 << 8) + p2;
-  
+
   // Connect to data port
   LOG_VRB("Data port: %i", dataPort);
   if (!dclient.connect(fsServer, dataPort)) {
-    LOG_WRN("Data connection failed");   
+    LOG_WRN("Data connection failed");
     return false;
   }
   return true;
 }
 
 static bool ftpStoreFile(File &fh) {
-  // Upload individual file to current folder, overwrite any existing file 
+  // Upload individual file to current folder, overwrite any existing file
   // reject if folder, or not valid file type
 #ifdef ISCAM
-  if (!strstr(fh.name(), AVI_EXT) && !strstr(fh.name(), CSV_EXT) && !strstr(fh.name(), SRT_EXT)) return false; 
+  if (!strstr(fh.name(), AVI_EXT) && !strstr(fh.name(), CSV_EXT) && !strstr(fh.name(), SRT_EXT)) return false;
 #else
-  if (!strstr(fh.name(), FILE_EXT)) return false; 
+  if (!strstr(fh.name(), FILE_EXT)) return false;
 #endif
   char ftpSaveName[FILE_NAME_LEN];
   snprintf(ftpSaveName, sizeof(ftpSaveName), "%s", fh.name());
   size_t fileSize = fh.size();
-  LOG_INF("Upload file: %s, size: %s", ftpSaveName, fmtSize(fileSize));    
+  LOG_INF("Upload file: %s, size: %s", ftpSaveName, fmtSize(fileSize));
 
   // open data connection
   openDataPort();
-  uint32_t writeBytes = 0; 
+  uint32_t writeBytes = 0;
   uint32_t uploadStart = millis();
   size_t readLen, writeLen;
   if (!sendFtpCommand("STOR ", ftpSaveName, "150", "125")) return false;
   do {
     // upload file in chunks
-    readLen = fh.read(fsChunk, CHUNKSIZE);  
+    readLen = fh.read(fsChunk, CHUNKSIZE);
     if (readLen) {
       writeLen = dclient.write((const uint8_t*)fsChunk, readLen);
       writeBytes += writeLen;
@@ -259,7 +259,7 @@ static bool ftpStoreFile(File &fh) {
         LOG_WRN("Upload file to ftp failed");
         return false;
       }
-      if (calcProgress(writeBytes, fileSize, 5, percentLoaded)) LOG_INF("Uploaded %u%%", percentLoaded); 
+      if (calcProgress(writeBytes, fileSize, 5, percentLoaded)) LOG_INF("Uploaded %u%%", percentLoaded);
     }
   } while (readLen > 0);
   dclient.stop();
@@ -277,7 +277,7 @@ static bool ftpStoreFile(File &fh) {
 
 static bool getFolderName(const char* folderName) {
   // extract folder names from path name
-  strcpy(folderPath, folderName); 
+  strcpy(folderPath, folderName);
   int pos = 1; // skip 1st '/'
   // get each folder name in sequence
   bool res = true;
@@ -303,10 +303,10 @@ static bool uploadFolderOrFileFs(const char* fileOrFolder) {
   refreshVal = 1;
   File root = STORAGE.open(fileOrFolder);
   if (!root.isDirectory()) {
-    // Upload a single file 
+    // Upload a single file
     char fsSaveName[FILE_NAME_LEN];
     snprintf(fsSaveName, sizeof(fsSaveName), "%s", root.path());
-    if (getFolderName(root.path())) res = fsUse ? hfsStoreFile(root) : ftpStoreFile(root); 
+    if (getFolderName(root.path())) res = fsUse ? hfsStoreFile(root) : ftpStoreFile(root);
 #ifdef ISCAM
     // upload corresponding csv and srt files if exist
     if (res) {
@@ -325,9 +325,9 @@ static bool uploadFolderOrFileFs(const char* fileOrFolder) {
     }
     if (!res) LOG_WRN("Failed to upload: %s", fsSaveName);
 #endif
-  } else {  
+  } else {
     // Upload a whole folder, file by file
-    LOG_INF("Uploading folder: %s", root.name()); 
+    LOG_INF("Uploading folder: %s", root.name());
     strncpy(folderPath, root.name(), FILE_NAME_LEN - 1);
     res = fsUse ? true : ftpCreateFolder(root.name());
     if (res) {
@@ -343,7 +343,7 @@ static bool uploadFolderOrFileFs(const char* fileOrFolder) {
   }
   refreshVal = saveRefreshVal;
   root.close();
-  fsUse ? remoteServerClose(hclient) : ftpDisconnect(); 
+  fsUse ? remoteServerClose(hclient) : ftpDisconnect();
   return res;
 }
 
@@ -352,15 +352,15 @@ static void fileServerTask(void* parameter) {
 #ifdef ISCAM
   doPlayback = false; // close any current playback
 #endif
-  fsChunk = psramFound() ? (byte*)ps_malloc(CHUNKSIZE) : (byte*)malloc(CHUNKSIZE); 
+  fsChunk = psramFound() ? (byte*)ps_malloc(CHUNKSIZE) : (byte*)malloc(CHUNKSIZE);
   if (strlen(storedPathName) >= 2) {
     File root = STORAGE.open(storedPathName);
     if (!root) LOG_WRN("Failed to open: %s", storedPathName);
-    else { 
+    else {
       bool res = uploadFolderOrFileFs(storedPathName);
       if (res && deleteAfter) deleteFolderOrFile(storedPathName);
     }
-  } else LOG_VRB("Root or null is not allowed %s", storedPathName);  
+  } else LOG_VRB("Root or null is not allowed %s", storedPathName);
   uploadInProgress = false;
   free(fsChunk);
   fsHandle = NULL;
@@ -372,7 +372,7 @@ bool fsStartTransfer(const char* fileFolder) {
   setFolderName(fileFolder, storedPathName);
   if (!uploadInProgress) {
     uploadInProgress = true;
-    if (fsHandle == NULL) xTaskCreateWithCaps(&fileServerTask, "fileServerTask", FS_STACK_SIZE, NULL, FTP_PRI, &fsHandle, STACK_MEM);    
+    if (fsHandle == NULL) xTaskCreateWithCaps(&fileServerTask, "fileServerTask", FS_STACK_SIZE, NULL, FTP_PRI, &fsHandle, STACK_MEM);
     debugMemory("fsStartTransfer");
     return true;
   } else LOG_WRN("Unable to transfer %s as another transfer in progress", storedPathName);

@@ -8,7 +8,7 @@
 // Using ideas from:
 // - https://github.com/jameszah/ESP32-CAM-Video-Telegram
 // - https://github.com/cotestatnt/AsyncTelegram2
-// 
+//
 //
 // s60sc 2023
 
@@ -16,7 +16,7 @@
 
 #if INCLUDE_TGRAM
 #define TELEGRAM_HOST "api.telegram.org"
-#define LONG_POLL 60 // how long in secs to keep connection open without reply                            
+#define LONG_POLL 60 // how long in secs to keep connection open without reply
 #define MAX_HTTP_MSG 2048 // max size of buffer for HTTP request or response body
 #define FORM_OFFSET 256 // offset in tgramBuff to prepare form data
 #define MAX_TGRAM_SIZE (50 * ONEMEG) // max size for Telegram file upload
@@ -69,7 +69,7 @@ static bool searchJsonResponse(const char* keyName) {
   }
   int valSize = endItem - startItem;
   if (valSize > sizeof(keyValue) - 1) {
-    LOG_WRN("Telegram JSON value too long %d", valSize); 
+    LOG_WRN("Telegram JSON value too long %d", valSize);
     valSize = sizeof(keyValue) - 1;
   }
   strncpy(keyValue, startItem, valSize);
@@ -85,13 +85,13 @@ size_t getResponseHeader(NetworkClientSecure& sclient, const char* host, int wai
   int httpCode = 0;
   uint32_t startTime = millis();
   while (!endOfHeader && millis() - startTime < waitSecs * 1000) {
-    if (sclient.available()) { 
+    if (sclient.available()) {
       String tline = sclient.readStringUntil('\n');
       endOfHeader = tline.length() > 1 ? false : true; // blank line ends header
-      if (!httpCode) sscanf(tline.c_str(), HTTP_CODE, &httpCode);  
+      if (!httpCode) sscanf(tline.c_str(), HTTP_CODE, &httpCode);
       // get contentLength from header
-      if (!contentLen) sscanf(tline.c_str(), "Content-Length: %d\r", &contentLen); 
-    } else delay(100); 
+      if (!contentLen) sscanf(tline.c_str(), "Content-Length: %d\r", &contentLen);
+    } else delay(100);
   }
   if (!endOfHeader) {
     LOG_WRN("Timed out waiting for response from %s", host);
@@ -120,7 +120,7 @@ static bool getTgramResponse() {
     }
     if (contentLen - readLen > 0) LOG_WRN("Timed out waiting for telegram response");
     else {
-      // format tgramBuff for searchJsonResponse() 
+      // format tgramBuff for searchJsonResponse()
       if (readLen != contentLen) LOG_WRN("Telegram data %d not equal to contentLength %d", readLen, contentLen);
       tgramBuff[contentLen] = 0;
       removeChar(tgramBuff, '"');
@@ -135,19 +135,19 @@ static bool getTgramResponse() {
           // have response if result contains data, else just an ack
           if (strcmp(keyValue, "[]")) haveResponse = true;
         }
-      } 
+      }
     }
-    remoteServerClose(tclient); // end of transaction 
+    remoteServerClose(tclient); // end of transaction
   } // else nothing received, so leave connection open
   return haveResponse;
 }
 
-static bool sendTgramHeader(const char* tmethod, const char* contentType, const char* dataType, 
+static bool sendTgramHeader(const char* tmethod, const char* contentType, const char* dataType,
   size_t fileSize, const char* fileName, const char* caption) {
   if (connectTelegram()) {
     // create http post header
     char* p = tgramBuff + FORM_OFFSET; // leave space for http request data
-    bool isFile = dataType != NULL ? true : false; 
+    bool isFile = dataType != NULL ? true : false;
     if (isFile) {
       size_t rem = MAX_HTTP_MSG - FORM_OFFSET;
       int written = snprintf(p, rem, FORM_DATA "chat_id\"\r\n\r\n%s", tgramChatId);
@@ -168,7 +168,7 @@ static bool sendTgramHeader(const char* tmethod, const char* contentType, const 
     // create http request header
     p = tgramBuff;
     size_t rem = FORM_OFFSET;
-    if (isFile) fileSize += formLen + strlen(END_BOUNDARY);
+    if (isFile) fileSize += formLen + (sizeof(END_BOUNDARY) - 1);
     int written = snprintf(p, rem, POST_HDR, tgramToken, tmethod, fileSize);
     if (written > 0 && written < (int)rem) { p += written; rem -= written; }
 
@@ -195,15 +195,15 @@ static bool sendTgramBuff(uint8_t* buffData, size_t buffSize) {
     for (size_t i = 0; i < buffSize; i += CHUNKSIZE) tclient.write(buffData + i, min((int)(buffSize - i), CHUNKSIZE));
     tclient.println(END_BOUNDARY);
     return true;
-  } 
-  return false; 
+  }
+  return false;
 }
-    
+
 bool prepTelegram() {
   // setup and check access to Telegram if required
   if (tgramUse) {
     if (strlen(tgramToken)) {
-      if (tgramBuff == NULL) tgramBuff = psramFound() ? (char*)ps_malloc(MAX_HTTP_MSG) : (char*)malloc(MAX_HTTP_MSG); 
+      if (tgramBuff == NULL) tgramBuff = psramFound() ? (char*)ps_malloc(MAX_HTTP_MSG) : (char*)malloc(MAX_HTTP_MSG);
       // check connection with getme request
       bool res = false;
       sendTgramHeader("getMe", NULL, NULL, 0, NULL, NULL);
@@ -214,9 +214,9 @@ bool prepTelegram() {
       }
       if (res) {
         // response loaded into tgramBuff
-        if (searchJsonResponse("username:")) {      
+        if (searchJsonResponse("username:")) {
           LOG_INF("Connected to Telegram Bot Handle: %s", keyValue);
-          xTaskCreateWithCaps(appSpecificTelegramTask, "telegramTask", TGRAM_STACK_SIZE, NULL, TGRAM_PRI, &telegramHandle, STACK_MEM); 
+          xTaskCreateWithCaps(appSpecificTelegramTask, "telegramTask", TGRAM_STACK_SIZE, NULL, TGRAM_PRI, &telegramHandle, STACK_MEM);
           debugMemory("setupTelegramTask");
           return true;
         } else LOG_WRN("getMe response not parsed %s", tgramBuff);
@@ -224,10 +224,10 @@ bool prepTelegram() {
     } else LOG_WRN("No Telegram Bot token supplied");
   } else LOG_INF("Telegram not being used");
   return false;
-} 
+}
 
 bool getTgramUpdate(char* responseText) {
-  // get and process message from Telegram 
+  // get and process message from Telegram
   if (tclient.connected()) {
     // check for incoming message
     if (getTgramResponse()) {
@@ -247,7 +247,7 @@ bool getTgramUpdate(char* responseText) {
           } else LOG_WRN("No chat id found");
         } else LOG_WRN("Old update_id: %ld", update_id);
       } // no update_id, ignore
-    } 
+    }
   } else {
     // send getUpdates request as not connected
     char* t = tgramBuff + FORM_OFFSET;
@@ -294,11 +294,11 @@ bool sendTgramFile(const char* fileName, const char* contentType, const char* ca
         while ((chunksize = df.read((uint8_t*)tgramBuff, MAX_HTTP_MSG))) {
           tclient.write((uint8_t*)tgramBuff, chunksize);
           totalSent += chunksize;
-          if (calcProgress(totalSent, df.size(), 5, percentLoaded)) LOG_INF("Downloaded %u%%", percentLoaded); 
+          if (calcProgress(totalSent, df.size(), 5, percentLoaded)) LOG_INF("Downloaded %u%%", percentLoaded);
         }
         df.close();
         tclient.println(END_BOUNDARY);
-      } else snprintf(errMsg, sizeof(errMsg) - 1, "File size too large: %s", fmtSize(df.size()));        
+      } else snprintf(errMsg, sizeof(errMsg) - 1, "File size too large: %s", fmtSize(df.size()));
     } else snprintf(errMsg, sizeof(errMsg) - 1, "File does not exist or cannot be opened: %s", fileName);
     if (strlen(errMsg)) {
       LOG_WRN("%s", errMsg);
