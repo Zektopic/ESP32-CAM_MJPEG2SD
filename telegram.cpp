@@ -168,7 +168,7 @@ static bool sendTgramHeader(const char* tmethod, const char* contentType, const 
     // create http request header
     p = tgramBuff;
     size_t rem = FORM_OFFSET;
-    if (isFile) fileSize += formLen + strlen(END_BOUNDARY);
+    if (isFile) fileSize += formLen + (sizeof(END_BOUNDARY) - 1);
     int written = snprintf(p, rem, POST_HDR, tgramToken, tmethod, fileSize);
     if (written > 0 && written < (int)rem) { p += written; rem -= written; }
 

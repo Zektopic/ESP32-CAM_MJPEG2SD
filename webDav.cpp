@@ -214,7 +214,7 @@ static bool handleLock() {
   // provide (dummy) lock while file open
   const char* lockToken = "0123456789012345";
   httpd_resp_set_hdr(req, "Lock-Token", lockToken);
-  char resp[strlen(XML5) + strlen(lockToken) + strlen(XML6) + 1];
+  char resp[(sizeof(XML5) - 1) + strlen(lockToken) + (sizeof(XML6) - 1) + 1];
   snprintf(resp, sizeof(resp), "%s%s%s", XML5, lockToken, XML6);
   httpd_resp_set_type(req, "application/xml;charset=utf-8");
   httpd_resp_sendstr(req, resp);
