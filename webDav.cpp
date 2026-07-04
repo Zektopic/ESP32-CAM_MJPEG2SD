@@ -90,7 +90,7 @@ static void sendContentProp(const char* prop, const char* value) {
 static void sendPropResponse(File& file, const char* payload) {
   // send SD properties details to PC
   size_t encodeLen = 3 + strlen(file.path()) * 2;
-  size_t maxLen = strlen(XML2) + encodeLen + strlen(XML3);
+  size_t maxLen = (sizeof(XML2) - 1) + encodeLen + (sizeof(XML3) - 1);
   char resp[maxLen + 1];
   snprintf(resp, maxLen, "%s%s%s", XML2, file.path(), XML3);
   httpd_resp_sendstr_chunk(req, resp);

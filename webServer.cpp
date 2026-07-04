@@ -100,7 +100,7 @@ bool checkAuth(httpd_req_t* req) {
     char credentials[credLen];
     snprintf(credentials, credLen, "%s:%s", Auth_Name, Auth_Pass);
     const char* encodedCreds = encode64(credentials);
-    size_t expectedLen = strlen("Basic ") + strlen(encodedCreds) + 1;
+    size_t expectedLen = (sizeof("Basic ") - 1) + strlen(encodedCreds) + 1;
     char expectedAuth[expectedLen];
     snprintf(expectedAuth, expectedLen, "Basic %s", encodedCreds);
 
@@ -347,7 +347,7 @@ void sendSSE(const char* eventType, const char* eventData) {
     snprintf(eventMsg, 30 - 1, "event: %s\ndata: ", eventType);
     int res = httpd_socket_send(sseSocketHD, sseSocketFD, eventMsg, strlen(eventMsg), 0);
     res = httpd_socket_send(sseSocketHD, sseSocketFD, eventData, strlen(eventData), 0);
-    res = httpd_socket_send(sseSocketHD, sseSocketFD, SSESEP, strlen(SSESEP), 0);
+    res = httpd_socket_send(sseSocketHD, sseSocketFD, SSESEP, (sizeof(SSESEP) - 1), 0);
     if (res == HTTPD_SOCK_ERR_TIMEOUT) LOG_WRN("Timeout/interrupted while using socket");
     if (res == HTTPD_SOCK_ERR_FAIL) LOG_WRN("Unrecoverable error while using socket");
     if (res == HTTPD_SOCK_ERR_INVALID) LOG_WRN("Invalid arguments %s, %s", eventType, eventData);
