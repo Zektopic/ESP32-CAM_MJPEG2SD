@@ -277,7 +277,8 @@ static bool ftpStoreFile(File &fh) {
 
 static bool getFolderName(const char* folderName) {
   // extract folder names from path name
-  strcpy(folderPath, folderName); 
+  strncpy(folderPath, folderName, sizeof(folderPath) - 1);
+  folderPath[sizeof(folderPath) - 1] = '\0';
   int pos = 1; // skip 1st '/'
   // get each folder name in sequence
   bool res = true;
