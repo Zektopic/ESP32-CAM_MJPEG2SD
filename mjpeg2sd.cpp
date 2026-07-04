@@ -544,7 +544,8 @@ static fnameStruct extractMeta(const char* fname) {
   // extract FPS, duration, and frame count from avi filename
   fnameStruct fnameMeta = {0, 0, 0};
   char fnameStr[FILE_NAME_LEN];
-  strcpy(fnameStr, fname);
+  strncpy(fnameStr, fname, sizeof(fnameStr) - 1);
+  fnameStr[sizeof(fnameStr) - 1] = '\0';
   // replace all '_' with space for sscanf
   replaceChar(fnameStr, '_', ' ');
   int items = sscanf(fnameStr, "%*s %*s %*s %hhu %lu", &fnameMeta.recFPS, &fnameMeta.recDuration);
