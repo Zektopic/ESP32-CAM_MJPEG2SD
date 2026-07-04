@@ -672,7 +672,7 @@ void getNocturnal() {
       remoteServerClose(hclient);
     }
   }
-  if (deepSleepTimer) LOG_INF("Night time duration: %lu secs at Lat: %0.6f, Lon: %0.6f", deepSleepTimer, latLon[0], latLon[1]);
+  if (deepSleepTimer) LOG_INF("Night time duration: %u secs at Lat: %0.6f, Lon: %0.6f", deepSleepTimer, latLon[0], latLon[1]);
 }
 
 void doAppPing(bool timeSynced) {
