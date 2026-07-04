@@ -344,7 +344,7 @@ esp_err_t appSpecificWebHandler(httpd_req_t *req, const char* variable, const ch
       httpd_resp_set_hdr(req, "Content-Disposition", "inline; filename=capture.jpg");
       httpd_resp_send(req, (const char*)alertBuffer, alertBufferSize);
       uint32_t jpegTime = millis() - startTime;
-      LOG_INF("JPEG: %uB in %ums", alertBufferSize, jpegTime);
+      LOG_INF("JPEG: %zuB in %ums", alertBufferSize, jpegTime);
       alertBufferSize = 0;
     } else LOG_WRN("Failed to get still");
   }
