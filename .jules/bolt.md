@@ -97,3 +97,6 @@
 ## 2024-05-24 - Compile-time strlen for Literals
 **Learning:** In the ESP32 codebase, many HTTP and FTP handlers use `strlen()` on hardcoded macros (like `END_BOUNDARY` or `WEBDAV`) and string literals inside loops or hot paths. This causes unnecessary O(N) runtime overhead.
 **Action:** Replace `strlen(MACRO)` with `(sizeof(MACRO) - 1)` to enforce compile-time length calculation, saving CPU cycles during network operations.
+## 2024-05-25 - Avoid O(N) strlen overhead after snprintf
+**Learning:** Determining the length of a string immediately after formatting it with `snprintf` by calling `strlen()` causes an unnecessary O(N) traversal of the string that was just constructed.
+**Action:** Use the return value of `snprintf` (clamped to the buffer size if it exceeds the bounds, e.g., `if (len >= size) len = size - 1;`) to determine the length of the formatted string in O(1) time.

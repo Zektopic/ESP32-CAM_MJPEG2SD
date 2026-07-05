@@ -328,13 +328,13 @@ bool parseJson(int rxSize) {
 static esp_err_t sseHandler(httpd_req_t *req) {
   if (!checkAuth(req)) return ESP_OK;
   // enable Server Sent Events
-  const char* sseHeader = "HTTP/1.1 200 OK\r\n"
-                          "Cache-Control: no-store\r\n"
-                          "Connection: keep-alive\r\n"
-                          "Content-Type: text/event-stream\r\n\r\n";
+  const char sseHeader[] = "HTTP/1.1 200 OK\r\n"
+                           "Cache-Control: no-store\r\n"
+                           "Connection: keep-alive\r\n"
+                           "Content-Type: text/event-stream\r\n\r\n";
   sseSocketHD = req->handle;
   sseSocketFD = httpd_req_to_sockfd(req);
-  httpd_socket_send(sseSocketHD, sseSocketFD, sseHeader, strlen(sseHeader), 0);
+  httpd_socket_send(sseSocketHD, sseSocketFD, sseHeader, sizeof(sseHeader) - 1, 0);
   sendSSE("open", "opened");
   return ESP_OK;
 }
@@ -344,8 +344,9 @@ void sendSSE(const char* eventType, const char* eventData) {
   // send event data to browser
   if (sseSocketFD > 0) {
     char eventMsg[30];
-    snprintf(eventMsg, 30 - 1, "event: %s\ndata: ", eventType);
-    int res = httpd_socket_send(sseSocketHD, sseSocketFD, eventMsg, strlen(eventMsg), 0);
+    int msgLen = snprintf(eventMsg, sizeof(eventMsg), "event: %s\ndata: ", eventType);
+    if (msgLen >= sizeof(eventMsg)) msgLen = sizeof(eventMsg) - 1;
+    int res = httpd_socket_send(sseSocketHD, sseSocketFD, eventMsg, msgLen, 0);
     res = httpd_socket_send(sseSocketHD, sseSocketFD, eventData, strlen(eventData), 0);
     res = httpd_socket_send(sseSocketHD, sseSocketFD, SSESEP, (sizeof(SSESEP) - 1), 0);
     if (res == HTTPD_SOCK_ERR_TIMEOUT) LOG_WRN("Timeout/interrupted while using socket");
