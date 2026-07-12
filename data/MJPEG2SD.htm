@@ -980,7 +980,7 @@
                   <div>
                     <div class="input-group" id="framesize-group">
                       <label for="framesize">Resolution</label>
-                      <select id="framesize" class="selectField">
+                      <select id="framesize" class="selectField" title="Set camera resolution">
                         <option class="PY260 hidden" value="24">5MP(2592x1944)</option>
                         <option class="OV5640 hidden" value="23">QSXGA(2560x1920)</option>
                         <option class="OV5640 hidden" value="22">P_FHD(1080x1920)</option>
@@ -1076,7 +1076,7 @@
                   </div>
                   <div class="input-group" id="special_effect-group">
                     <label for="special_effect">Special Effect</label>
-                    <select id="special_effect" class="selectField">
+                    <select id="special_effect" class="selectField" title="Select a special image effect">
                       <option value="0" selected="selected">No Effect</option>
                       <option value="1">Negative</option>
                       <option value="2">Grayscale</option>
@@ -1088,7 +1088,7 @@
                   </div>
                   <div class="input-group" id="wb_mode-group">
                     <label for="wb_mode">AWB Mode</label>
-                    <select id="wb_mode" class="selectField">
+                    <select id="wb_mode" class="selectField" title="Select Auto White Balance mode">
                       <option value="0" selected="selected">Auto</option>
                       <option value="1">Sunny</option>
                       <option value="2">Cloudy</option>
@@ -1325,7 +1325,7 @@
                   <div class="subheader">Network settings</div>
                   <div class="input-group" id="wifi-group" style="margin-top:0">
                     <label for="netMode">Network Type</label>
-                    <select id="netMode" class="selectField">
+                    <select id="netMode" class="selectField" title="Select the network connection type">
                       <option value="0">WiFi</option>
                       <option value="1">Ethernet</option>
                       <option value="2">Eth+AP</option>
@@ -1358,13 +1358,13 @@
                   </div>
                   <div class="input-group" id="time-group">
                     <label for="regionSel">Select Region</label>
-                    <select id="regionSel" name="regionSel" class="selectField local">
+                    <select id="regionSel" name="regionSel" class="selectField local" title="Select a time zone region">
                       <option value="" selected>Loading...</option>
                     </select>
                   </div>
                   <div class="input-group" id="time-group">
                     <label for="timezoneSel">Select Location</label>
-                    <select id="timezoneSel" name="timezoneSel" class="selectField">
+                    <select id="timezoneSel" name="timezoneSel" class="selectField" title="Select a time zone location">
                       <option value="" selected>Loading...</option>
                     </select>
                   </div>
