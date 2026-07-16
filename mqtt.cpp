@@ -46,8 +46,9 @@ static char mqttPublishTopic[FILE_NAME_LEN] = "";
 
 void mqtt_client_publish(const char* topic, const char* payload){
   if (!mqtt_client || !mqttConnected) return;
-  int id = esp_mqtt_client_publish(mqtt_client, topic, payload, strlen(payload), MQTT_QOS, MQTT_RETAIN);
-  LOG_VRB("Mqtt pub, topic:%s, ID:%d, length:%i", topic, id, strlen(payload));
+  size_t payloadLen = strlen(payload);
+  int id = esp_mqtt_client_publish(mqtt_client, topic, payload, payloadLen, MQTT_QOS, MQTT_RETAIN);
+  LOG_VRB("Mqtt pub, topic:%s, ID:%d, length:%u", topic, id, (unsigned int)payloadLen);
   LOG_VRB("Mqtt pub, payload:%s", payload);
 }
 
