@@ -106,7 +106,7 @@ static void listFolder(const char* rootDir) {
   char fPath[FILE_NAME_LEN];
   char timebuf[30] = {0};
   while (file) {
-    sprintf(fPath, "%s%s", fsPaths[thisFS], file.path());
+    snprintf(fPath, sizeof(fPath), "%s%s", fsPaths[thisFS], file.path());
     fileModifiedDate(fPath, timebuf, sizeof(timebuf));
     LOG_INF("File: %s, size: %s, Date: %s", file.path(), fmtSize(file.size()), timebuf);
     file = root.openNextFile();
@@ -258,14 +258,14 @@ bool listDir(const char* fname, char* jsonBuff, size_t jsonBuffLen, const char* 
     while (file) {
       if (returnDirs && file.isDirectory() && strstr(DATA_DIR, file.name()) == NULL) {  
         // build folder list, ignore data folder
-        sprintf(partJson, "\"%s\":\"%s\",", file.path(), file.name());
+        snprintf(partJson, sizeof(partJson), "\"%s\":\"%s\",", file.path(), file.name());
         fileVec.push_back(std::string(partJson));
         noEntries = false;
       }
       if (!returnDirs && !file.isDirectory()) {
         // build file list
         if (strstr(file.name(), extension) != NULL) {
-          sprintf(partJson, "\"%s\":\"%s %s\",", file.path(), file.name(), fmtSize(file.size()));
+          snprintf(partJson, sizeof(partJson), "\"%s\":\"%s %s\",", file.path(), file.name(), fmtSize(file.size()));
           fileVec.push_back(std::string(partJson));
           noEntries = false;
         }
@@ -275,7 +275,7 @@ bool listDir(const char* fname, char* jsonBuff, size_t jsonBuffLen, const char* 
     if (psramFound()) heap_caps_malloc_extmem_enable(MAX_RAM);
   }
   
-  if (noEntries && !hasExtension) sprintf(jsonBuff, "{\"/\":\"List folders\",\"%s\":\"Go to current (today)\",\"%s\":\"Go to previous (yesterday)\"}", currentDir, previousDir);
+  if (noEntries && !hasExtension) snprintf(jsonBuff, jsonBuffLen, "{\"/\":\"List folders\",\"%s\":\"Go to current (today)\",\"%s\":\"Go to previous (yesterday)\"}", currentDir, previousDir);
   else {
     // build json string content
     sort(fileVec.begin(), fileVec.end(), std::greater<std::string>());
