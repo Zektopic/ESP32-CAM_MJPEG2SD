@@ -192,14 +192,6 @@ int vprintfRedirect(const char* format, va_list args) {
   return len;
 }
 
-void formatHex(const char* inData, size_t inLen) {
-  // format data as hex bytes for output
-  char formatted[(inLen * 3) + 1];
-  for (int i=0; i<inLen; i++) sprintf(formatted + (i*3), "%02x ", inData[i]);
-  formatted[(inLen * 3)] = 0; // terminator
-  LOG_INF("Hex: %s", formatted);
-}
-
 const char* espErrMsg(esp_err_t errCode) {
   // convert esp error code to text
   // https://github.com/espressif/esp-idf/blob/master/components/esp_common/include/esp_err.h

@@ -144,7 +144,6 @@ esp_err_t fileHandler(httpd_req_t* req, bool download = false);
 void flush_log(bool andClose = false);
 char* fmtSize (uint64_t sizeVal);
 void formatElapsedTime(char* timeStr, uint32_t timeVal, bool noDays = false);
-void formatHex(const char* inData, size_t inLen);
 const char* formatIPstr(bool getAP = false);
 bool formatSDcard();
 bool fsStartTransfer(const char* fileFolder);
