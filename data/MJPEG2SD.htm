@@ -1726,9 +1726,9 @@
         <!-- Input field for users to enter individual IPs -->
         <label for="ipInput">Enter IP address:&nbsp;</label>
         <input type="text" id="ipInput" class="local" placeholder="e.g. 192.168.1.100">
-        <button id="addIpButton" class="local" onclick="addIP()">Add IP</button>
-        <button id="clearStorageButton" class="local" onclick="clearLocalStorage()">Delete All</button>
-        <button id="refreshAllButton" class="local" onclick="refreshAllContainers(true)">Refresh</button>
+        <button id="addIpButton" class="local" onclick="addIP()" aria-label="Add entered IP address to Camera Hub" title="Add IP">Add IP</button>
+        <button id="clearStorageButton" class="local" onclick="clearLocalStorage()" aria-label="Delete all saved camera IP addresses" title="Delete All saved IPs">Delete All</button>
+        <button id="refreshAllButton" class="local" onclick="refreshAllContainers(true)" aria-label="Refresh all camera images" title="Refresh all images">Refresh</button>
       </div>
       <!-- Container to hold the image elements -->
       <div id="imageContainer"></div>
