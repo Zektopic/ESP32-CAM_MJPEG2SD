@@ -880,11 +880,6 @@ void setupADC() {
   analogReadResolution(ADC_BITS);
 }
 
-float smoothSensor(float latestVal, float smoothedVal, float alpha) {
-  // simple Exponential Moving Average filter 
-  // where alpha between 0.0 (max smooth) and 1.0 (no smooth)
-  return (latestVal * alpha) + smoothedVal * (1.0 - alpha);
-}
 
 // onboard chip temperature sensor
 #if CONFIG_IDF_TARGET_ESP32
