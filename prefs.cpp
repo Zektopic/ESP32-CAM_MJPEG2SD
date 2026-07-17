@@ -132,11 +132,14 @@ static void saveConfigVect() {
     configs.erase(unique(configs.begin(), configs.end()), configs.end()); // remove any dups
     for (const auto& row: configs) {
       // recreate config file with updated content
+      int lineLen;
       if (row[0].length() >= 5 && row[0].compare(row[0].length() - 5, 5, "_Pass") == 0)
         // replace passwords with asterisks
-        snprintf(configLine, FILE_NAME_LEN + 100, "%s%c%.*s%c%s%c%s%c%s\n", row[0].c_str(), DELIM, row[1].length(), FILLSTAR, DELIM, row[2].c_str(), DELIM, row[3].c_str(), DELIM, row[4].c_str());
-      else snprintf(configLine, FILE_NAME_LEN + 100, "%s%c%s%c%s%c%s%c%s\n", row[0].c_str(), DELIM, row[1].c_str(), DELIM, row[2].c_str(), DELIM, row[3].c_str(), DELIM, row[4].c_str());
-      file.write((uint8_t*)configLine, strlen(configLine));
+        lineLen = snprintf(configLine, FILE_NAME_LEN + 100, "%s%c%.*s%c%s%c%s%c%s\n", row[0].c_str(), DELIM, row[1].length(), FILLSTAR, DELIM, row[2].c_str(), DELIM, row[3].c_str(), DELIM, row[4].c_str());
+      else lineLen = snprintf(configLine, FILE_NAME_LEN + 100, "%s%c%s%c%s%c%s%c%s\n", row[0].c_str(), DELIM, row[1].c_str(), DELIM, row[2].c_str(), DELIM, row[3].c_str(), DELIM, row[4].c_str());
+      if (lineLen < 0) lineLen = 0; // Prevent write underflow crash if snprintf fails
+      if (lineLen > FILE_NAME_LEN + 100 - 1) lineLen = FILE_NAME_LEN + 100 - 1; // Prevent out-of-bounds write from snprintf truncation return
+      file.write((uint8_t*)configLine, lineLen);
       cfgCnt++;
     }
     LOG_ALT("Config file saved %d entries", cfgCnt);
@@ -509,14 +512,23 @@ static bool checkConfigFile() {
       }
       sprintf(hostName, "%s_%012llX", APP_NAME, ESP.getEfuseMac());
       char cfg[100];
-      sprintf(cfg, "appId~%s~99~~na\n", APP_NAME);
-      file.write((uint8_t*)cfg, strlen(cfg));
-      sprintf(cfg, "hostName~%s~%d~T~Device host name\n", hostName, HOSTNAME_GRP);
-      file.write((uint8_t*)cfg, strlen(cfg));
-      sprintf(cfg, "AP_SSID~%s~0~T~AP SSID name\n", hostName);
-      file.write((uint8_t*)cfg, strlen(cfg));
-      sprintf(cfg, "cfgVer~%u~99~T~na\n", CFG_VER);
-      file.write((uint8_t*)cfg, strlen(cfg));
+      int cfgLen;
+      cfgLen = snprintf(cfg, 100, "appId~%s~99~~na\n", APP_NAME);
+      if (cfgLen < 0) cfgLen = 0;
+      if (cfgLen > 100 - 1) cfgLen = 100 - 1;
+      file.write((uint8_t*)cfg, cfgLen);
+      cfgLen = snprintf(cfg, 100, "hostName~%s~%d~T~Device host name\n", hostName, HOSTNAME_GRP);
+      if (cfgLen < 0) cfgLen = 0;
+      if (cfgLen > 100 - 1) cfgLen = 100 - 1;
+      file.write((uint8_t*)cfg, cfgLen);
+      cfgLen = snprintf(cfg, 100, "AP_SSID~%s~0~T~AP SSID name\n", hostName);
+      if (cfgLen < 0) cfgLen = 0;
+      if (cfgLen > 100 - 1) cfgLen = 100 - 1;
+      file.write((uint8_t*)cfg, cfgLen);
+      cfgLen = snprintf(cfg, 100, "cfgVer~%u~99~T~na\n", CFG_VER);
+      if (cfgLen < 0) cfgLen = 0;
+      if (cfgLen > 100 - 1) cfgLen = 100 - 1;
+      file.write((uint8_t*)cfg, cfgLen);
       file.close();
       LOG_INF("Created %s from local store", CONFIG_FILE_PATH);
       return true;
