@@ -261,7 +261,6 @@ bool checkAccelMove();
 int8_t checkPotVol(int8_t adjVol);
 bool checkSDFiles();
 void currentStackUsage();
-void displayAudioLed(int16_t audioSample);
 void finalizeAviIndex(uint16_t frameCnt, bool isTL = false);
 void finishAudioRecord(bool isValid);
 float* getBMx280();
