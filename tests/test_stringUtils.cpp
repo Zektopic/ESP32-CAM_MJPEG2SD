@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstring>
 #include <cassert>
+#include <cstdint>
 #include "../stringUtils.h"
 
 // Stub for removeChar since it's defined in utils.cpp which has ESP32 dependencies
@@ -22,6 +23,52 @@ void replaceChar(char* s, char c, char r) {
     if (s[reader] == c) s[reader] = r;
     reader++;
   }
+}
+
+// Stub for isSubArray since it's defined in utils.cpp which has ESP32 dependencies
+size_t isSubArray(uint8_t* haystack, uint8_t* needle, size_t hSize, size_t nSize) {
+  size_t h = 0, n = 0;
+  while (h < hSize && n < nSize) {
+    if (haystack[h] == needle[n]) {
+      h++;
+      n++;
+      if (n == nSize) return h;
+    } else {
+      h = h - n + 1;
+      n = 0;
+    }
+  }
+  return 0;
+}
+
+void test_isSubArray() {
+    uint8_t haystack1[] = {1, 2, 3, 4, 5};
+    uint8_t needle1[] = {3, 4};
+    assert(isSubArray(haystack1, needle1, 5, 2) == 4);
+
+    uint8_t haystack2[] = {1, 2, 1, 2, 3};
+    uint8_t needle2[] = {1, 2, 3};
+    assert(isSubArray(haystack2, needle2, 5, 3) == 5);
+
+    uint8_t needle3[] = {1, 2};
+    assert(isSubArray(haystack2, needle3, 5, 2) == 2);
+
+    uint8_t haystack3[] = {1, 2, 3};
+    uint8_t needle4[] = {4, 5};
+    assert(isSubArray(haystack3, needle4, 3, 2) == 0);
+
+    uint8_t needle5[] = {1, 2, 3, 4};
+    assert(isSubArray(haystack3, needle5, 3, 4) == 0);
+
+    uint8_t needle6[] = {};
+    assert(isSubArray(haystack3, needle6, 3, 0) == 0);
+
+    uint8_t haystack4[] = {};
+    assert(isSubArray(haystack4, needle1, 0, 2) == 0);
+
+    assert(isSubArray(haystack4, needle6, 0, 0) == 0);
+
+    std::cout << "All tests passed for isSubArray!" << std::endl;
 }
 
 void test_replaceChar() {
@@ -200,6 +247,7 @@ void test_urlEncode() {
 }
 
 int main() {
+    test_isSubArray();
     test_replaceChar();
     test_removeChar();
     test_isPathTraversal();
