@@ -7,7 +7,7 @@
 // MPU6050 6 axis accel & gyro
 // MPU9250 9 axis accel & gyro & mag
 // DS3231 RTC
-// LCD 1602 display 2*16 
+// LCD 1602 display 2*16
 //
 // To enable a device, set the appropriate USE_* define in appGlobals.h
 //
@@ -26,10 +26,10 @@
 // if pins not correctly defined for board, spurious results will occur
 int I2Csda = -1;
 int I2Cscl = -1;
-static byte I2CDATA[10]; // store I2C data received or to be sent 
+static byte I2CDATA[10]; // store I2C data received or to be sent
 static int I2Cdevices = -1;
 static bool isShared = false;
-  
+
 // I2C device names, indexed by address
 static bool deviceStatus[128] = {false}; // whether device present
 static const char* clientName[128] = {
@@ -52,10 +52,10 @@ static bool sendTransmission(int clientAddr, bool scanning) {
     /*1: data too long to fit in transmit buffer
       2: received NACK on transmit of address
       3: received NACK on transmit of data
-      4: other error, e.g. switched off 
-      5: i2c busy 
+      4: other error, e.g. switched off
+      5: i2c busy
       8: unknown pcf8591 status */
-      
+
   if (!scanning && result > 0) LOG_WRN("Client %s at 0x%02X with connection error: %d", clientName[clientAddr], clientAddr, result);
   return result == 0;
 }
@@ -87,8 +87,8 @@ static bool getI2Cdata (uint8_t clientAddr, uint8_t controlByte, uint8_t numByte
     Wire.requestFrom (clientAddr, numBytes);
     for (int i=0; i<numBytes; i++) I2CDATA[i] = Wire.read();
     return sendTransmission(clientAddr, false);
-  } 
-  return false; 
+  }
+  return false;
 }
 
 static bool sendI2Cdata(int clientAddr, uint8_t controlByte, uint8_t numBytes) {
@@ -103,9 +103,9 @@ static bool sendI2Cdata(int clientAddr, uint8_t controlByte, uint8_t numBytes) {
 }
 
 bool shareI2C(int sdaShare, int sclShare) {
-  // apply given pins if bus to be shared 
+  // apply given pins if bus to be shared
   /* needs arduino-esp32 core v3.3.0 or higher */
-  if (I2Csda < 0) { 
+  if (I2Csda < 0) {
     // I2C bus shared with another peripheral, eg camera
     I2Csda = sdaShare;
     I2Cscl = sclShare;
@@ -121,7 +121,7 @@ bool prepI2C() {
   if (I2Csda == I2Cscl) {
     LOG_ALT("I2C pins not defined: %d", I2Csda);
     return false;
-  } 
+  }
   // start I2C
   if (!isShared) {
     Wire.begin(I2Csda, I2Cscl); // Join I2C bus as master
@@ -136,7 +136,7 @@ bool prepI2C() {
 
 /***************************************** OLED Display *************************************/
 
-#define SSD1306_BIaddr 0x3d // built in oled 
+#define SSD1306_BIaddr 0x3d // built in oled
 #define SSD1306_Extaddr 0x3c // external oled (also address for OV5640
 #if USE_SSD1306
 #include "SSD1306Wire.h" // https://github.com/ThingPulse/esp8266-oled-ssd1306
@@ -148,8 +148,8 @@ static bool oledOK = false;
 bool flipOled = false; // true if oled pins oriented above display
 
 // OLED SSD1306 display 128*64
-void oledLine(const char* msg, int hpos, int vpos, int msgwidth, int fontsize) { 
-  // display text message on OLED SSD1306 display 
+void oledLine(const char* msg, int hpos, int vpos, int msgwidth, int fontsize) {
+  // display text message on OLED SSD1306 display
   // to avoid flicker, only call periodically
   // args: message string, horizontal pixel start, vertical pixel start, width to clear, font type
   // clear original line
@@ -166,11 +166,11 @@ void oledLine(const char* msg, int hpos, int vpos, int msgwidth, int fontsize) {
   }
 }
 
-static void tellTale() { 
+static void tellTale() {
   static bool ledState = false;
   ledState = !ledState;
   static const char* tellTaleStr[] = {"*", ""}; // shows that oled (& I2C) are running
-  oledLine(tellTaleStr[ledState],124,60,4,10); 
+  oledLine(tellTaleStr[ledState],124,60,4,10);
 }
 
 void oledDisplay() {
@@ -213,7 +213,7 @@ void finalMsg(const char* finalTxt) {
 #define PCF8591addr 0x48 // PCF8591 ADC
 
 byte* getPCF8591() { // analog channels
-/*   
+/*
    YL-40 module
    return the 4 ADC channel 8 bit values, using auto increment control instruction
    PC8591 commands:
@@ -222,13 +222,13 @@ byte* getPCF8591() { // analog channels
    bits 4-5: input programming, separate inputs (00), etc
    bit 6: analog out enable
   */
-  static byte PCF8591[4] = {0}; 
+  static byte PCF8591[4] = {0};
   if (deviceStatus[PCF8591addr]) {
     if (getI2Cdata(PCF8591addr, 0x44, 5)) {
       // need to read 5 bytes, but ignore first as it is previous 0 channel
       // order high -> low channels 3 2 1 0
-      for (int i = 0; i < 4; i++) PCF8591[i] = smoothAnalog(I2CDATA[i + 1]);
-    } 
+      for (int i = 0; i < 4; i++) PCF8591[i] = I2CDATA[i + 1];
+    }
   } else LOG_WRN("PCF8591 ADC not available");
   return PCF8591;
 }
@@ -245,10 +245,10 @@ static bool BMx280ok = false;
 #define STD_PRESSURE 1013.25 // reference pressure in mB/hPa at sea level
 #define DEGREE_SYMBOL "\xC2\xB0"
 
-#if __has_include("../libraries/BMx280MI/src/BMx280I2C.h") 
+#if __has_include("../libraries/BMx280MI/src/BMx280I2C.h")
 
 #include <BMx280I2C.h> // https://github.com/christandlg/BMx280MI
-BMx280I2C bmxDef(BMx280_Def); 
+BMx280I2C bmxDef(BMx280_Def);
 BMx280I2C bmxAlt(BMx280_Alt);
 BMx280I2C* thisBmx;
 
@@ -273,8 +273,8 @@ static float getSeaLevelPressure() {
       if (httpCode == HTTP_CODE_OK) {
         String payload = http.getString();
         if (!getJsonValue(payload.c_str(), "pressure_msl", jsonVal, nullptr, 2)) LOG_WRN("'pressure_msl' field not present");
-      } else LOG_WRN("MSL pressure request failed, error: %s", http.errorToString(httpCode).c_str());    
-      http.end();     
+      } else LOG_WRN("MSL pressure request failed, error: %s", http.errorToString(httpCode).c_str());
+      http.end();
     }
     remoteServerClose(hclient);
   }
@@ -302,11 +302,11 @@ static bool setupBMx() {
       LOG_INF("BMx280 setup complete, local MSL pressure %0.1fhPa @ Lat %0.6f / Lon %0.6f", pressureMSL, latLon[0], latLon[1]);
     }
     if (!BMx280ok) LOG_WRN("BMx280 not available");
-  } 
+  }
   return BMx280ok;
 }
 
-static void updateBMx280() { 
+static void updateBMx280() {
   // get and return pressure, temperature, altitude, humidity
   thisBmx->measure();
   uint32_t bmxWait = millis();
@@ -314,7 +314,7 @@ static void updateBMx280() {
   if (thisBmx->hasValue()) {
     // PSI = pascals * 0.000145
     // ambient temperature (but affected by chip heating)
-    BMx280[0] = thisBmx->getTemperature(); // celsius 
+    BMx280[0] = thisBmx->getTemperature(); // celsius
     BMx280[1] = thisBmx->getPressure() * 0.01;  // pascals to mB/hPa
     BMx280[2] = 44330.0 * (1.0 - pow(BMx280[1] / pressureMSL, 1.0 / 5.255)); // altitude in meters
     if (isBME) BMx280[3] = thisBmx->getHumidity(); // % relative humidity
@@ -371,7 +371,7 @@ static uint8_t MPUaddr;
 #define PWR_MGMT_1 0x6B
 
 bool sleepMPU6050(bool doSleep) {
-  // power down or wake up MPU6050 
+  // power down or wake up MPU6050
   I2CDATA[0] = doSleep ? 0x40 : 0x01;
   // PWR_MGMT_1 register set to sleep
   return sendI2Cdata(MPUaddr, PWR_MGMT_1, 1);
@@ -380,22 +380,22 @@ bool sleepMPU6050(bool doSleep) {
 static bool setupMPU6050() {
   if (!MPU6050ok) {
     // set full range
-    I2CDATA[0] = 0x00; 
+    I2CDATA[0] = 0x00;
     MPU6050ok = sendI2Cdata(MPUaddr, CONFIG, 1);
-    // wakeup the sensor 
+    // wakeup the sensor
     if (MPU6050ok) MPU6050ok = sleepMPU6050(false);
-  } 
+  }
   return MPU6050ok;
 }
 
 static void updateMPU6050data() {
   // get data from MPU6050 and store in array
   if (MPU6050ok) {
-    if (getI2Cdata(MPUaddr, ACCEL_XOUT_H, ACCEL_BYTES+2)) { 
+    if (getI2Cdata(MPUaddr, ACCEL_XOUT_H, ACCEL_BYTES+2)) {
       // read 3 axis accelerometer & temperature
       int16_t raw[4]; // X, Y, Z, Temp
       float axes[4];
-      for (int i=0; i<4; i++) raw[i] = I2CDATA[i*2] << 8 | I2CDATA[(i*2)+1]; 
+      for (int i=0; i<4; i++) raw[i] = I2CDATA[i*2] << 8 | I2CDATA[(i*2)+1];
       // each axis G force value, straight down is 1.0 if stationary
       for (int i=0; i<3; i++) axes[i] = (float)raw[i] / SENS_2G;
       // determine gravity from all 3 axes (no linear velocity)
@@ -404,14 +404,14 @@ static void updateMPU6050data() {
       // pitch in degrees - X axis
       float ratio = axes[0] / gXYZ;
       mpuData[0] = (float)((ratio < 0.5) ? 90-fabsf(asin(ratio)*RAD_TO_DEG) : fabsf(acos(ratio)*RAD_TO_DEG));
-      // roll in degrees - Y axis 
+      // roll in degrees - Y axis
       ratio = axes[1] / gXYZ;
       mpuData[1] = (float)((ratio < 0.5) ? 90-fabsf(asin(ratio)*RAD_TO_DEG) : fabsf(acos(ratio)*RAD_TO_DEG));
       // yaw in degrees - Z axis (inaccurate as gravity is constant)
       ratio = axes[2] / gXYZ;
       mpuData[2] = (float)((ratio < 0.5) ? 90-fabsf(asin(ratio)*RAD_TO_DEG) : fabsf(acos(ratio)*RAD_TO_DEG));
       // temperature in degrees celsius
-      mpuData[3] = ((float)raw[3] / 340.0) + 36.53; 
+      mpuData[3] = ((float)raw[3] / 340.0) + 36.53;
     }
   }
 }
@@ -423,8 +423,8 @@ MPU9250 on GY-91
 VIN: Voltage Supply Pin
 3V3: 3.3v Regulator output
 GND: 0V Power Supply
-SCL: I2C Clock 
-SDA: I2C Data 
+SCL: I2C Clock
+SDA: I2C Data
 SDO/SAO: I2C Address selection MPU9250
 NCS: n/a
 CSB: I2C Address selection BMP280
@@ -468,7 +468,7 @@ static float getMagneticDeclination() {
             if (strstr(jsonVal, "west")) sign = -1.0f;
           }
         } else LOG_WRN("'declination' field not present");
-      } else LOG_WRN("Magnetic declination request failed, error: %s", http.errorToString(httpCode).c_str());    
+      } else LOG_WRN("Magnetic declination request failed, error: %s", http.errorToString(httpCode).c_str());
       http.end();
     }
     remoteServerClose(hclient);
@@ -511,7 +511,7 @@ static bool setupMPU9250() {
   return MPU9250ok;
 }
 
-#else 
+#else
 
 static bool setupMPU9250() {
   LOG_WRN("MPU9250 library not installed");
@@ -607,13 +607,13 @@ static bool setupRTC() {
         LOG_WRN("RTC is older than compile time, updating DateTime");
         Rtc.SetDateTime(compiled);
       }
-      
+
       Rtc.Enable32kHzPin(false);
       Rtc.SetSquareWavePin(DS3231SquareWavePin_ModeAlarmBoth); // set to be alarm output
       Rtc.LatchAlarmsTriggeredFlags();  // throw away any old alarm state
-      // setup alarm interrupt 
+      // setup alarm interrupt
       attachInterrupt(digitalPinToInterrupt(SQWpin), RTCalarmISR, FALLING);
-      
+
       DS3231ok = true;
     } else DS3231ok = false;
   }
@@ -675,10 +675,10 @@ int RTCalarmed() {
   // check if RTC alarm occurred and return alarm number
   int wasAlarmed = 0;
   if (DS3231ok) {
-    if (RTCalarmFlag) { 
+    if (RTCalarmFlag) {
       RTCalarmFlag = false; // reset the flag
       DS3231AlarmFlag flag = Rtc.LatchAlarmsTriggeredFlags(); // which alarms triggered and reset for next
-      if (flag & DS3231AlarmFlag_Alarm1) wasAlarmed = 1; 
+      if (flag & DS3231AlarmFlag_Alarm1) wasAlarmed = 1;
       if (flag & DS3231AlarmFlag_Alarm2) wasAlarmed = 2;
     }
   }
@@ -707,7 +707,7 @@ void RTCdatetime(char* datestring, int datestringLen) {
 
 
 /**************************** LCD1602 ******************************/
-// I2C LCD display: 2 lines, 16 cols 
+// I2C LCD display: 2 lines, 16 cols
 // Derived from https://github.com/arduino-libraries/LiquidCrystal
 
 #define LCD1602 0x27 // 16 chars by 2 lines LCD
@@ -770,7 +770,7 @@ static uint8_t backlightval;
 static void lcdWrite(uint8_t data) {
   if (LCD1602ok) {
     I2CDATA[0] = data | backlightval;
-    sendI2Cdata(LCD1602, 0, 1); 
+    sendI2Cdata(LCD1602, 0, 1);
   }
 }
 
@@ -786,7 +786,7 @@ static void lcdSend(uint8_t value, uint8_t mode = 0) {
   // write either command (mode = 0) or data, as two 4 bit values
   if (LCD1602ok) {
     writeNibble((value & 0xf0) | mode);
-    writeNibble(((value << 4 ) & 0xf0) | mode); 
+    writeNibble(((value << 4 ) & 0xf0) | mode);
   }
 }
 
@@ -799,13 +799,13 @@ void lcdBacklight(bool lightOn) {
 void lcdClear() {
   // clear display, set cursor position to zero
   lcdSend(LCD_CLEARDISPLAY);
-  delayMicroseconds(2000);  
+  delayMicroseconds(2000);
 }
 
 void lcdHome() {
   // set cursor position to zero
-  lcdSend(LCD_RETURNHOME);  
-  delayMicroseconds(2000); 
+  lcdSend(LCD_RETURNHOME);
+  delayMicroseconds(2000);
 }
 
 void lcdDisplay(bool setDisplay) {
@@ -815,14 +815,14 @@ void lcdDisplay(bool setDisplay) {
   lcdSend(LCD_DISPLAYCONTROL | displaycontrol);
 }
 
-static bool setupLCD1602() {  
+static bool setupLCD1602() {
   if (!LCD1602ok) {
     if (deviceStatus[LCD1602]) {
       LCD1602ok = true;
-      delay(50); 
+      delay(50);
       lcdBacklight(false);
       delay(1000);
-  
+
       // can only use 4 bit mode with PCF8574 as not enough pins for HD44780 8 bit.
       // use magic sequence to set it
       writeNibble(0x03 << 4);
@@ -832,20 +832,20 @@ static bool setupLCD1602() {
       writeNibble(0x03 << 4);
       delayMicroseconds(150);
       writeNibble(0x02 << 4);
-    
+
        // set initial display format
-      lcdSend(LCD_FUNCTIONSET | LCD_4BITMODE | LCD_2LINE | LCD_5x8DOTS);  
-      
+      lcdSend(LCD_FUNCTIONSET | LCD_4BITMODE | LCD_2LINE | LCD_5x8DOTS);
+
       // turn on display and clear content
-      displaycontrol = LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKOFF; 
+      displaycontrol = LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKOFF;
       lcdDisplay(true);
       lcdClear();
-      
+
       // set the entry mode and set cursor position to top left
       displaymode = LCD_ENTRYLEFT | LCD_ENTRYSHIFTDECREMENT;
-      lcdSend(LCD_ENTRYMODESET | displaymode); 
+      lcdSend(LCD_ENTRYMODESET | displaymode);
       lcdHome();
-      lcdBacklight(true); 
+      lcdBacklight(true);
     } else LCD1602ok = false;
     if (!LCD1602ok) LOG_WRN("LCD1602 display not available");
   }
@@ -860,7 +860,7 @@ void lcdPrint(const char* str) {
 
 void lcdSetCursorPos(uint8_t row, uint8_t col) {
   // set row and col of cursor position
-	int row_offsets[] = {0x00, 0x40, 0x14, 0x54}; 
+	int row_offsets[] = {0x00, 0x40, 0x14, 0x54};
   if (row >= NUM_ROWS) row = NUM_ROWS - 1;
   if (col >= NUM_COLS) col = NUM_COLS - 1;
 	lcdSend(LCD_SETDDRAMADDR | (col + row_offsets[row]));
@@ -887,7 +887,7 @@ void lcdScrollText(bool scrollLeft) {
 }
 
 void lcdTextDirection(bool scrollLeft) {
-  // write text forward or backward from cursor 
+  // write text forward or backward from cursor
   if (scrollLeft) displaymode &= ~LCD_ENTRYLEFT;
   else displaymode |= LCD_ENTRYLEFT;
 	lcdSend(LCD_ENTRYMODESET | displaymode);
@@ -895,8 +895,8 @@ void lcdTextDirection(bool scrollLeft) {
 
 void lcdAutoScroll(bool autoScroll) {
   // As each character entered at cursor, scroll previous text left
-	if (autoScroll) displaymode |= LCD_ENTRYSHIFTINCREMENT; 
-  else displaymode &= ~LCD_ENTRYSHIFTINCREMENT; 
+	if (autoScroll) displaymode |= LCD_ENTRYSHIFTINCREMENT;
+  else displaymode &= ~LCD_ENTRYSHIFTINCREMENT;
 	lcdSend(LCD_ENTRYMODESET | displaymode);
 }
 
@@ -904,14 +904,14 @@ void lcdLoadCustom(uint8_t charLoc, uint8_t charmap[]) {
   // Load custom character
   if (charLoc > 7) LOG_WRN("custom char number %u out of range", charLoc);
   else {
-  	charLoc &= 0x7; // CGRAM location to load 0 - 7
-  	lcdSend(LCD_SETCGRAMADDR | (charLoc << 3));
-  	for (int i=0; i<8; i++)	lcdSend(charmap[i], Rs);
+	charLoc &= 0x7; // CGRAM location to load 0 - 7
+	lcdSend(LCD_SETCGRAMADDR | (charLoc << 3));
+	for (int i=0; i<8; i++)	lcdSend(charmap[i], Rs);
   }
 }
 
 void lcdWriteCustom(uint8_t charLoc) {
-  // write one of 8 custom chars 
+  // write one of 8 custom chars
   if (charLoc > 7) LOG_WRN("custom char number %u out of range", charLoc);
   else lcdSend(charLoc, Rs);
 }
@@ -975,7 +975,7 @@ static void startPollTask() {
 #if USE_TELEM
   pollInterval = srtInterval;
 #endif
-  if (sensorPollHandle == NULL) xTaskCreateWithCaps(sensorPollTask, "sensorPollTask", SENSOR_STACK_SIZE, NULL, SENSOR_PRI, &sensorPollHandle, STACK_MEM); 
+  if (sensorPollHandle == NULL) xTaskCreateWithCaps(sensorPollTask, "sensorPollTask", SENSOR_STACK_SIZE, NULL, SENSOR_PRI, &sensorPollHandle, STACK_MEM);
 }
 
 #endif  // IS_POLLABLE
@@ -995,7 +995,7 @@ bool checkI2Cdevice(const char* devName) {
 }
 
 static bool prepI2Cdevices() {
-  // setup available I2C devices 
+  // setup available I2C devices
   bool res = false;
   if (I2Cdevices == 0) LOG_WRN("No I2C devices connected");
   else {

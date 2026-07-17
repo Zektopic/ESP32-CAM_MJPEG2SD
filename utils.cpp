@@ -30,7 +30,7 @@ uint32_t deepSleepTimer = 0;
 /************************** Network (WiFi/Ethernet) **************************/
 
 #include <esp_task_wdt.h>
- 
+
 /** Do not hard code anything below here unless you know what you are doing **/
 /** Use the web interface to configure wifi settings **/
 
@@ -61,7 +61,7 @@ int ethMiso = -1; // W5500 SPI data pin
 int ethMosi = -1; // W5500 SPI data pin
 
 // basic HTTP Authentication access to web page
-char Auth_Name[MAX_HOST_LEN] = ""; 
+char Auth_Name[MAX_HOST_LEN] = "";
 char Auth_Pass[MAX_PWD_LEN] = "";
 
 int responseTimeoutSecs = 10; // time to wait for FTP or SMTP response
@@ -77,11 +77,11 @@ static bool getLocalNTP();
 int netMode = 0; // 0=WiFi only, 1=Ethernet only, 2=Ethernet+AP
 
 // LAN8720
-#define ETH_PHY_ADDR  0 
+#define ETH_PHY_ADDR  0
 #define ETH_CLK_MODE  ETH_CLOCK_GPIO0_IN // external clock from crystal oscillator
 
-static void setupMdnsHost() {  
-  // set up MDNS service 
+static void setupMdnsHost() {
+  // set up MDNS service
   char mdnsName[MAX_IP_LEN]; // max mdns host name length
   snprintf(mdnsName, MAX_IP_LEN, "%.*s", MAX_IP_LEN - 1, hostName);
   MDNS.end();
@@ -89,7 +89,7 @@ static void setupMdnsHost() {
     // Add service to MDNS
     useHttps ? MDNS.addService("https", "tcp", HTTPS_PORT) : MDNS.addService("http", "tcp", HTTP_PORT);
     MDNS.addService("ws", "udp", 83);
-    MDNS.addService("ftp", "tcp", 21);    
+    MDNS.addService("ftp", "tcp", 21);
     LOG_INF("mDNS service: http%s://%s.local", useHttps ? "s" : "", mdnsName);
   } else LOG_WRN("mDNS host: %s Failed", mdnsName);
   debugMemory("setupMdnsHost");
@@ -104,7 +104,7 @@ static const char* wifiStatusStr(wl_status_t wlStat) {
     case WL_CONNECTED: return "WL_CONNECTED";
     case WL_CONNECT_FAILED: return "WL_CONNECT_FAILED";
     case WL_CONNECTION_LOST: return "WL_CONNECTION_LOST";
-    case WL_DISCONNECTED: return "unable to connect";  
+    case WL_DISCONNECTED: return "unable to connect";
     case WL_STOPPED: return "wifi stopped";
     default: return "Invalid WiFi.status";
   }
@@ -159,7 +159,7 @@ static void onNetEvent(arduino_event_id_t event, arduino_event_info_t info) {
     case ARDUINO_EVENT_ETH_CONNECTED: LOG_INF("Ethernet connected, MAC: %s", ETH.macAddress().c_str()); break;
     case ARDUINO_EVENT_ETH_STOP: LOG_INF("Ethernet Stopped"); break;
     case ARDUINO_EVENT_ETH_GOT_IP: {
-      LOG_INF("Ethernet IP, use '%s://%s' to connect", useHttps ? "https" : "http", formatIPstr()); 
+      LOG_INF("Ethernet IP, use '%s://%s' to connect", useHttps ? "https" : "http", formatIPstr());
       if (netMode == 2) WiFi.AP.enableNAPT(true);
       break;
     }
@@ -182,14 +182,14 @@ static void setWifiAP() {
     WiFi.AP.begin();
     // Set access point with static ip if provided
     if (strlen(AP_ip) > 1) {
-      LOG_INF("Set AP static IP :%s, %s, %s", AP_ip, AP_gw, AP_sn);  
+      LOG_INF("Set AP static IP :%s, %s, %s", AP_ip, AP_gw, AP_sn);
       IPAddress _ip, _gw, _sn, _ns1, _ns2;
       _ip.fromString(AP_ip);
       _gw.fromString(AP_gw);
       _sn.fromString(AP_sn);
       // set static ip
       WiFi.AP.config(_ip, _gw, _sn);
-    } 
+    }
     WiFi.AP.create(AP_SSID, AP_Pass);
     debugMemory("setWifiAP");
   }
@@ -209,9 +209,9 @@ static void setWifiSTA() {
       // set static ip
       WiFi.STA.config(_ip, _gw, _sn, _ns1); // need DNS for SNTP
       LOG_INF("Wifi Station set static IP");
-    } 
+    }
   } else LOG_INF("Wifi Station IP from DHCP");
-  WiFi.STA.enableIPv6(USE_IP6); 
+  WiFi.STA.enableIPv6(USE_IP6);
   WiFi.STA.begin();
   WiFi.STA.connect(ST_SSID, ST_Pass);
   debugMemory("setWifiSTA");
@@ -257,7 +257,7 @@ static bool startEth(bool firstcall) {
                    ethSclk,
                    ethMiso,
                    ethMosi,
-                   ETH_PHY_SPI_FREQ_MHZ)) { 
+                   ETH_PHY_SPI_FREQ_MHZ)) {
       LOG_WRN("Ethernet W5500 init failed");
       return false;
     }
@@ -271,10 +271,10 @@ static bool startEth(bool firstcall) {
     // RMII uses predefined pins 19, 21, 22, 25, 26, 27
     if (!ETH.begin(ETH_PHY_LAN8720,
                    ETH_PHY_ADDR,
-                   ethCS,  // LAN8720 MDC 
+                   ethCS,  // LAN8720 MDC
                    ethInt, // LAN8720 MDIO
                    ethRst, // LAN8720 POWER
-                   ETH_CLK_MODE)) { 
+                   ETH_CLK_MODE)) {
       LOG_WRN("Ethernet LAN8720 init failed");
       return false;
     }
@@ -321,7 +321,7 @@ static bool startWifi(bool firstcall = true) {
     WiFi.STA.setHostname(hostName);
     delay(100);
   }
-  
+
   wl_status_t wlStat = WL_NO_SSID_AVAIL;
   if (netMode == 0) {
     // connect to Wifi station
@@ -343,8 +343,8 @@ static bool startWifi(bool firstcall = true) {
     }
     if (wlStat != WL_CONNECTED) LOG_WRN("SSID %s not connected %s", ST_SSID, wifiStatusStr(wlStat));
   }
-  
-  if (wlStat == WL_NO_SSID_AVAIL || allowAP) setWifiAP(); // AP allowed if no Station SSID eg on first time use 
+
+  if (wlStat == WL_NO_SSID_AVAIL || allowAP) setWifiAP(); // AP allowed if no Station SSID eg on first time use
 #if CONFIG_IDF_TARGET_ESP32S3
   if (netMode == 0) setupMdnsHost(); // not on ESP32 as uses 6k of heap
 #endif
@@ -382,7 +382,7 @@ bool startNetwork(bool firstcall) {
   }
   // connect wifi STA, or AP if router details not available
   if (!res) startWifi(firstcall);
-  res = startWebServer(); 
+  res = startWebServer();
 #ifdef DEV_ONLY
   devCheck();
 #endif
@@ -398,7 +398,7 @@ bool netIsConnected() { return (netMode > 0) ? (ETH.linkUp() && ETH.localIP()) :
 const char* formatIPstr(bool getAP) {
   static char localIP[16] = "";
   IPAddress ipLocal = getAP ? WiFi.AP.localIP() : netLocalIP();
-  sprintf(localIP, "%u.%u.%u.%u", ipLocal[0], ipLocal[1], ipLocal[2], ipLocal[3]); 
+  sprintf(localIP, "%u.%u.%u.%u", ipLocal[0], ipLocal[1], ipLocal[2], ipLocal[3]);
   return localIP;
 }
 
@@ -409,7 +409,7 @@ void resetWatchDog(int wdIndex, uint32_t wdTimeout) {
   if (watchDogStarted[wdIndex]) esp_task_wdt_reset();
   else {
     // setup watchdog on first call
-    esp_task_wdt_deinit(); 
+    esp_task_wdt_deinit();
     esp_task_wdt_config_t twdt_config = {
       .timeout_ms = wdTimeout,
       .idle_core_mask = (1 << portNUM_PROCESSORS) - 1,
@@ -488,20 +488,20 @@ static void pingTimeout(esp_ping_handle_t hdl, void *args) {
 static void startPing() {
   IPAddress ipAddr = netGatewayIP();
   if (!ipAddr) return; // don't start ping until gateway is known
-  ip_addr_t pingDest; 
+  ip_addr_t pingDest;
   IP_ADDR4(&pingDest, ipAddr[0], ipAddr[1], ipAddr[2], ipAddr[3]);
   esp_ping_config_t pingConfig = ESP_PING_DEFAULT_CONFIG();
-  pingConfig.target_addr = pingDest;  
+  pingConfig.target_addr = pingDest;
   pingConfig.count = ESP_PING_COUNT_INFINITE;
   pingConfig.interval_ms = wifiTimeoutSecs * 1000;
   pingConfig.timeout_ms = 5000;
   pingConfig.task_stack_size = PING_STACK_SIZE;
   pingConfig.task_prio = 1;
-  // set ping task callback functions 
+  // set ping task callback functions
   esp_ping_callbacks_t cbs;
   cbs.on_ping_success = pingSuccess;
   cbs.on_ping_timeout = pingTimeout;
-  cbs.on_ping_end = NULL; 
+  cbs.on_ping_end = NULL;
   cbs.cb_args = NULL;
   esp_ping_new_session(&pingConfig, &cbs, &pingHandle);
   esp_ping_start(pingHandle);
@@ -524,7 +524,7 @@ bool doGetExtIP = true;
 
 void getExtIP() {
   // Get external IP address
-  if (doGetExtIP) { 
+  if (doGetExtIP) {
     NetworkClient hclient;
     if (remoteServerConnect(hclient, EXT_IP_HOST, HTTP_PORT, GETEXTIP)) {
       HTTPClient http;
@@ -543,13 +543,13 @@ void getExtIP() {
               externalAlert("External IP changed", extIP);
             } else LOG_INF("External IP: %s", extIP);
           } else LOG_WRN("'ip' field not present");
-          
+
           if (getJsonValue(payload.c_str(), "latitude", jsonVal)) latLon[0] = atof(jsonVal);
           else LOG_WRN("'latitude' field not present");
           if (getJsonValue(payload.c_str(), "longitude", jsonVal)) latLon[1] = atof(jsonVal);
           else LOG_WRN("'longitude' field not present");
-        } else LOG_WRN("External IP request failed, error: %s", http.errorToString(httpCode).c_str());    
-        
+        } else LOG_WRN("External IP request failed, error: %s", http.errorToString(httpCode).c_str());
+
         if (httpCode != HTTP_CODE_OK) doGetExtIP = false;
         http.end();
       }
@@ -577,7 +577,7 @@ static bool checkFailureThreshold(const char* host, uint8_t idx) {
       failCounts[idx] = MAX_FAIL + 1;
     }
     return false;
-  } 
+  }
   return true;
 }
 
@@ -589,7 +589,7 @@ bool remoteServerConnect(Client& client, const char* host, uint16_t port, uint8_
     while (!client.connected()) {
       if (client.connect(host, port)) break;
       if (millis() - start > (uint32_t)responseTimeoutSecs * 1000) break;
-      delay(500); 
+      delay(500);
     }
 
     // Final status & error reporting
@@ -813,7 +813,7 @@ void removeChar(char* s, char c) {
   int writer = 0, reader = 0;
   while (s[reader]) {
     if (s[reader] != c) s[writer++] = s[reader];
-    reader++;       
+    reader++;
   }
   s[writer] = 0;
 }
@@ -865,23 +865,13 @@ char* toCase(char *s, bool toLower) {
 
 /********************** analog functions ************************/
 
-uint16_t smoothAnalog(int analogPin, int samples) {
-  // get averaged analog pin value 
-  uint32_t level = 0; 
-  if (analogPin > 0) {
-    for (int j = 0; j < samples; j++) level += analogRead(analogPin); 
-    level /= samples;
-  }
-  return level;
-}
-
 void setupADC() {
   analogSetAttenuation(ADC_ATTEN);
   analogReadResolution(ADC_BITS);
 }
 
 float smoothSensor(float latestVal, float smoothedVal, float alpha) {
-  // simple Exponential Moving Average filter 
+  // simple Exponential Moving Average filter
   // where alpha between 0.0 (max smooth) and 1.0 (no smooth)
   return (latestVal * alpha) + smoothedVal * (1.0 - alpha);
 }
@@ -912,7 +902,7 @@ float readInternalTemp() {
   // convert on chip raw temperature in F to Celsius degrees
   intTemp = (temprature_sens_read() - 32) / 1.8;  // value of 55 means not present
 #elif CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S3
-    temperature_sensor_get_celsius(temp_sensor, &intTemp); 
+    temperature_sensor_get_celsius(temp_sensor, &intTemp);
 #endif
   return intTemp;
 }
@@ -924,15 +914,15 @@ float readInternalTemp() {
 
 const uint8_t* encode64chunk(const uint8_t* inp, int rem) {
   // receive 3 byte input buffer and return 4 byte base64 buffer
-  rem = 3 - rem; // last chunk may be less than 3 bytes 
+  rem = 3 - rem; // last chunk may be less than 3 bytes
   uint32_t buff = 0; // hold 3 bytes as shifted 24 bits
   static uint8_t b64[4];
   // shift input into buffer
-  for (int i = 0; i < 3 - rem; i++) buff |= inp[i] << (8*(2-i)); 
+  for (int i = 0; i < 3 - rem; i++) buff |= inp[i] << (8*(2-i));
   // shift 6 bit output from buffer and encode
-  for (int i = 0; i < 4 - rem; i++) b64[i] = BASE64[buff >> (6*(3-i)) & 0x3F]; 
+  for (int i = 0; i < 4 - rem; i++) b64[i] = BASE64[buff >> (6*(3-i)) & 0x3F];
   // filler for last chunk if less than 3 bytes
-  for (int i = 0; i < rem; i++) b64[3-i] = '='; 
+  for (int i = 0; i < rem; i++) b64[3-i] = '=';
   return b64;
 }
 
@@ -972,7 +962,7 @@ void doRestart(const char* restartStr) {
 #endif
 #if INCLUDE_MQTT
   if (mqtt_active) stopMqttClient();
-#endif  
+#endif
   resetCrashLoop();
   flush_log(true);
   delay(2000);
@@ -997,7 +987,7 @@ void goToSleep(bool deepSleep) {
   // if light sleep, restarts by continuing this function
   LOG_INF("Going into %s sleep", deepSleep ? "deep" : "light");
   delay(100);
-  if (deepSleep) { 
+  if (deepSleep) {
     if (wakePin >= 0) {
       // wakeup on pin low (0) or high (1)
       // needs to be RTC pin and support input pullup/down
@@ -1015,7 +1005,7 @@ void goToSleep(bool deepSleep) {
     // light sleep
     esp_wifi_stop();
     // wakeup on selected pin
-    if (wakePin >= 0) gpio_wakeup_enable((gpio_num_t)wakePin, wakeLevel == 0 ? GPIO_INTR_LOW_LEVEL : GPIO_INTR_HIGH_LEVEL); 
+    if (wakePin >= 0) gpio_wakeup_enable((gpio_num_t)wakePin, wakeLevel == 0 ? GPIO_INTR_LOW_LEVEL : GPIO_INTR_HIGH_LEVEL);
     esp_light_sleep_start();
   }
   // light sleep restarts here
@@ -1038,11 +1028,11 @@ bool utilsStartup() {
   logSetup();
 #ifdef NEED_PSRAM
   if (psramFound()) {
-    if (ESP.getPsramSize() < MIN_PSRAM * ONEMEG) 
+    if (ESP.getPsramSize() < MIN_PSRAM * ONEMEG)
       snprintf(startupFailure, SF_LEN, STARTUP_FAIL "App needs at least %dMB PSRAM", MIN_PSRAM);
   } else snprintf(startupFailure, SF_LEN, STARTUP_FAIL "Need PSRAM to be enabled");
 #endif
-  
+
   prepInternalTemp();
   if (jsonBuff == NULL) jsonBuff = psramFound() ? (char*)ps_malloc(JSON_BUFF_LEN) : (char*)malloc(JSON_BUFF_LEN);
   LOG_INF("Compiled with arduino-esp32 v%s", ESP_ARDUINO_VERSION_STR);

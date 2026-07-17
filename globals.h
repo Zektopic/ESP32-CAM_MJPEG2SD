@@ -198,7 +198,6 @@ void setPeripheralResponse(const byte pinNum, const uint32_t responseData);
 void setupADC();
 void showProgress(const char* marker = ".");
 void showSys();
-uint16_t smoothAnalog(int analogPin, int samples = ADC_SAMPLES);
 float smoothSensor(float latestVal, float smoothedVal, float alpha);
 void startOTAtask();
 void startSecTimer(bool startTimer);
