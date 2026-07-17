@@ -321,7 +321,6 @@ bool checkMotion(camera_fb_t* fb, bool motionStatus, bool lightLevelOnly) {
     }
   } else {
     // normal motion detection
-    dTime = millis();
     if (!nightTime && changeCount > moveThreshold) {
       LOG_VRB("### Change detected");
       motionCnt++; // number of consecutive changes
@@ -336,7 +335,6 @@ bool checkMotion(camera_fb_t* fb, bool motionStatus, bool lightLevelOnly) {
           motionStatus = false;
         }
 #endif
-        dTime = millis();
 #if INCLUDE_MQTT
         if (mqtt_active && motionCnt) {
           snprintf(jsonBuff, JSON_BUFF_LEN, "{\"MOTION\":\"ON\",\"TIME\":\"%s\"}", esp_log_system_timestamp());
