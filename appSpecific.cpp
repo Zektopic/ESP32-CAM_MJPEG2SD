@@ -529,11 +529,6 @@ void externalAlert(const char* subject, const char* message) {
 #endif
 }
 
-void displayAudioLed(int16_t audioSample) {
-}
-
-void setupAudioLed() {
-}
 
 int8_t checkPotVol(int8_t adjVol) {
   return adjVol; // dummy
