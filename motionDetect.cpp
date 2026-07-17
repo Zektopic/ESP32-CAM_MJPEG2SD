@@ -116,23 +116,47 @@ static void rescaleImage(const uint8_t* input, int inputWidth, int inputHeight, 
   float xRatio = (float)inputWidth / (float)outputWidth;
   float yRatio = (float)inputHeight / (float)outputHeight;
 
-  for (int i = 0; i < outputHeight; ++i) {
-    for (int j = 0; j < outputWidth; ++j) {
-      int xL = (int)floor(xRatio * j);
-      int yL = (int)floor(yRatio * i);
-      int xH = (int)ceil(xRatio * j);
-      int yH = (int)ceil(yRatio * i);
-      float xWeight = xRatio * j - xL;
-      float yWeight = yRatio * i - yL;
-      for (int channel = 0; channel < colorDepth; ++channel) {
-        uint8_t a = input[(yL * inputWidth + xL) * colorDepth + channel];
-        uint8_t b = input[(yL * inputWidth + xH) * colorDepth + channel];
-        uint8_t c = input[(yH * inputWidth + xL) * colorDepth + channel];
-        uint8_t d = input[(yH * inputWidth + xH) * colorDepth + channel];
+  int inW_cD = inputWidth * colorDepth;
+  int outW_cD = outputWidth * colorDepth;
 
-        float pixel = a * (1 - xWeight) * (1 - yWeight) + b * xWeight * (1 - yWeight)
-                    + c * yWeight * (1 - xWeight) + d * xWeight * yWeight;
-        output[(i * outputWidth + j) * colorDepth + channel] = (uint8_t)pixel;
+  for (int i = 0; i < outputHeight; ++i) {
+    float yf = yRatio * i;
+    int yL = (int)floor(yf);
+    int yH = (int)ceil(yf);
+    float yWeight = yf - yL;
+    float one_minus_yWeight = 1.0f - yWeight;
+
+    int yL_idx = yL * inW_cD;
+    int yH_idx = yH * inW_cD;
+    int out_y_idx = i * outW_cD;
+
+    for (int j = 0; j < outputWidth; ++j) {
+      float xf = xRatio * j;
+      int xL = (int)floor(xf);
+      int xH = (int)ceil(xf);
+      float xWeight = xf - xL;
+      float one_minus_xWeight = 1.0f - xWeight;
+
+      float w1 = one_minus_xWeight * one_minus_yWeight;
+      float w2 = xWeight * one_minus_yWeight;
+      float w3 = one_minus_xWeight * yWeight;
+      float w4 = xWeight * yWeight;
+
+      int xL_cD = xL * colorDepth;
+      int xH_cD = xH * colorDepth;
+
+      int a_idx = yL_idx + xL_cD;
+      int b_idx = yL_idx + xH_cD;
+      int c_idx = yH_idx + xL_cD;
+      int d_idx = yH_idx + xH_cD;
+      int out_idx = out_y_idx + j * colorDepth;
+
+      for (int channel = 0; channel < colorDepth; ++channel) {
+        float pixel = input[a_idx + channel] * w1 +
+                      input[b_idx + channel] * w2 +
+                      input[c_idx + channel] * w3 +
+                      input[d_idx + channel] * w4;
+        output[out_idx + channel] = (uint8_t)pixel;
       }
     }
   }
