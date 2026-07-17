@@ -671,7 +671,7 @@
             // trigger click for elements with role="button" or SVG rects when Enter or Space is pressed
             if (keyPress === 13 || keyPress === 32) {
               const e = event.target;
-              if (e.getAttribute('role') === 'button' || e.nodeName === 'rect') {
+              if (e.getAttribute('role') === 'button' || e.nodeName === 'rect' || e.classList.contains('iconSize')) {
                 event.preventDefault(); // prevent scrolling for Space
                 if (e.nodeName === 'DIV') {
                   const rect = e.querySelector('rect');
