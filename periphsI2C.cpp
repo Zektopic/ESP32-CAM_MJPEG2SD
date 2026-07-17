@@ -265,11 +265,10 @@ static float getSeaLevelPressure() {
   char jsonVal[FILE_NAME_LEN] = "";
   if (remoteServerConnect(hclient, EXT_MSL_HOST, HTTP_PORT, GETEXTMSL)) {
     HTTPClient http;
-    int httpCode = HTTP_CODE_NOT_FOUND;
     char extMslPath[100];
     snprintf(extMslPath, sizeof(extMslPath), EXT_MSL_PATH, latLon[0], latLon[1]);
     if (http.begin(hclient, EXT_MSL_HOST, HTTP_PORT, extMslPath)) {
-      httpCode = http.GET();
+      int httpCode = http.GET();
       if (httpCode == HTTP_CODE_OK) {
         String payload = http.getString();
         if (!getJsonValue(payload.c_str(), "pressure_msl", jsonVal, nullptr, 2)) LOG_WRN("'pressure_msl' field not present");
@@ -455,11 +454,10 @@ static float getMagneticDeclination() {
   float angle = 0.0f;
   if (remoteServerConnect(hclient, EXT_MAG_HOST, HTTP_PORT, GETEXTMAG)) {
     HTTPClient http;
-    int httpCode = HTTP_CODE_NOT_FOUND;
     char extMagPath[100];
     snprintf(extMagPath, sizeof(extMagPath), EXT_MAG_PATH, latLon[0], latLon[1]);
     if (http.begin(hclient, EXT_MAG_HOST, HTTP_PORT, extMagPath)) {
-      httpCode = http.GET();
+      int httpCode = http.GET();
       if (httpCode == HTTP_CODE_OK) {
         String payload = http.getString();
         if (getJsonValue(payload.c_str(), "declination", jsonVal, "value")) {
