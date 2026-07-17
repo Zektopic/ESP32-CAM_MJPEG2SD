@@ -617,12 +617,11 @@ mjpegStruct getNextFrame(bool firstCall) {
   }
   LOG_VRB("http send time %lu ms", millis() - hTime);
   hTimeTot += millis() - hTime;
-  uint32_t mTime = millis();
   if (!stopPlayback) {
     // continue sending out frames
     if (!remainingBuff) {
       // load more data from SD
-      mTime = millis();
+      uint32_t mTime = millis();
       // move final bytes to buffer start in case jpeg marker at end of buffer
       memcpy(iSDbuffer, iSDbuffer + RAMSIZE, CHUNK_HDR);
       xSemaphoreTake(readSemaphore, portMAX_DELAY); // wait for read from SD card completed
@@ -639,7 +638,6 @@ mjpegStruct getNextFrame(bool firstCall) {
       else buffOffset = frameCnt ? 0 : CHUNK_HDR; // only before 1st frame
       xTaskNotifyGive(playbackHandle); // wake up task to get next cluster - sets readLen
     }
-    mTime = millis();
     if (!remainingFrame) {
       // at start of jpeg frame marker
       uint32_t inVal;
@@ -659,7 +657,7 @@ mjpegStruct getNextFrame(bool firstCall) {
         vidSize += jpegSize;
         buffOffset += CHUNK_HDR; // skip over marker
         mjpegData.jpegSize = jpegSize; // signal start of jpeg to webServer
-        mTime = millis();
+        uint32_t mTime = millis();
         // wait on playbackSemaphore for rate control
         xSemaphoreTake(playbackSemaphore, portMAX_DELAY);
         LOG_VRB("frame timer wait %lu ms", millis() - mTime);
