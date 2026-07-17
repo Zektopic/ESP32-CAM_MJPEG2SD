@@ -838,24 +838,6 @@ char* fmtSize (uint64_t sizeVal) {
   return returnStr;
 }
 
-char* trim(char* str) {
-  // trim whitespace around string
-    char* start = str;
-    char* end;
-    // Trim leading whitespace
-    while (*start && isspace((unsigned char)*start)) start++;
-    if (*start == '\0') {
-        *str = '\0';
-        return str;
-    }
-    // Trim trailing whitespace
-    end = start + strlen(start) - 1;
-    while (end > start && isspace((unsigned char)*end)) end--;
-    *(end + 1) = '\0';
-    // Shift string back to original buffer if needed
-    if (start != str) memmove(str, start, end - start + 2);
-    return str;
-}
 
 char* toCase(char *s, bool toLower) {
   // convert supplied string to lower or upper case
