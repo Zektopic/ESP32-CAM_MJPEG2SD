@@ -8,3 +8,7 @@
 ## 2025-06-26 - Playwright Hover Events on Dropdowns
 **Learning:** When using Playwright to visually verify tooltips on hidden or complex DOM elements (like `<select>` dropdowns inside hidden panels), the standard `page.locator().hover()` method may timeout even after the parent elements are forcefully unhidden.
 **Action:** Instead of relying on Playwright's native hover simulation, dispatch the event directly using JavaScript: `page.evaluate("document.getElementById('element_id').dispatchEvent(new MouseEvent('mouseover'))")` to ensure the interaction registers for verification screenshots.
+
+## 2024-07-17 - Added Tooltips and Screen Reader Labels to Camera Hub Buttons
+**Learning:** Native HTML buttons in the `#DeviceHub` component (Add IP, Delete All, Refresh) used brief, ambiguous text labels (like "Delete All") which lack context for screen reader users and don't provide tooltips for sighted users.
+**Action:** Always verify that interactive elements, especially those with generic text or icons, include descriptive `aria-label` and native `title` attributes to improve accessibility and discoverability without requiring custom CSS or heavy UI changes.
