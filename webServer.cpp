@@ -291,7 +291,7 @@ static esp_err_t statusHandler(httpd_req_t *req) {
 }
 
 bool parseJson(int rxSize) {
-  if (rxSize <= 0) return false;
+  if (rxSize <= 0 || rxSize >= JSON_BUFF_LEN) return false;
   // process json in jsonBuff to extract properly formatted flat key:value pairs
   jsonBuff[rxSize - 1] = ','; // replace final '}'
   jsonBuff[rxSize] = 0; // terminator
@@ -599,7 +599,10 @@ static esp_err_t wsHandler(httpd_req_t *req) {
     wsPkt.payload = wsMsg;
     ret = httpd_ws_recv_frame(req, &wsPkt, MAX_PAYLOAD_LEN);
     if (ret == ESP_OK) {
-      if (wsPkt.len >= MAX_PAYLOAD_LEN) LOG_ERR("websocket payload too long %d", wsPkt.len);
+      if (wsPkt.len >= MAX_PAYLOAD_LEN) {
+        LOG_ERR("websocket payload too long %d", wsPkt.len);
+        return ESP_FAIL;
+      }
       wsMsg[wsPkt.len] = 0; // terminator
       if (wsPkt.type == HTTPD_WS_TYPE_BINARY && wsPkt.len) appSpecificWsBinHandler(wsMsg, wsPkt.len);
       else if (wsPkt.type == HTTPD_WS_TYPE_TEXT) appSpecificWsHandler((const char*)wsMsg);
