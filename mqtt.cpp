@@ -53,14 +53,14 @@ void mqtt_client_publish(const char* topic, const char* payload){
 }
 
 void mqttPublish(const char* payload) {
-  if (!strlen(mqtt_topic_prefix)) return; //Called before load config?
-  if (!strlen(mqttPublishTopic)) snprintf(mqttPublishTopic, FILE_NAME_LEN, "%ssensor/%s/state", mqtt_topic_prefix, hostName);
+  if (mqtt_topic_prefix[0] == '\0') return; //Called before load config?
+  if (mqttPublishTopic[0] == '\0') snprintf(mqttPublishTopic, FILE_NAME_LEN, "%ssensor/%s/state", mqtt_topic_prefix, hostName);
   mqtt_client_publish(mqttPublishTopic, payload);
 }
 
 void mqttPublishPath(const char* suffix, const char* payload, const char *device) {
   char topic[2 * FILE_NAME_LEN];
-  if (!strlen(mqtt_topic_prefix)) return;
+  if (mqtt_topic_prefix[0] == '\0') return;
   snprintf(topic, 2 * FILE_NAME_LEN, "%s%s/%s/%s", mqtt_topic_prefix, device, hostName, suffix);
   mqtt_client_publish(topic, payload);
 }
@@ -107,7 +107,7 @@ static void mqtt_data_handler(void *handler_args, esp_event_base_t base, int32_t
   }
 #endif
   if(strncmp(event->topic, cmd_topic, event->topic_len) == 0){
-    if (strlen(remoteQuery) == 0) snprintf(remoteQuery, sizeof(remoteQuery), "%.*s", event->data_len, (char*)event->data);
+    if (remoteQuery[0] == '\0') snprintf(remoteQuery, sizeof(remoteQuery), "%.*s", event->data_len, (char*)event->data);
     mqttConnected = true;
     LOG_VRB("Resuming mqtt thread..");
     xTaskNotifyGive(mqttTaskHandle);
@@ -125,7 +125,7 @@ static void mqtt_error_handler(void *handler_args, esp_event_base_t base, int32_
 }
 void sendMqttImage(){
   uint32_t startTime = millis();
-  if (!strlen(mqtt_topic_prefix)) return;
+  if (mqtt_topic_prefix[0] == '\0') return;
   doKeepFrame = true;
   while (doKeepFrame && millis() - startTime < 4 * MAX_FRAME_WAIT) delay(100);
   if (!doKeepFrame && alertBufferSize) {
@@ -139,7 +139,7 @@ void sendMqttImage(){
 
 void checkForRemoteQuery() {
   //Execute remote query i.e. dbgVerbose=1;framesize=7;fps=1
-  if (strlen(remoteQuery) > 0) {
+  if (remoteQuery[0] != '\0') {
     char* query = strtok(remoteQuery, ";");
     while (query != NULL) {
       char* value = strchr(query, '=');
@@ -321,34 +321,34 @@ void sendHasEntities (const char *name, const char *displayName, const char *uni
   JSON_APPEND("\"name\":\"%s\",", displayName);
   JSON_APPEND("\"uniq_id\":\"%s_%012llX\",", name, ESP.getEfuseMac() );
   //JSON_APPEND("\"obj_id\":\"%s %s\",", hostName, name);
-  if(strlen(units)>0)
+  if(units[0] != '\0')
     JSON_APPEND("\"unit_of_meas\":\"%s\",", units);
-  if(strlen(icon)>0)
+  if(icon[0] != '\0')
     JSON_APPEND("\"ic\":\"%s\",", icon);
   
   if(strcmp(category, "camera") == 0 ){
     JSON_APPEND("\"t\":\"%ssensor/%s/%s\",", mqtt_topic_prefix, hostName, topic);
   
   }else{
-    if(strlen(category)>0){  
+    if(category[0] != '\0'){
       JSON_APPEND("\"ent_cat\":\"%s\",", category);
     }
-    if(strlen(topic))
+    if(topic[0] != '\0')
       JSON_APPEND("\"stat_t\":\"%ssensor/%s/%s\",", mqtt_topic_prefix, hostName, topic);
     else
       JSON_APPEND("\"stat_t\":\"%ssensor/%s/%s\",", mqtt_topic_prefix, hostName, name);
   
-    if(strlen(payload_on) && strlen(payload_off) ){  
+    if(payload_on[0] != '\0' && payload_off[0] != '\0' ){
       JSON_APPEND("\"pl_on\":\"%s\",", payload_on);
       JSON_APPEND("\"pl_off\":\"%s\",", payload_off);
       JSON_APPEND("\"cmd_t\":\"%ssensor/%s/%s\",", mqtt_topic_prefix, hostName, "cmd");
-    }else if(strlen(payload_on) && !strlen(payload_off) ){
+    }else if(payload_on[0] != '\0' && payload_off[0] == '\0' ){
       JSON_APPEND("\"pl_prs\":\"%s\",", payload_on);
       JSON_APPEND("\"cmd_t\":\"%ssensor/%s/%s\",", mqtt_topic_prefix, hostName, "cmd");
     }
   }
   
-  if(strcmp(category, "diagnostic") != 0 && strlen(payload_on) == 0){
+  if(strcmp(category, "diagnostic") != 0 && payload_on[0] == '\0'){
     JSON_APPEND("\"avty_t\":\"%ssensor/%s/%s\",", mqtt_topic_prefix, hostName, "lwt");
     JSON_APPEND("\"pl_avail\":\"%s\",", "online");
     JSON_APPEND("\"pl_not_avail\":\"%s\",", "offline");
@@ -369,9 +369,9 @@ void sendHasEntities (const char *name, const char *displayName, const char *uni
 
   char suffix[FILE_NAME_LEN] = "";  
   snprintf(suffix, sizeof(suffix), "%s/config", name);
-  if(strlen(payload_on) && strlen(payload_off) )
+  if(payload_on[0] != '\0' && payload_off[0] != '\0' )
     mqttPublishPath(suffix, jsonBuff, "switch");
-  else if(strlen(payload_on) && !strlen(payload_off))
+  else if(payload_on[0] != '\0' && payload_off[0] == '\0')
     mqttPublishPath(suffix, jsonBuff, "button");
   else if(strcmp(category, "camera") == 0 )
     mqttPublishPath("config", jsonBuff, "camera");
