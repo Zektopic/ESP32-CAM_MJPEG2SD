@@ -330,7 +330,7 @@ void deleteFolderOrFile(const char* deleteThis) {
     File file = df.openNextFile();
     while (file) {
       char filepath[FILE_NAME_LEN];
-      strcpy(filepath, file.path()); 
+      snprintf(filepath, sizeof(filepath), "%s", file.path());
       if (file.isDirectory()) LOG_INF("  DIR : %s", filepath);
       else {
         size_t fSize = file.size();
