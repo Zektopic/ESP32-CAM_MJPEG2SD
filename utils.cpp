@@ -819,11 +819,6 @@ uint16_t smoothAnalog(int analogPin, int samples) {
   return level;
 }
 
-void setupADC() {
-  analogSetAttenuation(ADC_ATTEN);
-  analogReadResolution(ADC_BITS);
-}
-
 float smoothSensor(float latestVal, float smoothedVal, float alpha) {
   // simple Exponential Moving Average filter 
   // where alpha between 0.0 (max smooth) and 1.0 (no smooth)

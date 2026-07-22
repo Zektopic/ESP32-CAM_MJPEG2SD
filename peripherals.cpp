@@ -750,7 +750,8 @@ static void prepLedBar() {
 
 void prepPeripherals() {
   // initial setup of each peripheral on client or extender
-  setupADC();
+  analogSetAttenuation(ADC_ATTEN);
+  analogReadResolution(ADC_BITS);
   setupBatt();
   setupLamp();
   prepPIR();
