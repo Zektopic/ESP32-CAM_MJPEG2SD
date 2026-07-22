@@ -115,8 +115,11 @@ static bool getTgramResponse() {
       // retrieve response content
       size_t availLen = tclient.available();
       // ⚡ Bolt optimization: Use block read() instead of readBytes() to bypass per-byte timedRead() overhead
-      if (availLen) readLen += tclient.read((uint8_t*)tgramBuff + readLen, availLen);
-      delay(50);
+      if (availLen) {
+        readLen += tclient.read((uint8_t*)tgramBuff + readLen, availLen);
+      } else {
+        vTaskDelay(pdMS_TO_TICKS(10));
+      }
     }
     if (contentLen - readLen > 0) LOG_WRN("Timed out waiting for telegram response");
     else {
