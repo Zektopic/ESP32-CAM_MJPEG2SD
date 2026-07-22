@@ -86,7 +86,7 @@ static bool getI2Cdata (uint8_t clientAddr, uint8_t controlByte, uint8_t numByte
   if (sendTransmission(clientAddr, false)) {
     // get required number of bytes
     Wire.requestFrom (clientAddr, numBytes);
-    for (int i=0; i<numBytes; i++) I2CDATA[i] = Wire.read();
+    Wire.readBytes(I2CDATA, numBytes);
     return sendTransmission(clientAddr, false);
   }
   return false;
