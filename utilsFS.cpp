@@ -172,14 +172,6 @@ static void getOldestDir(char* oldestDir) {
   }
 }
 
-void inline getFileDate(File& file, char* fileDate) {
-  // get last write date of file as string
-  time_t writeTime = file.getLastWrite();
-  struct tm lt;
-  localtime_r(&writeTime, &lt);
-  strftime(fileDate, strlen(fileDate), "%Y-%m-%d %H:%M:%S", &lt);
-}
-
 bool checkFreeStorage() { 
   // Check for sufficient space on storage
   bool res = false;
