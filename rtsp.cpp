@@ -131,7 +131,7 @@ static void sendRTSPAudio(void* p) {
       rtspServer.sendRTSPAudio((int16_t*)audioBuffer, audioBytes);
       audioBytes = 0;
     } 
-    delay(20);
+    vTaskDelay(pdMS_TO_TICKS(20));
   }
 #endif
   vTaskDelete(NULL);

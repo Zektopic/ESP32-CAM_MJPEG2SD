@@ -112,3 +112,6 @@
 ## 2024-05-24 - O(N) strlen overhead for boolean empty checks
 **Learning:** Checking if a string is empty or has a minimal length using `strlen(str) > 0` or `strlen(str) > 1` forces an O(N) traversal of the string, which is inefficient, especially when checking many dynamically parsed strings like HTTP parameters or parsed JSON keys.
 **Action:** Replace length boundary checks with O(1) direct character evaluations utilizing boolean short-circuiting. Use `str[0] != '\0'` instead of `strlen(str) > 0` and `str[0] != '\0' && str[1] != '\0'` instead of `strlen(str) > 1`.
+## 2024-05-24 - Replace delay with vTaskDelay in FreeRTOS tasks
+**Learning:** Arduino's `delay()` function introduces overhead such as watchdog resets, `yieldIfNecessary()`, and busy-waiting via `micros()` to ensure exact delays.
+**Action:** When working in FreeRTOS tasks on ESP32, replace `delay(ms)` with native `vTaskDelay(pdMS_TO_TICKS(ms))` to properly place the task in the Blocked state and free CPU cycles for other tasks.
