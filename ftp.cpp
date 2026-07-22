@@ -84,7 +84,7 @@ static void postHeader(const char* tmethod, const char* contentType, bool isFile
   // create http request header
   p = fsBuff;
   if (isFile) fileSize += formLen + (sizeof(END_BOUNDARY) - 1);
-  p += sprintf(p, POST_HDR, tmethod, fsServer, fileSize, isFile ? MULTI_TYPE : JSON_TYPE);
+  snprintf(p, FORM_OFFSET, POST_HDR, tmethod, fsServer, fileSize, isFile ? MULTI_TYPE : JSON_TYPE);
   size_t reqLen = strlen(fsBuff);
   // concatenate request and form data
   if (formLen) {
