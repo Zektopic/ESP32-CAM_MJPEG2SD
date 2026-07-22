@@ -181,7 +181,7 @@ static void setWifiAP() {
   if (!APstarted) {
     WiFi.AP.begin();
     // Set access point with static ip if provided
-    if (strlen(AP_ip) > 1) {
+    if (AP_ip[0] != '\0' && AP_ip[1] != '\0') {
       LOG_INF("Set AP static IP :%s, %s, %s", AP_ip, AP_gw, AP_sn);  
       IPAddress _ip, _gw, _sn, _ns1, _ns2;
       _ip.fromString(AP_ip);
@@ -197,7 +197,7 @@ static void setWifiAP() {
 
 static void setWifiSTA() {
   // set station with static ip if provided
-  if (strlen(ST_ip) > 1) {
+  if (ST_ip[0] != '\0' && ST_ip[1] != '\0') {
     IPAddress _ip, _gw, _sn, _ns1, _ns2;
     if (!_ip.fromString(ST_ip)) LOG_WRN("Failed to parse IP: %s", ST_ip);
     else {
@@ -282,7 +282,7 @@ static bool startEth(bool firstcall) {
 #endif
 
     // Apply static IP to Ethernet if configured in existing fields
-    if (strlen(ST_ip) > 1) {
+    if (ST_ip[0] != '\0' && ST_ip[1] != '\0') {
       IPAddress _ip, _gw, _sn, _ns1, _ns2;
       if (_ip.fromString(ST_ip)) {
         _gw.fromString(ST_gw);
@@ -329,7 +329,7 @@ static bool startWifi(bool firstcall = true) {
     uint32_t startAttemptTime = millis();
     // Stop trying on failure timeout, will try to reconnect later by ping
     wlStat = WL_NO_SSID_AVAIL;
-    if (strlen(ST_SSID)) {
+    if (ST_SSID[0] != '\0') {
       while (wlStat = WiFi.STA.status(), wlStat != WL_CONNECTED && millis() - startAttemptTime < 5000)  {
         LOG_SEND(".");
         delay(500);
@@ -467,7 +467,7 @@ static void pingTimeout(esp_ping_handle_t hdl, void *args) {
       }
     }
   } else {
-    if (strlen(ST_SSID)) {
+    if (ST_SSID[0] != '\0') {
       wl_status_t wStat = WiFi.STA.status();
       if (wStat != WL_NO_SSID_AVAIL && wStat != WL_NO_SHIELD) {
         if (usePing) {
@@ -613,7 +613,7 @@ bool remoteServerConnect(NetworkClientSecure& client, const char* host, uint16_t
       return false;
     }
     // Configure security
-    if (useSecure && strlen(cert)) client.setCACert(cert);
+    if (useSecure && cert[0] != '\0') client.setCACert(cert);
     else client.setInsecure();
     if (remoteServerConnect(static_cast<Client&>(client), host, port, idx)) return true;
     else {

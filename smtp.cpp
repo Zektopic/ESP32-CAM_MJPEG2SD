@@ -42,7 +42,7 @@ int alertMax = 10; // only applied to emails
 static bool sendSmtpCommand(NetworkClientSecure& client, const char* cmd, const char* respCode) {
   // wait from smtp server response, check response code and extract response data
   LOG_VRB("Cmd: %s", cmd);
-  if (strlen(cmd)) client.println(cmd);
+  if (cmd[0] != '\0') client.println(cmd);
   
 	uint32_t start = millis();
   while (!client.available() && millis() < start + (responseTimeoutSecs * 1000)) delay(1);

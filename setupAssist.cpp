@@ -59,7 +59,7 @@ static bool wgetFile(const char* filePath) {
 bool checkDataFiles() {
   // Download any missing data files
   bool res = false;
-  if (strlen(GITHUB_PATH)) {
+  if (GITHUB_PATH[0] != '\0') {
     res = wgetFile(COMMON_JS_PATH); 
     if (res) res = wgetFile(INDEX_PAGE_PATH); 
     if (res) res = appDataFiles(); 

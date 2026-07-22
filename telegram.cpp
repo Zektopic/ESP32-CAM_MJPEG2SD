@@ -202,7 +202,7 @@ static bool sendTgramBuff(uint8_t* buffData, size_t buffSize) {
 bool prepTelegram() {
   // setup and check access to Telegram if required
   if (tgramUse) {
-    if (strlen(tgramToken)) {
+    if (tgramToken[0] != '\0') {
       if (tgramBuff == NULL) tgramBuff = psramFound() ? (char*)ps_malloc(MAX_HTTP_MSG) : (char*)malloc(MAX_HTTP_MSG); 
       // check connection with getme request
       bool res = false;
@@ -265,7 +265,7 @@ bool sendTgramMessage(const char* info, const char* item, const char* parseMode)
   size_t rem = MAX_HTTP_MSG - FORM_OFFSET;
   int written = snprintf(t, rem, POST_JSON, tgramChatId, tgramHdr, info, item);
   if (written > 0 && written < (int)rem) { t += written; rem -= written; }
-  if (strlen(parseMode) && rem + 1 > 0) {
+  if (parseMode[0] != '\0' && rem + 1 > 0) {
     written = snprintf(t - 1, rem + 1, PARSE_MODE, parseMode); // overwrite previous '}'
     if (written > 0 && written < (int)(rem + 1)) { t += written - 1; rem -= written - 1; }
   }
@@ -300,7 +300,7 @@ bool sendTgramFile(const char* fileName, const char* contentType, const char* ca
         tclient.println(END_BOUNDARY);
       } else snprintf(errMsg, sizeof(errMsg) - 1, "File size too large: %s", fmtSize(df.size()));        
     } else snprintf(errMsg, sizeof(errMsg) - 1, "File does not exist or cannot be opened: %s", fileName);
-    if (strlen(errMsg)) {
+    if (errMsg[0] != '\0') {
       LOG_WRN("%s", errMsg);
       sendTgramMessage("ERROR: ", errMsg, "");
     }

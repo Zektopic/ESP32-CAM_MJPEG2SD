@@ -100,3 +100,6 @@
 ## 2024-05-25 - Avoid O(N) strlen overhead after snprintf
 **Learning:** Determining the length of a string immediately after formatting it with `snprintf` by calling `strlen()` causes an unnecessary O(N) traversal of the string that was just constructed.
 **Action:** Use the return value of `snprintf` (clamped to the buffer size if it exceeds the bounds, e.g., `if (len >= size) len = size - 1;`) to determine the length of the formatted string in O(1) time.
+## 2024-05-24 - O(N) strlen overhead for boolean empty checks
+**Learning:** Checking if a string is empty or has a minimal length using `strlen(str) > 0` or `strlen(str) > 1` forces an O(N) traversal of the string, which is inefficient, especially when checking many dynamically parsed strings like HTTP parameters or parsed JSON keys.
+**Action:** Replace length boundary checks with O(1) direct character evaluations utilizing boolean short-circuiting. Use `str[0] != '\0'` instead of `strlen(str) > 0` and `str[0] != '\0' && str[1] != '\0'` instead of `strlen(str) > 1`.
