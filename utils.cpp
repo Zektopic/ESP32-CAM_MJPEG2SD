@@ -776,17 +776,6 @@ void urlDecode(char* inVal) {
   *writePtr = '\0';
 }
 
-void listBuff (const uint8_t* b, size_t len) {
-  // output buffer content as hex, 16 bytes per line
-  if (!len || !b) LOG_WRN("Nothing to print");
-  else {
-    for (size_t i = 0; i < len; i += 16) {
-      int linelen = (len - i) < 16 ? (len - i) : 16;
-      for (size_t k = 0; k < linelen; k++) LOG_SEND(" %02x", b[i+k]);
-      puts(" ");
-    }
-  }
-}
 void removeChar(char* s, char c) {
   // remove specified character from string
   int writer = 0, reader = 0;
