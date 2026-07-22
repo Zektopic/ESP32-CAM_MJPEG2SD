@@ -15,6 +15,20 @@ void removeChar(char* s, char c) {
   s[writer] = 0;
 }
 
+// Stub for formatElapsedTime since it's defined in utils.cpp which has ESP32 dependencies
+void formatElapsedTime(char* timeStr, uint32_t timeVal, bool noDays) {
+  // elapsed time that app has been running
+  uint32_t secs = timeVal / 1000; //convert milliseconds to seconds
+  uint32_t mins = secs / 60; //convert seconds to minutes
+  uint32_t hours = mins / 60; //convert minutes to hours
+  uint32_t days = hours / 24; //convert hours to days
+  secs = secs - (mins * 60); //subtract the converted seconds to minutes in order to display 59 secs max
+  mins = mins - (hours * 60); //subtract the converted minutes to hours in order to display 59 minutes max
+  hours = hours - (days * 24); //subtract the converted hours to days in order to display 23 hours max
+  if (noDays) sprintf(timeStr, "%02lu:%02lu:%02lu", (unsigned long)hours, (unsigned long)mins, (unsigned long)secs);
+  else sprintf(timeStr, "%lu-%02lu:%02lu:%02lu", (unsigned long)days, (unsigned long)hours, (unsigned long)mins, (unsigned long)secs);
+}
+
 // Stub for replaceChar since it's defined in utils.cpp which has ESP32 dependencies
 void replaceChar(char* s, char c, char r) {
   // replace specified character in string
@@ -246,8 +260,46 @@ void test_urlEncode() {
     std::cout << "All urlEncode tests passed!" << std::endl;
 }
 
+void test_formatElapsedTime() {
+    char buffer[256];
+
+    // Test 1: 0ms
+    formatElapsedTime(buffer, 0, false);
+    assert(strcmp(buffer, "0-00:00:00") == 0);
+
+    // Test 2: < 1000ms (should be 0s)
+    formatElapsedTime(buffer, 999, false);
+    assert(strcmp(buffer, "0-00:00:00") == 0);
+
+    // Test 3: exactly 1 minute
+    formatElapsedTime(buffer, 60000, false);
+    assert(strcmp(buffer, "0-00:01:00") == 0);
+
+    // Test 4: exactly 1 hour
+    formatElapsedTime(buffer, 3600000, false);
+    assert(strcmp(buffer, "0-01:00:00") == 0);
+
+    // Test 5: exactly 1 day
+    formatElapsedTime(buffer, 86400000, false);
+    assert(strcmp(buffer, "1-00:00:00") == 0);
+
+    // Test 6: > 1 day with noDays flag (should show >24 hours if logic was different, but it truncates days, so hours should be modulo 24)
+    formatElapsedTime(buffer, 90061000, true);
+    // 90061000 ms = 25 hours, 1 minute, 1 second.
+    // In formatElapsedTime, hours = hours - (days*24) = 25 - 24 = 1.
+    // So with noDays, it will just show "01:01:01"
+    assert(strcmp(buffer, "01:01:01") == 0);
+
+    // Test 7: > 1 day with days
+    formatElapsedTime(buffer, 90061000, false);
+    assert(strcmp(buffer, "1-01:01:01") == 0);
+
+    std::cout << "All tests passed for formatElapsedTime!" << std::endl;
+}
+
 int main() {
     test_isSubArray();
+    test_formatElapsedTime();
     test_replaceChar();
     test_removeChar();
     test_isPathTraversal();
