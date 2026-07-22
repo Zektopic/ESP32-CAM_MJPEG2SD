@@ -818,11 +818,7 @@ uint16_t smoothAnalog(int analogPin, int samples) {
   return level;
 }
 
-float smoothSensor(float latestVal, float smoothedVal, float alpha) {
-  // simple Exponential Moving Average filter 
-  // where alpha between 0.0 (max smooth) and 1.0 (no smooth)
-  return (latestVal * alpha) + smoothedVal * (1.0 - alpha);
-}
+
 
 // onboard chip temperature sensor
 #if CONFIG_IDF_TARGET_ESP32
