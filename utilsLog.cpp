@@ -74,6 +74,7 @@ void saveRamLog(const char* ramLogName) {
     if (chunkSize > 0) ramFile.write((uint8_t*)messageLog + startPtr, chunkSize);
     startPtr += chunkSize;
     if (startPtr >= RAM_LOG_LEN) startPtr = 0;
+    vTaskDelay(1);
   } while (startPtr != endPtr);
   ramFile.close();
 }
