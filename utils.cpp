@@ -807,12 +807,6 @@ char* fmtSize (uint64_t sizeVal) {
 }
 
 
-char* toCase(char *s, bool toLower) {
-  // convert supplied string to lower or upper case
-  for (char *p = s; *p; ++p) *p = toLower ? (char)tolower((unsigned char)*p) : (char)toupper((unsigned char)*p);
-  return s;
-}
-
 /********************** analog functions ************************/
 
 uint16_t smoothAnalog(int analogPin, int samples) {
