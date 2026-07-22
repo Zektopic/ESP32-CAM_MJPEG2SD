@@ -470,10 +470,15 @@ static esp_err_t setupHandler(httpd_req_t *req) {
   // Populate the JSON string with scan results
   for (int i = 0; i < w; ++i) {
     n = snprintf(p, rem, "{\"ssid\":\"%s\",\"encryption\":\"%s\",\"strength\":\"%ld\"},", WiFi.SSID(i).c_str(), getEncType(i), WiFi.RSSI(i));
-    if (n > 0 && n < rem) { p += n; rem -= n; }
+    if (n > 0 && (size_t)n + 2 < rem) {
+      p += n;
+      rem -= n;
+    } else {
+      break;
+    }
   }
   // remove final comma and close the JSON array
-  if (w > 0 && p > jsonBuff) { p--; rem++; } // step back over comma
+  if (p > jsonBuff && *(p - 1) == ',') { p--; rem++; } // step back over comma
   snprintf(p, rem, "]}");
   // Set the response type to JSON and send JSON
   httpd_resp_set_type(req, "application/json");
