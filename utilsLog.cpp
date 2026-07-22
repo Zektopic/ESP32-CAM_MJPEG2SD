@@ -8,6 +8,7 @@
  * - To clear the log file contents, on log web page press Clear Log link
  */
  
+#ifndef TEST_ENV
 #include "appGlobals.h"
 #include "freertos/atomic.h"
 
@@ -568,6 +569,7 @@ static void printGpioInfo() {
   }
 }
 
+#endif // TEST_ENV
 // display partition map
 const char* partitionTypeToStr(uint8_t type) {
   // Map type to string
@@ -604,6 +606,7 @@ const char* partitionSubtypeToStr(uint8_t type, uint8_t subtype) {
   }
   return "Unknown";
 }
+#ifndef TEST_ENV
 
 static void printPartitionTable() {
   // print all partitions
@@ -648,3 +651,4 @@ void showSys() {
   logLine();
   //gpio_dump_io_configuration(stdout, SOC_GPIO_VALID_GPIO_MASK);
 }
+#endif // TEST_ENV
