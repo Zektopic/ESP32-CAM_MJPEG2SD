@@ -882,6 +882,16 @@
         margin-left: var(--buttonDbl);
       }
 
+      #imageContainer:empty::after {
+        content: "No cameras added. Enter an IP address above to add a camera.";
+        display: block;
+        grid-column: 1 / -1;
+        text-align: center;
+        color: var(--itemInactive);
+        font-size: var(--headingSize);
+        padding: calc(var(--buttonSize) * 2);
+      }
+
       .hubImg {
         max-width: 100%;
         height: auto;
