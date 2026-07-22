@@ -12,3 +12,6 @@
 ## 2024-07-17 - Added Tooltips and Screen Reader Labels to Camera Hub Buttons
 **Learning:** Native HTML buttons in the `#DeviceHub` component (Add IP, Delete All, Refresh) used brief, ambiguous text labels (like "Delete All") which lack context for screen reader users and don't provide tooltips for sighted users.
 **Action:** Always verify that interactive elements, especially those with generic text or icons, include descriptive `aria-label` and native `title` attributes to improve accessibility and discoverability without requiring custom CSS or heavy UI changes.
+## 2025-07-22 - Keyboard accessibility for custom buttons
+**Learning:** Many interactive components in this application (like custom tabs, overlay controls, and settings menus) use `div` or `nav` elements with `role="button"` and `tabindex="0"`. These elements require explicit keyboard event handling to be accessible to keyboard-only and screen reader users.
+**Action:** Always ensure that custom button elements include `onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}"` to replicate native HTML button behavior, allowing activation via Enter or Space.
