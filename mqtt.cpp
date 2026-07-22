@@ -50,6 +50,7 @@ void mqtt_client_publish(const char* topic, const char* payload){
   int id = esp_mqtt_client_publish(mqtt_client, topic, payload, payloadLen, MQTT_QOS, MQTT_RETAIN);
   LOG_VRB("Mqtt pub, topic:%s, ID:%d, length:%zu", topic, id, payloadLen);
 
+
   LOG_VRB("Mqtt pub, payload:%s", payload);
 }
 
