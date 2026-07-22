@@ -528,9 +528,8 @@ void getExtIP() {
     NetworkClient hclient;
     if (remoteServerConnect(hclient, EXT_IP_HOST, HTTP_PORT, GETEXTIP)) {
       HTTPClient http;
-      int httpCode = HTTP_CODE_NOT_FOUND;
       if (http.begin(hclient, EXT_IP_HOST, HTTP_PORT, EXT_IP_PATH)) {
-        httpCode = http.GET();
+        int httpCode = http.GET();
         if (httpCode == HTTP_CODE_OK) {
           String payload = http.getString();
           char jsonVal[FILE_NAME_LEN] = "";
