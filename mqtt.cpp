@@ -49,18 +49,20 @@ void mqtt_client_publish(const char* topic, const char* payload){
   size_t payloadLen = strlen(payload);
   int id = esp_mqtt_client_publish(mqtt_client, topic, payload, payloadLen, MQTT_QOS, MQTT_RETAIN);
   LOG_VRB("Mqtt pub, topic:%s, ID:%d, length:%zu", topic, id, payloadLen);
+
   LOG_VRB("Mqtt pub, payload:%s", payload);
 }
 
 void mqttPublish(const char* payload) {
-  if (!mqtt_topic_prefix[0]) return; //Called before load config?
-  if (!mqttPublishTopic[0]) snprintf(mqttPublishTopic, FILE_NAME_LEN, "%ssensor/%s/state", mqtt_topic_prefix, hostName);
+  // ⚡ Bolt optimization: O(1) empty string check
+  if (mqtt_topic_prefix[0] == '\0') return; //Called before load config?
+  if (mqttPublishTopic[0] == '\0') snprintf(mqttPublishTopic, FILE_NAME_LEN, "%ssensor/%s/state", mqtt_topic_prefix, hostName);
   mqtt_client_publish(mqttPublishTopic, payload);
 }
 
 void mqttPublishPath(const char* suffix, const char* payload, const char *device) {
   char topic[2 * FILE_NAME_LEN];
-  if (!mqtt_topic_prefix[0]) return;
+  if (mqtt_topic_prefix[0] == '\0') return;
   snprintf(topic, 2 * FILE_NAME_LEN, "%s%s/%s/%s", mqtt_topic_prefix, device, hostName, suffix);
   mqtt_client_publish(topic, payload);
 }
@@ -79,19 +81,19 @@ static void mqtt_connected_handler(void *handler_args, esp_event_base_t base, in
 
 #if (INCLUDE_HASIO)
   sendMqttHasDiscovery();
-  vTaskDelay(1000 / portTICK_RATE_MS);
+  vTaskDelay(1000 / portTICK_RATE_MS);   
   sendMqttHasState();
   id = esp_mqtt_client_subscribe(mqtt_client, HASIO_AVAILABILITY, 1);
   if (id == -1){
     LOG_WRN("Mqtt failed to subscribe: %s", HASIO_AVAILABILITY );
   } else LOG_VRB("Mqtt subscribed: %s", HASIO_AVAILABILITY );
-#endif
+#endif 
 }
 
 static void mqtt_disconnected_handler(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data) {
   LOG_INF("Mqtt disconnect");
   mqttConnected = false;
-  //xTaskNotifyGive(mqttTaskHandle); //Unblock task
+  //xTaskNotifyGive(mqttTaskHandle); //Unblock task    
 }
 
 static void mqtt_data_handler(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data) {
@@ -101,9 +103,9 @@ static void mqtt_data_handler(void *handler_args, esp_event_base_t base, int32_t
 #if INCLUDE_HASIO
   if(strncmp(event->topic, HASIO_AVAILABILITY, event->topic_len) == 0){
     sendMqttHasDiscovery();
-    vTaskDelay(1000 / portTICK_RATE_MS);
+    vTaskDelay(1000 / portTICK_RATE_MS);   
     sendMqttHasState();
-    return;
+    return; 
   }
 #endif
   if(strncmp(event->topic, cmd_topic, event->topic_len) == 0){
@@ -117,7 +119,7 @@ static void mqtt_data_handler(void *handler_args, esp_event_base_t base, int32_t
 static void mqtt_error_handler(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data) {
   LOG_VRB("Event base=%s, event_id=%ld", base, event_id);
   esp_mqtt_event_handle_t event = (esp_mqtt_event_handle_t)event_data;
-  LOG_VRB("Mqtt event error %i", event->msg_id);
+  LOG_VRB("Mqtt event error %i", event->msg_id);    
   if (event->error_handle->error_type == MQTT_ERROR_TYPE_TCP_TRANSPORT) {
     LOG_WRN("Last err string (%s)", strerror(event->error_handle->esp_transport_sock_errno));
     mqttConnected = false;
@@ -125,7 +127,7 @@ static void mqtt_error_handler(void *handler_args, esp_event_base_t base, int32_
 }
 void sendMqttImage(){
   uint32_t startTime = millis();
-  if (!mqtt_topic_prefix[0]) return;
+  if (mqtt_topic_prefix[0] == '\0') return;
   doKeepFrame = true;
   while (doKeepFrame && millis() - startTime < 4 * MAX_FRAME_WAIT) delay(100);
   if (!doKeepFrame && alertBufferSize) {
@@ -139,7 +141,7 @@ void sendMqttImage(){
 
 void checkForRemoteQuery() {
   //Execute remote query i.e. dbgVerbose=1;framesize=7;fps=1
-  if (remoteQuery[0]) {
+  if (remoteQuery[0] != '\0') {
     char* query = strtok(remoteQuery, ";");
     while (query != NULL) {
       char* value = strchr(query, '=');
@@ -147,10 +149,10 @@ void checkForRemoteQuery() {
         *value = 0; // split remoteQuery into 2 strings, first is key name
         value++; // second is value
         LOG_VRB("Mqtt exec q: %s v: %s", query, value);
-        //Extra handling
+        //Extra handling           
         if (!strcmp(query, "clockUTC")) { //Set time from browser clock
-
-        } else {
+            
+        } else {  
 #ifdef ISCAM
 #ifndef AUXILIARY
           //Block other tasks from accessing the camera
@@ -159,38 +161,38 @@ void checkForRemoteQuery() {
 #endif
 #endif
           updateStatus(query, value);
-        }
+        }          
       } else { //No params command
         LOG_VRB("Execute cmd: %s", query);
         if (!strcmp(query, "reset")) { //Reboot
-            doRestart("Mqtt remote restart");
+            doRestart("Mqtt remote restart");  
         }else if (!strcmp(query, "status")) {
           buildJsonString(false);
           mqttPublishPath("status", jsonBuff);
         } else if (!strcmp(query, "status?q")) {
           buildJsonString(true);
           mqttPublishPath("status", jsonBuff);
-#if (INCLUDE_HASIO)
+#if (INCLUDE_HASIO)          
         } else if (!strcmp(query, "still")) {
            sendMqttImage();
            sendMqttHasState();
         } else if (!strcmp(query, "state")) {
-          sendMqttHasState();
+          sendMqttHasState();          
         } else if (!strcmp(query, "disc")) {
           sendMqttHasDiscovery();
-          vTaskDelay(1000 / portTICK_RATE_MS);
-          sendMqttHasState();
-#endif
+          vTaskDelay(1000 / portTICK_RATE_MS);   
+          sendMqttHasState();          
+#endif          
         }
       }
       query = strtok(NULL, ";");
     }
     remoteQuery[0] = '\0';
-  }
+  }  
 }
 
-static void mqttTask(void* parameter) {
-  LOG_VRB("Mqtt task start");
+static void mqttTask(void* parameter) { 
+  LOG_VRB("Mqtt task start"); 
   while (mqtt_active) {
     //LOG_VRB("Waiting for signal..");
     ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
@@ -199,13 +201,13 @@ static void mqttTask(void* parameter) {
       //Check if server sends a remote command
       checkForRemoteQuery();
       if (mqttTaskDelay > 0 ) vTaskDelay(mqttTaskDelay / portTICK_RATE_MS);
-    } else { //Disconnected
+    } else { //Disconnected      
       LOG_WRN("Disconnected, wait..");
       vTaskDelay(2000 / portTICK_RATE_MS);
     }
   }
   mqttRunning = false;
-  LOG_VRB("Mqtt Task exiting..");
+  LOG_VRB("Mqtt Task exiting..");  
   mqttTaskHandle = NULL;
   vTaskDelete(NULL);
 }
@@ -217,7 +219,7 @@ void stopMqttClient() {
     vTaskDelay(1000 / portTICK_RATE_MS);
   }
   ESP_ERROR_CHECK_WITHOUT_ABORT(esp_mqtt_client_stop(mqtt_client));
-  ESP_ERROR_CHECK_WITHOUT_ABORT(esp_mqtt_client_destroy(mqtt_client));
+  ESP_ERROR_CHECK_WITHOUT_ABORT(esp_mqtt_client_destroy(mqtt_client));    
   LOG_VRB("Checking mqtt task");
   if ( mqttTaskHandle != NULL ) {
     LOG_VRB("Unlock task..");
@@ -230,23 +232,23 @@ void stopMqttClient() {
   mqtt_client = nullptr;
 }
 
-void startMqttClient(void){
+void startMqttClient(void){  
   if (!mqtt_active) {
     LOG_VRB("MQTT not active..");
     return;
   }
-
+  
   if (mqttConnected) {
     LOG_VRB("MQTT already running.. Exiting");
     return;
   }
-
+    
   if (!netIsConnected()) {
     mqttConnected = false;
     LOG_VRB("Network disconnected.. Retry mqtt on connect");
     return;
   }
-
+  
   char mqtt_uri[FILE_NAME_LEN];
   sprintf(mqtt_uri, "mqtt://%s:%s", mqtt_broker, mqtt_port);
   snprintf(lwt_topic, FILE_NAME_LEN, "%ssensor/%s/lwt", mqtt_topic_prefix, hostName);
@@ -288,7 +290,7 @@ void startMqttClient(void){
     if (ESP_ERROR_CHECK_WITHOUT_ABORT(esp_mqtt_client_start(mqtt_client)) != ESP_OK) {
       LOG_WRN("Mqtt start failed");
     } else {
-      LOG_VRB("Mqtt started");
+      LOG_VRB("Mqtt started");        
       // Create a mqtt task
       BaseType_t xReturned = xTaskCreateWithCaps(&mqttTask, "mqttTask", MQTT_STACK_SIZE, NULL, MQTT_PRI, &mqttTaskHandle, STACK_MEM);
       LOG_INF("Created mqtt task: %u", xReturned );
@@ -321,33 +323,33 @@ void sendHasEntities (const char *name, const char *displayName, const char *uni
   JSON_APPEND("\"name\":\"%s\",", displayName);
   JSON_APPEND("\"uniq_id\":\"%s_%012llX\",", name, ESP.getEfuseMac() );
   //JSON_APPEND("\"obj_id\":\"%s %s\",", hostName, name);
-  if(units[0])
+  if(units[0] != '\0')
     JSON_APPEND("\"unit_of_meas\":\"%s\",", units);
-  if(icon[0])
+  if(icon[0] != '\0')
     JSON_APPEND("\"ic\":\"%s\",", icon);
-
+  
   if(strcmp(category, "camera") == 0 ){
     JSON_APPEND("\"t\":\"%ssensor/%s/%s\",", mqtt_topic_prefix, hostName, topic);
-
+  
   }else{
-    if(category[0]){
+    if(category[0] != '\0'){
       JSON_APPEND("\"ent_cat\":\"%s\",", category);
     }
-    if(topic[0])
+    if(topic[0] != '\0')
       JSON_APPEND("\"stat_t\":\"%ssensor/%s/%s\",", mqtt_topic_prefix, hostName, topic);
     else
       JSON_APPEND("\"stat_t\":\"%ssensor/%s/%s\",", mqtt_topic_prefix, hostName, name);
-
-    if(payload_on[0] && payload_off[0] ){
+  
+    if(payload_on[0] != '\0' && payload_off[0] != '\0' ){
       JSON_APPEND("\"pl_on\":\"%s\",", payload_on);
       JSON_APPEND("\"pl_off\":\"%s\",", payload_off);
       JSON_APPEND("\"cmd_t\":\"%ssensor/%s/%s\",", mqtt_topic_prefix, hostName, "cmd");
-    }else if(payload_on[0] && !payload_off[0] ){
+    }else if(payload_on[0] != '\0' && payload_off[0] == '\0' ){
       JSON_APPEND("\"pl_prs\":\"%s\",", payload_on);
       JSON_APPEND("\"cmd_t\":\"%ssensor/%s/%s\",", mqtt_topic_prefix, hostName, "cmd");
     }
   }
-
+  
   if(strcmp(category, "diagnostic") != 0 && payload_on[0] == '\0'){
     JSON_APPEND("\"avty_t\":\"%ssensor/%s/%s\",", mqtt_topic_prefix, hostName, "lwt");
     JSON_APPEND("\"pl_avail\":\"%s\",", "online");
@@ -367,11 +369,11 @@ void sendHasEntities (const char *name, const char *displayName, const char *uni
 
   #undef JSON_APPEND
 
-  char suffix[FILE_NAME_LEN] = "";
+  char suffix[FILE_NAME_LEN] = "";  
   snprintf(suffix, sizeof(suffix), "%s/config", name);
-  if(payload_on[0] && payload_off[0] )
+  if(payload_on[0] != '\0' && payload_off[0] != '\0' )
     mqttPublishPath(suffix, jsonBuff, "switch");
-  else if(payload_on[0] && !payload_off[0])
+  else if(payload_on[0] != '\0' && payload_off[0] == '\0')
     mqttPublishPath(suffix, jsonBuff, "button");
   else if(strcmp(category, "camera") == 0 )
     mqttPublishPath("config", jsonBuff, "camera");
@@ -384,7 +386,7 @@ void sendMqttHasDiscovery(){
   //Home Asssistant sensors
   sendHasEntities ("motion", "Motion", "", "mdi:motion-sensor");
   sendHasEntities ("record", "Record","", "mdi:video-check");
-  //Home Asssistant Diagnostic
+  //Home Asssistant Diagnostic 
   sendHasEntities ("clock", "Camera clock", "", "mdi:clock-outline", "diagnostic", "clock");
   sendHasEntities ("up_time", "Up time", "", "mdi:clock", "diagnostic", "up_time");
   sendHasEntities ("atemp", "Camera temperature", "C", "mdi:coolant-temperature", "diagnostic", "atemp");
@@ -405,9 +407,9 @@ void sendMqttHasDiscovery(){
   mqttPublishPath("cmd", "still");
   if (isCapturing) mqttPublishPath("record", "on");
   else mqttPublishPath("record", "off");
-  mqttPublishPath("motion", "off");
+  mqttPublishPath("motion", "off"); 
 }
-void sendMqttHasState(){
+void sendMqttHasState(){  
   char* p = jsonBuff;
   size_t rem = JSON_BUFF_LEN;
   char timeBuff[20];
@@ -416,7 +418,7 @@ void sendMqttHasState(){
   formatElapsedTime(timeBuff, millis());
   mqttPublishPath("up_time", timeBuff);
   float aTemp = readTemperature(true);
-  if (aTemp > -127.0){
+  if (aTemp > -127.0){    
     snprintf(p, rem, "%0.1f", aTemp);
     mqttPublishPath("atemp", p);
   }

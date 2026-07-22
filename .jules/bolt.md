@@ -100,6 +100,11 @@
 ## 2024-05-25 - Avoid O(N) strlen overhead after snprintf
 **Learning:** Determining the length of a string immediately after formatting it with `snprintf` by calling `strlen()` causes an unnecessary O(N) traversal of the string that was just constructed.
 **Action:** Use the return value of `snprintf` (clamped to the buffer size if it exceeds the bounds, e.g., `if (len >= size) len = size - 1;`) to determine the length of the formatted string in O(1) time.
+
 ## 2024-07-18 - Avoid O(N) strlen checks for string emptiness
 **Learning:** Using `strlen(str) > 0` or `!strlen(str)` to check if a string is empty or not introduces an unnecessary O(N) traversal of the entire string up to the null terminator. In functions called sequentially (like `sendHasEntities`), this overhead accumulates.
 **Action:** Replace `strlen(str) > 0` with `str[0] != '\0'` (or simply `str[0]`) and `!strlen(str)` with `str[0] == '\0'` (or `!str[0]`). This reduces the time complexity of emptiness checks to O(1).
+
+## 2024-05-30 - O(1) String Emptiness Checks
+**Learning:** In C/C++, checking if a string is empty using `strlen(str) == 0` or `!strlen(str)` requires an O(N) traversal of the string to find the null terminator. This introduces unnecessary overhead, especially in loops or frequently called functions like MQTT serialization.
+**Action:** Replace `strlen` emptiness checks with O(1) character checks: `str[0] == '\0'` or `str[0] != '\0'`.
