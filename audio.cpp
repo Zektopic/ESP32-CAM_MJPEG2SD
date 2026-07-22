@@ -238,7 +238,6 @@ static void ampOutput(size_t bytesRead = sampleBytes) {
     memcpy(audioBuffer, sampleBuffer, bytesRead);
     audioBytes = bytesRead;
   }
-  displayAudioLed(sampleBuffer[0]);
 }
 
 static void passThru() {
@@ -317,7 +316,6 @@ static void VCactions() {
     default: 
     break;
   }
-  displayAudioLed(0);
   xSemaphoreGive(audioSemaphore);
 }
 

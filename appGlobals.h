@@ -260,7 +260,6 @@ void buzzerAlert(bool buzzerOn);
 bool checkAccelMove();
 bool checkSDFiles();
 void currentStackUsage();
-void displayAudioLed(int16_t audioSample);
 void finalizeAviIndex(uint16_t frameCnt, bool isTL = false);
 void finishAudioRecord(bool isValid);
 float* getBMx280();
