@@ -258,7 +258,6 @@ void buildAviIdx(size_t dataSize, bool isVid = true, bool isTL = false);
 size_t buildSubtitle(int srtSeqNo, uint32_t sampleInterval);
 void buzzerAlert(bool buzzerOn);
 bool checkAccelMove();
-int8_t checkPotVol(int8_t adjVol);
 bool checkSDFiles();
 void currentStackUsage();
 void displayAudioLed(int16_t audioSample);

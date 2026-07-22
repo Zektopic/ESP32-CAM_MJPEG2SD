@@ -103,9 +103,6 @@ static uint8_t wavHeader[WAV_HDR_LEN] = { // WAV header template
 void applyVolume() {
   // determine required volume setting
   int8_t adjVol = ampVol * 2; // use web page setting
-#ifdef ISVC
-  adjVol = checkPotVol(adjVol);  // use potentiometer setting if available
-#endif
   if (adjVol) {
     // increase or reduce volume, 6 is unity eg midpoint of pot / web slider
     adjVol = adjVol > 5 ? adjVol - 5 : adjVol - 7; 
