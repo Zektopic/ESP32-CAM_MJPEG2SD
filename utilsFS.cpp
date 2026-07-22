@@ -162,11 +162,17 @@ static void getOldestDir(char* oldestDir) {
   // get oldest folder by its date name
   File root = STORAGE.open("/");
   File file = root.openNextFile();
-  if (file) strcpy(oldestDir, file.path()); // initialise oldestDir
+  if (file) {
+    strncpy(oldestDir, file.path(), FILE_NAME_LEN - 1); // initialise oldestDir
+    oldestDir[FILE_NAME_LEN - 1] = '\0';
+  }
   while (file) {
     if (file.isDirectory() && strstr(file.name(), "System") == NULL // ignore Sys Vol Info
         && strstr(DATA_DIR, file.name()) == NULL) { // ignore data folder
-      if (strcmp(oldestDir, file.path()) > 0) strcpy(oldestDir, file.path()); 
+      if (strcmp(oldestDir, file.path()) > 0) {
+        strncpy(oldestDir, file.path(), FILE_NAME_LEN - 1);
+        oldestDir[FILE_NAME_LEN - 1] = '\0';
+      }
     }
     file = root.openNextFile();
   }
