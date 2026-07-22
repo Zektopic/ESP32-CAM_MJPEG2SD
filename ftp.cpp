@@ -134,7 +134,7 @@ NetworkClient dclient;
 
 static bool sendFtpCommand(const char* cmd, const char* param, const char* respCode, const char* respCode2 = NO_CHECK) {
   // build and send ftp command
-  if (strlen(cmd)) {
+  if (cmd[0] != '\0') {
     rclient.print(cmd);
     rclient.println(param);
   }
@@ -354,7 +354,7 @@ static void fileServerTask(void* parameter) {
   doPlayback = false; // close any current playback
 #endif
   fsChunk = psramFound() ? (byte*)ps_malloc(CHUNKSIZE) : (byte*)malloc(CHUNKSIZE); 
-  if (strlen(storedPathName) >= 2) {
+  if (storedPathName[0] != '\0' && storedPathName[1] != '\0') {
     File root = STORAGE.open(storedPathName);
     if (!root) LOG_WRN("Failed to open: %s", storedPathName);
     else { 

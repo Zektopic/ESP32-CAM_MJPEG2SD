@@ -130,7 +130,7 @@ static esp_err_t indexHandler(httpd_req_t* req) {
   strcpy(inFileName, INDEX_PAGE_PATH);
   httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
   // first check if a startup failure needs to be reported
-  if (strlen(startupFailure)) {
+  if (startupFailure[0] != '\0') {
     httpd_resp_set_type(req, "text/html");
     httpd_resp_sendstr_chunk(req, failPageS_html);
     httpd_resp_sendstr_chunk(req, startupFailure);
@@ -711,7 +711,7 @@ bool startWebServer() {
   } else snprintf(startupFailure, SF_LEN, STARTUP_FAIL "Failed to start webserver %s",espErrMsg(res));
   if (!DBG_ON) esp_log_level_set("*", ESP_LOG_NONE); // suppress ESP_LOG_ERROR messages
   debugMemory("startWebserver");
-  if (strlen(startupFailure)) {
+  if (startupFailure[0] != '\0') {
     LOG_WRN("%s", startupFailure);
     return false;
   }

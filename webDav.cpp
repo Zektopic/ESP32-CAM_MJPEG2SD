@@ -110,7 +110,7 @@ static void sendPropResponse(File& file, const char* payload) {
   }
   sendContentProp("displayname", file.name());
 
-  if (strlen(payload)) {
+  if (payload[0] != '\0') {
     // return quota data if requested
     if (strstr(payload, "quota-available-bytes") != NULL || strstr(payload, "quota-used-bytes") != NULL) {
       char numberStr[24];

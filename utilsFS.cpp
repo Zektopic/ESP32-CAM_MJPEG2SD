@@ -234,10 +234,10 @@ bool listDir(const char* fname, char* jsonBuff, size_t jsonBuffLen, const char* 
     strcpy(jsonBuff, "{}");     
   } else {
     // ignore leading '/' if not the only character
-    bool returnDirs = strlen(fileName) > 1 ? (strchr(fileName+1, '/') == NULL ? false : true) : true; 
+    bool returnDirs = fileName[0] != '\0' && fileName[1] != '\0' ? (strchr(fileName+1, '/') == NULL ? false : true) : true;
     // open relevant folder to list contents
     File root = STORAGE.open(fileName);
-    if (strlen(fileName)) {
+    if (fileName[0] != '\0') {
       if (!root) LOG_WRN("Failed to open directory %s", fileName);
       else if (!root.isDirectory()) LOG_WRN("Not a directory %s", fileName);
       LOG_VRB("Retrieving %s in %s", returnDirs ? "folders" : "files", fileName);

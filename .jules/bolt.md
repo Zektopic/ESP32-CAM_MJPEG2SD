@@ -108,3 +108,7 @@
 ## 2024-05-30 - O(1) String Emptiness Checks
 **Learning:** In C/C++, checking if a string is empty using `strlen(str) == 0` or `!strlen(str)` requires an O(N) traversal of the string to find the null terminator. This introduces unnecessary overhead, especially in loops or frequently called functions like MQTT serialization.
 **Action:** Replace `strlen` emptiness checks with O(1) character checks: `str[0] == '\0'` or `str[0] != '\0'`.
+
+## 2024-05-24 - O(N) strlen overhead for boolean empty checks
+**Learning:** Checking if a string is empty or has a minimal length using `strlen(str) > 0` or `strlen(str) > 1` forces an O(N) traversal of the string, which is inefficient, especially when checking many dynamically parsed strings like HTTP parameters or parsed JSON keys.
+**Action:** Replace length boundary checks with O(1) direct character evaluations utilizing boolean short-circuiting. Use `str[0] != '\0'` instead of `strlen(str) > 0` and `str[0] != '\0' && str[1] != '\0'` instead of `strlen(str) > 1`.

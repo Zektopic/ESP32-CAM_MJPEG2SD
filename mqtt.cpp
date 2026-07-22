@@ -52,6 +52,7 @@ void mqtt_client_publish(const char* topic, const char* payload){
 
 
 
+
   LOG_VRB("Mqtt pub, payload:%s", payload);
 }
 
