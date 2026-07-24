@@ -870,7 +870,7 @@
                       // format checkbox as slider
                       inputHtml = '<div class="switch"><input type="checkbox" class="configItem" id="' + saveKey;
                       inputHtml += '" value="'+ saveVal +'"' + (saveVal == 1 ? ' checked' : '') + '>';
-                      inputHtml += '<label class="slider" for="' + saveKey + '"></label></div>';
+                      inputHtml += '<label class="slider" title="Toggle ' + saveKey + '" for="' + saveKey + '"></label></div>';
                     break;
                     case 'D': // display only
                       inputHtml = '<input type="text" class="configItem" id="' + saveKey + '" value="'+ saveVal +'" readonly style="background-color: var(--menuBackground);">';
