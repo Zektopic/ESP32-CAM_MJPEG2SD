@@ -279,7 +279,7 @@ static float getSeaLevelPressure() {
     }
     remoteServerClose(hclient);
   }
-  return strlen(jsonVal) ? atof(jsonVal) : STD_PRESSURE; // in hPa / mbars
+  return jsonVal[0] ? atof(jsonVal) : STD_PRESSURE; // in hPa / mbars
 }
 
 static bool setupBMx() {
@@ -474,7 +474,7 @@ static float getMagneticDeclination() {
     }
     remoteServerClose(hclient);
   }
-  return strlen(jsonVal) ? sign * angle : LOCAL_MAG_DECLINATION; // in degrees
+  return jsonVal[0] ? sign * angle : LOCAL_MAG_DECLINATION; // in degrees
 }
 
 static void updateMPU9250data() {

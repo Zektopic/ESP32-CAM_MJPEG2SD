@@ -94,7 +94,7 @@ static void displayLog(httpd_req_t *req) {
 
 bool checkAuth(httpd_req_t* req) {
   // check if authentication is required
-  if (strlen(Auth_Name)) {
+  if (Auth_Name[0] != '\0') {
     // authentication required
     size_t credLen = strlen(Auth_Name) + strlen(Auth_Pass) + 2; // +2 for colon & terminator
     char credentials[credLen];

@@ -227,7 +227,7 @@ static void appPanicHandler(arduino_panic_info_t *info, void *arg) {
 }
 
 static void expandReason() {
-  if (!strlen(btReason)) strcpy(btReason, "unknown");
+  if (!btReason[0]) strcpy(btReason, "unknown");
 #if CONFIG_IDF_TARGET_ARCH_RISCV
   // riscV
   else if (strstr(btReason, "Breakpoint") != NULL) sprintf(btReason, "probably printf format"); // usually misplaced or misformatted vsnprintf()
@@ -509,10 +509,10 @@ void runTaskStats(bool _onceOnly) {
 #endif
 
 void checkMemory(const char* source) {
-  LOG_INF("%s Free: heap %lu, block: %lu, min: %lu, pSRAM %lu", strlen(source) ? source : "Setup", ESP.getFreeHeap(), ESP.getMaxAllocHeap(), ESP.getMinFreeHeap(), ESP.getFreePsram());
+  LOG_INF("%s Free: heap %lu, block: %lu, min: %lu, pSRAM %lu", source[0] ? source : "Setup", ESP.getFreeHeap(), ESP.getMaxAllocHeap(), ESP.getMinFreeHeap(), ESP.getFreePsram());
   if (ESP.getFreeHeap() < WARN_HEAP) LOG_WRN("Free heap only %lu, min %lu", ESP.getFreeHeap(), ESP.getMinFreeHeap());
   if (ESP.getMaxAllocHeap() < WARN_ALLOC) LOG_WRN("Max allocatable heap block is only %lu", ESP.getMaxAllocHeap());
-  if (!strlen(source) && DEBUG_MEM) runTaskStats();
+  if (!source[0] && DEBUG_MEM) runTaskStats();
 }
 
 uint32_t checkStackUse(TaskHandle_t thisTask, int taskIdx) {
