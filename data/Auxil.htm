@@ -215,9 +215,17 @@
        background: var(--buttonActive);
       }
 
-      button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+      button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, .password-toggle:focus-visible, .iconSize:focus-visible {
         outline: 2px solid var(--buttonActive);
         outline-offset: 2px;
+      }
+      .password-toggle {
+        cursor: pointer;
+        transition: 0.3s;
+      }
+
+      .password-toggle:hover, .pin-menu:hover, .nav-toggle:hover {
+        opacity: 0.7;
       }
 
       button:hover {
@@ -418,6 +426,11 @@
         background: var(--buttonReady);
         -webkit-appearance: none;
         margin-top: calc(-0.5 * var(--smallThumbSize));
+        transition: 0.3s;
+      }
+
+      input[type=range]::-webkit-slider-thumb:hover {
+        background: var(--buttonHover);
       }
       input[type=range].bigThumb::-webkit-slider-thumb{
         height: var(--bigThumbSize);
@@ -474,6 +487,11 @@
         position: relative;
         display: inline-block;
         border-radius: var(--buttonSize);
+        transition: 0.3s;
+      }
+
+      .switch:hover .slider {
+        background: var(--itemBorder);
       }
       .switch input[type="checkbox"]:checked + .slider {
         background-color: var(--buttonActive);
@@ -565,6 +583,7 @@
         margin-bottom: calc(var(--buttonSize) * 3/4);
         padding-bottom: var(--buttonHalf);
         border-bottom: 1px solid var(--itemBorder);
+        transition: 0.3s;
       }
 
       section#main {
@@ -732,6 +751,7 @@
         height: calc(var(--buttonSize) * 3/2);
         float: right;
         cursor: pointer;
+        transition: 0.3s;
       }
 
       .displayonly {

@@ -15,3 +15,6 @@
 ## 2025-07-22 - Keyboard accessibility for custom buttons
 **Learning:** Many interactive components in this application (like custom tabs, overlay controls, and settings menus) use `div` or `nav` elements with `role="button"` and `tabindex="0"`. These elements require explicit keyboard event handling to be accessible to keyboard-only and screen reader users.
 **Action:** Always ensure that custom button elements include `onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}"` to replicate native HTML button behavior, allowing activation via Enter or Space.
+## 2024-07-24 - Dynamic element accessibility
+**Learning:** Automatically generated form fields (like toggle switches generated via `common.js`) often lack descriptive context (like a `title` or `aria-label`) that screen readers and power users rely on, since the HTML isn't hand-coded.
+**Action:** When working with JS-rendered components, always ensure that dynamic attributes (e.g., using the setting's key name) are injected into the template string to maintain accessibility.
