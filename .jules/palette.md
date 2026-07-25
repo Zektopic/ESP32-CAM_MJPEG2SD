@@ -18,3 +18,7 @@
 ## 2024-07-24 - Dynamic element accessibility
 **Learning:** Automatically generated form fields (like toggle switches generated via `common.js`) often lack descriptive context (like a `title` or `aria-label`) that screen readers and power users rely on, since the HTML isn't hand-coded.
 **Action:** When working with JS-rendered components, always ensure that dynamic attributes (e.g., using the setting's key name) are injected into the template string to maintain accessibility.
+
+## 2025-01-20 - Dynamic Tooltips for Disabled States
+**Learning:** When interactive elements (like buttons) are disabled, removing their tooltip or leaving a default action tooltip is confusing. Users need to know *why* an element is disabled.
+**Action:** Update the `disable()` JavaScript helper to accept and set an optional `title` parameter explaining the disabled state, and update `enable()` to restore the original action tooltip.

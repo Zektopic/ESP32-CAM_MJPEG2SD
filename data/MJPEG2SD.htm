@@ -2132,7 +2132,7 @@
         playbackButton.innerHTML = "➤&nbsp;Start Playback";
         playbackButton.setAttribute("aria-label", "Start Playback");
         playbackButton.classList.remove("blinking");
-        disable(playbackButton);
+        disable(playbackButton, "Select a .avi video to activate playback");
         stopAll("deactivatePlaybackButton");
         if (sendStop) sendAll("stopPlaying", 1);
       }
@@ -2328,23 +2328,23 @@
           $('#upload').value = filePath; //Store file path for file server upload
           pathDir = filePath.substring(0, filePath.lastIndexOf("/"));
 
-          enable($('#upload'));
-          enable($('#delete'));
+          enable($('#upload'), "Upload selected file/folder to Fileserver");
+          enable($('#delete'), "Delete selected file/folder from SD card");
           if (filePath.includes('.')) {
-            enable($('#download'));
+            enable($('#download'), "Download selected file from SD card");
           } else {
-            disable($('#download'));
+            disable($('#download'), "Select a file to enable download");
           }
         } else {
-          disable($('#download'));
-          disable($('#upload'));
-          disable($('#delete'));
+          disable($('#download'), "Select a file to enable download");
+          disable($('#upload'), "Select a file or folder to enable upload");
+          disable($('#delete'), "Select a file or folder to enable delete");
         }
         if (pathDir == "") $$('#sfile option:not(:first-child)').forEach(el => { el.remove()});
         if (filePath.substr(-4) === '.avi') {
-          if (!isActive(playbackButton)) enable(playbackButton);
+          if (!isActive(playbackButton)) enable(playbackButton, "Start Playback");
         } else {
-          if (!isActive(playbackButton)) disable(playbackButton);
+          if (!isActive(playbackButton)) disable(playbackButton, "Select a .avi video to activate playback");
         }
         if (fromUser) getFiles(filePath);
         return false;
@@ -2409,12 +2409,12 @@
 
       function micState(value) {
         value > 0 ? enableRangeSlider($('#micGain')) : disableRangeSlider($('#micGain'));
-        value > 0 ? enable($('#spkrRem')) : disable($('#spkrRem'))
+        value > 0 ? enable($('#spkrRem'), "Speaker Control") : disable($('#spkrRem'), "Speaker requires SD card pin configured")
       }
 
       function spkrState(value) {
         value > 0 ? enableRangeSlider($('#ampVol')) : disableRangeSlider($('#ampVol'));
-        value > 0 ? enable($('#micRem')) : disable($('#micRem'));
+        value > 0 ? enable($('#micRem'), "Microphone Control") : disable($('#micRem'), "Microphone requires SD card pin configured");
       }
 
       /************** RC ****************/
@@ -2586,8 +2586,8 @@
         disableRangeSlider($('#camTilt'));
         disableRangeSlider($('#camPan'));
         disableRangeSlider($('#lampLevel'));
-        disable($('#micRem'));
-        disable($('#spkrRem'));
+        disable($('#micRem'), "Microphone requires SD card pin configured");
+        disable($('#spkrRem'), "Speaker requires SD card pin configured");
         closedTab(false);
       }
 
