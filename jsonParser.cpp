@@ -184,7 +184,7 @@ bool getJsonValue(const char* json, const char* key, char* value, const char* ne
   size_t pos = 0;
   int count = 0;
   
-  bool extractNested = (nestedKey != nullptr && strlen(nestedKey) > 0);
+  bool extractNested = (nestedKey != nullptr && nestedKey[0] != '\0');
   std::string_view nestedKeyStr = extractNested ? std::string_view(nestedKey) : std::string_view("");
   
   std::string_view retvalue = findNthOccurrence(jsonStr, pos, keyStr, count, occurrence, extractNested, nestedKeyStr);

@@ -778,7 +778,7 @@ void appSpecificTelegramTask(void* p) {
         deleteFolderOrFile(ramLogName);
       } else if (!strcmp(userCmd, "/extIP")) {
         char extIpPt[24];
-        snprintf(extIpPt, sizeof(extIpPt), "%s%s", extIP, strlen(portFwd) ? portFwd : "");
+        snprintf(extIpPt, sizeof(extIpPt), "%s%s", extIP, portFwd[0] ? portFwd : "");
         sendTgramMessage("Ext IP: ", extIpPt, "");
       } else {
         // initially assume it is an avi file download request

@@ -225,7 +225,7 @@ static bool loadPrefs() {
     savePrefs(); // if prefs do not yet exist
     return false;
   }
-  if (!strlen(ST_SSID)) {
+  if (ST_SSID[0] == '\0') {
      // first call only after instal
     prefs.getString("ST_SSID", ST_SSID, MAX_PWD_LEN); // max 15 chars
     updateConfigVect("ST_SSID", ST_SSID);
