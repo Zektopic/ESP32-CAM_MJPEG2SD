@@ -512,7 +512,6 @@ static bool checkConfigFile() {
       }
       sprintf(hostName, "%s_%012llX", APP_NAME, ESP.getEfuseMac());
       char cfg[100];
-      int cfgLen;
       cfgLen = snprintf(cfg, 100, "appId~%s~99~~na\n", APP_NAME);
       if (cfgLen < 0) cfgLen = 0;
       if (cfgLen > 100 - 1) cfgLen = 100 - 1;
