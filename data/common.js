@@ -466,16 +466,18 @@
           el.style.display = "";
         }
 
-        function disable(el) {
+        function disable(el, title) {
           el.classList.add('disabled');
           el.disabled = true;
           el.setAttribute('aria-disabled', 'true');
+          if (title) el.title = title;
         }
 
-        function enable(el) {
+        function enable(el, title) {
           el.classList.remove('disabled');
           el.disabled = false;
           el.removeAttribute('aria-disabled');
+          if (title) el.title = title;
         }
 
         function disableRangeSlider(el) {
@@ -930,12 +932,12 @@
         const refreshBtn = document.getElementById('refreshAllButton');
         if (ipAddresses.length === 0) {
           container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--itemInactive); font-style: italic;">No cameras added yet. Enter an IP address above to add your first camera.</div>';
-          if (clearBtn) disable(clearBtn);
-          if (refreshBtn) disable(refreshBtn);
+          if (clearBtn) disable(clearBtn, "No saved cameras to remove");
+          if (refreshBtn) disable(refreshBtn, "No cameras to refresh");
           return;
         }
-        if (clearBtn) enable(clearBtn);
-        if (refreshBtn) enable(refreshBtn);
+        if (clearBtn) enable(clearBtn, "Remove all saved cameras");
+        if (refreshBtn) enable(refreshBtn, "Refresh all camera streams");
 
         // Convert the array of IP addresses into individual IPs
         for (const ip of ipAddresses) {
