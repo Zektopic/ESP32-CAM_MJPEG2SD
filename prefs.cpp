@@ -417,56 +417,76 @@ void updateStatus(const char* variable, const char* _value, bool fromUser) {
 void buildJsonString(uint8_t filter) {
   // called from statusHandler() to build json string with current status to return to browser
   char* p = jsonBuff;
-  *p++ = '{';
+  size_t rem = JSON_BUFF_LEN;
+  int w = 0;
+
+  #define JSON_APPEND(...) \
+    do { \
+      w = snprintf(p, rem, __VA_ARGS__); \
+      if (w > 0 && w < (int)rem) { \
+        p += w; \
+        rem -= w; \
+      } else { \
+        LOG_ERR("jsonBuff overrun in buildJsonString"); \
+        return; \
+      } \
+    } while (0)
+
+  JSON_APPEND("{");
   if (filter < 2) {
     // build json string for main page refresh
+
+    // adjust p and rem based on buildAppJsonString
+    char* start_p = p;
     p = buildAppJsonString((bool)filter);
-    p += sprintf(p, "\"cfgGroup\":\"-1\",");
+    rem -= (p - start_p);
+
+    JSON_APPEND("\"cfgGroup\":\"-1\",");
     // generic footer
     currEpoch = getEpoch();
-    p += sprintf(p, "\"clockUTC\":\"%lu\",", (uint32_t)currEpoch);
+    JSON_APPEND("\"clockUTC\":\"%lu\",", (uint32_t)currEpoch);
     char timeBuff[20];
     strftime(timeBuff, 20, "%Y-%m-%d %H:%M:%S", localtime(&currEpoch));
-    p += sprintf(p, "\"clock\":\"%s\",", timeBuff);
+    JSON_APPEND("\"clock\":\"%s\",", timeBuff);
     formatElapsedTime(timeBuff, millis()); // rolls over after 49.7 days due to max uint32
-    p += sprintf(p, "\"up_time\":\"%s\",", timeBuff);
-    p += sprintf(p, "\"free_heap\":\"%s\",", fmtSize(ESP.getFreeHeap()));
-    p += sprintf(p, "\"wifi_rssi\":\"%i dBm\",", netRSSI() );
+    JSON_APPEND("\"up_time\":\"%s\",", timeBuff);
+    JSON_APPEND("\"free_heap\":\"%s\",", fmtSize(ESP.getFreeHeap()));
+    JSON_APPEND("\"wifi_rssi\":\"%i dBm\",", netRSSI() );
     if (!filter) {
       // populate first part of json string from config vect
       for (const auto& row : configs)
-        p += sprintf(p, "\"%s\":\"%s\",", row[0].c_str(), row[1].c_str());
-      p += sprintf(p, "\"logType\":\"%d\",", logType);
+        JSON_APPEND("\"%s\":\"%s\",", row[0].c_str(), row[1].c_str());
+      JSON_APPEND("\"logType\":\"%d\",", logType);
       // passwords stored in prefs on NVS
-      p += sprintf(p, "\"ST_Pass\":\"%.*s\",", strlen(ST_Pass), FILLSTAR);
-      p += sprintf(p, "\"AP_Pass\":\"%.*s\",", strlen(AP_Pass), FILLSTAR);
-      p += sprintf(p, "\"Auth_Pass\":\"%.*s\",", strlen(Auth_Pass), FILLSTAR);
+      JSON_APPEND("\"ST_Pass\":\"%.*s\",", (int)strlen(ST_Pass), FILLSTAR);
+      JSON_APPEND("\"AP_Pass\":\"%.*s\",", (int)strlen(AP_Pass), FILLSTAR);
+      JSON_APPEND("\"Auth_Pass\":\"%.*s\",", (int)strlen(Auth_Pass), FILLSTAR);
 #if INCLUDE_FTP_HFS
-      p += sprintf(p, "\"FS_Pass\":\"%.*s\",", strlen(FS_Pass), FILLSTAR);
+      JSON_APPEND("\"FS_Pass\":\"%.*s\",", (int)strlen(FS_Pass), FILLSTAR);
 #endif
 #if INCLUDE_SMTP
-      p += sprintf(p, "\"SMTP_Pass\":\"%.*s\",", strlen(SMTP_Pass), FILLSTAR);
+      JSON_APPEND("\"SMTP_Pass\":\"%.*s\",", (int)strlen(SMTP_Pass), FILLSTAR);
 #endif
 #if INCLUDE_MQTT
-      p += sprintf(p, "\"mqtt_user_Pass\":\"%.*s\",", strlen(mqtt_user_Pass), FILLSTAR);
+      JSON_APPEND("\"mqtt_user_Pass\":\"%.*s\",", (int)strlen(mqtt_user_Pass), FILLSTAR);
 #endif
 #if INCLUDE_RTSP
-      p += sprintf(p, "\"RTSP_Pass\":\"%.*s\",", strlen(RTSP_Pass), FILLSTAR);
+      JSON_APPEND("\"RTSP_Pass\":\"%.*s\",", (int)strlen(RTSP_Pass), FILLSTAR);
 #endif
       // session constants
-      p += sprintf(p, "\"fw_version\":\"%s\",", APP_VER);
-      p += sprintf(p, "\"macAddressEfuse\":\"%012llX\",", ESP.getEfuseMac() );
-      p += sprintf(p, "\"macAddressWiFi\":\"%s\",", netMacAddress().c_str() );
-      p += sprintf(p, "\"extIP\":\"%s\",", extIP);
-      p += sprintf(p, "\"httpPort\":\"%u\",", HTTP_PORT);
-      p += sprintf(p, "\"httpsPort\":\"%u\",", HTTPS_PORT);
-      p += sprintf(p, "\"ip\":\"%s\",", formatIPstr());
+      JSON_APPEND("\"fw_version\":\"%s\",", APP_VER);
+      JSON_APPEND("\"macAddressEfuse\":\"%012llX\",", ESP.getEfuseMac() );
+      JSON_APPEND("\"macAddressWiFi\":\"%s\",", netMacAddress().c_str() );
+      JSON_APPEND("\"extIP\":\"%s\",", extIP);
+      JSON_APPEND("\"httpPort\":\"%u\",", HTTP_PORT);
+      JSON_APPEND("\"httpsPort\":\"%u\",", HTTPS_PORT);
+      JSON_APPEND("\"ip\":\"%s\",", formatIPstr());
     }
   } else {
     // build json string for requested config group
     updateAppStatus("custom", "");
     uint8_t cfgGroup = filter - 10; // filter number is length of url query string, config group number is length of string - 10
-    p += sprintf(p, "\"cfgGroup\":\"%u\",", cfgGroup);
+    JSON_APPEND("\"cfgGroup\":\"%u\",", cfgGroup);
     char pwdHide[MAX_PWD_LEN] = {0};  // used to replace password value with asterisks
     for (const auto& row : configs) {
       if (atoi(row[2].c_str()) == cfgGroup) {
@@ -476,14 +496,14 @@ void buildJsonString(uint8_t filter) {
           pwdHide[valSize] = 0;
         }
         // for each config item, list - key:value, key:label text, key:type identifier
-        p += sprintf(p, "\"%s\":\"%s\",\"lab%s\":\"%s\",\"typ%s\":\"%s\",", row[0].c_str(),
+        JSON_APPEND("\"%s\":\"%s\",\"lab%s\":\"%s\",\"typ%s\":\"%s\",", row[0].c_str(),
           row[0].find("_Pass") == std::string::npos ? row[1].c_str() : pwdHide, row[0].c_str(), row[4].c_str(), row[0].c_str(), row[3].c_str());
       }
     }
   }
   *p = 0;
   *(--p) = '}'; // overwrite final comma
-  if (p - jsonBuff >= JSON_BUFF_LEN) LOG_ERR("jsonBuff overrun by: %u bytes", (p - jsonBuff) - JSON_BUFF_LEN);
+  #undef JSON_APPEND
 }
 
 void initStatus(int cfgGroup, int delayVal) {
