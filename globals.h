@@ -2,10 +2,12 @@
 //
 // s60sc 2021, 2022
 
+#ifndef TEST_ENV
 #include "esp_arduino_version.h"
 
 #if ESP_ARDUINO_VERSION < ESP_ARDUINO_VERSION_VAL(3, 1, 1)
 #error Must be compiled with arduino-esp32 core v3.1.1 or higher
+#endif
 #endif
 
 #pragma once
@@ -29,6 +31,7 @@
 
 /******************** Libraries *******************/
 
+#ifndef TEST_ENV
 #include "Arduino.h"
 #include <ESPmDNS.h>
 #include "lwip/sockets.h"
@@ -52,6 +55,7 @@
 #include <WiFiClientSecure.h>
 #include <esp_http_server.h>
 #include <esp_https_server.h>
+#endif
 
 // ADC
 #define ADC_ATTEN ADC_11db

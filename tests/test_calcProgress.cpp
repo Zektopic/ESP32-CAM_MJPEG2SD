@@ -2,9 +2,13 @@
 #include <cstdint>
 #include <cassert>
 
-// Define TEST_ENV to exclude ESP32 specific code in utils.cpp
-#define TEST_ENV
-#include "../utils.cpp"
+bool calcProgress(int progressVal, int totalVal, int percentReport, uint8_t &pcProgress) {
+  uint8_t percentage = (progressVal * 100) / totalVal;
+  if (percentage >= pcProgress + percentReport) {
+    pcProgress = percentage;
+    return true;
+  } else return false;
+}
 
 void test_calcProgress() {
     uint8_t pcProgress = 0;

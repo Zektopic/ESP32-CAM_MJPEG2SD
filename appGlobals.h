@@ -48,8 +48,10 @@
 #define NO_SD
 #endif
 
+#ifndef TEST_ENV
 #if !defined(CONFIG_IDF_TARGET_ESP32S3) && !defined(CONFIG_IDF_TARGET_ESP32) && !defined(AUXILIARY)
 #error "Must select ESP32 or ESP32S3 board for camera"
+#endif
 #endif
 
 /***************************************************************
@@ -108,8 +110,10 @@
 /*********************** Fixed defines leave as is ************************/ 
 /** Do not change anything below here unless you know what you are doing **/
 
+#ifndef TEST_ENV
 #ifndef AUXILIARY
 #include "esp_camera.h"
+#endif
 #endif
 #include "camera_pins.h"
 

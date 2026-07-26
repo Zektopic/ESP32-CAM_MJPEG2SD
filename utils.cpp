@@ -30,7 +30,9 @@ uint32_t deepSleepTimer = 0;
 
 /************************** Network (WiFi/Ethernet) **************************/
 
+#ifndef TEST_ENV
 #include <esp_task_wdt.h>
+#endif
  
 /** Do not hard code anything below here unless you know what you are doing **/
 /** Use the web interface to configure wifi settings **/
@@ -955,6 +957,7 @@ const char* encode64(const char* inp) {
   return encoded;
 }
 
+#ifndef TEST_ENV
 void debugMemory(const char* caller) {
   if (DEBUG_MEM) {
     LOG_SEND("%s > Free: heap %lu, block: %lu, min: %lu, pSRAM %lu\n", caller, ESP.getFreeHeap(), ESP.getMaxAllocHeap(), ESP.getMinFreeHeap(), ESP.getFreePsram());
@@ -1056,3 +1059,4 @@ bool utilsStartup() {
 #endif
   return res;
 }
+#endif

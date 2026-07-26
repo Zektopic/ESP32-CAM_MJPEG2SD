@@ -655,7 +655,9 @@
 #define NO_SD
 
 #else
+#ifndef TEST_ENV
 #error "Camera model not selected"
+#endif
 #endif
 
  
