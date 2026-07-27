@@ -1026,7 +1026,7 @@ bool prepCam() {
       }
       // set frame size to configured value
       char fsizePtrStr[4];
-      if (retrieveConfigVal("framesize", fsizePtrStr)) s->set_framesize(s, (framesize_t)(atoi(fsizePtrStr)));
+      if (retrieveConfigVal("framesize", fsizePtrStr, sizeof(fsizePtrStr))) s->set_framesize(s, (framesize_t)(atoi(fsizePtrStr)));
       else s->set_framesize(s, FRAMESIZE_VGA);
 
       // model specific corrections
