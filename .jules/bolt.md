@@ -120,3 +120,6 @@
 ## 2024-05-24 - Replace delay with vTaskDelay in FreeRTOS tasks
 **Learning:** Arduino's `delay()` function introduces overhead such as watchdog resets, `yieldIfNecessary()`, and busy-waiting via `micros()` to ensure exact delays.
 **Action:** When working in FreeRTOS tasks on ESP32, replace `delay(ms)` with native `vTaskDelay(pdMS_TO_TICKS(ms))` to properly place the task in the Blocked state and free CPU cycles for other tasks.
+## 2024-11-20 - Replace redundant strncpy+strlen with a single snprintf
+**Learning:** Using `strncpy` followed by `snprintf` with `strlen()` to append strings (e.g., `strncpy(subject, _subject, sizeof(subject)-1); snprintf(subject+strlen(subject), ...);`) causes redundant O(N) string traversals and creates potential buffer overruns.
+**Action:** Combine multi-step string building operations into a single bounded `snprintf(dest, sizeof(dest), "%s from %s", _subject, hostName)` to eliminate redundant string length calculations.

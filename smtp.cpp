@@ -172,8 +172,8 @@ void emailAlert(const char* _subject, const char* _message) {
   if (smtpUse) {
     if (alertBuffer != NULL) {
       if (emailHandle == NULL) {
-        strncpy(subject, _subject, sizeof(subject)-1);
-        snprintf(subject+strlen(subject), sizeof(subject)-strlen(subject), " from %s", hostName);
+        // ⚡ Bolt optimization: Combine string building into a single snprintf to eliminate O(N) strlen overhead and zero-padding
+        snprintf(subject, sizeof(subject), "%s from %s", _subject, hostName);
         strncpy(message, _message, sizeof(message)-1);
         xTaskCreateWithCaps(&emailTask, "emailTask", EMAIL_STACK_SIZE, NULL, EMAIL_PRI, &emailHandle, STACK_MEM);
         debugMemory("emailAlert");
