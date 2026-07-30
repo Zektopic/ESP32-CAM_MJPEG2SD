@@ -298,9 +298,9 @@
             if (el.classList.contains('vertical')) el.style.transform = 'rotate(270deg)';
             else if (el.classList.contains('vertInv')) el.style.transform = 'rotate(90deg)';
             if (!el.classList.contains('ignore')) {
-              if (!isDefined(el.parentElement.children.rangeMin)) el.insertAdjacentHTML("beforebegin", '<div name="rangeMin"/>'+el.min+'</div>');
-              el.insertAdjacentHTML("afterend", '<div name="rangeVal">'+el.value+'</div>');
-              if (!isDefined(el.parentElement.children.rangeMax)) el.insertAdjacentHTML("afterend", '<div name="rangeMax"/>'+el.max+'</div>');
+              if (!isDefined(el.parentElement.children.rangeMin)) el.insertAdjacentHTML("beforebegin", '<div name="rangeMin" aria-hidden="true">'+el.min+'</div>');
+              el.insertAdjacentHTML("afterend", '<div name="rangeVal" aria-hidden="true">'+el.value+'</div>');
+              if (!isDefined(el.parentElement.children.rangeMax)) el.insertAdjacentHTML("afterend", '<div name="rangeMax" aria-hidden="true">'+el.max+'</div>');
             }
             rangeSlider(el, false);
           });
@@ -888,7 +888,7 @@
                       const range = value.substring(2).split(":");
                       inputHtml = '<div class="input-group">';
                       inputHtml += '<input type="range" class="configItem" id="' + saveKey + '" min="' + range[0] + '" max="' + range[1];
-                      inputHtml += '" step="' + range[2] + '" value="' + saveVal + '"><div name="rangeVal">' + saveVal + '</div></div>';
+                      inputHtml += '" step="' + range[2] + '" value="' + saveVal + '"><div name="rangeVal" aria-hidden="true">' + saveVal + '</div></div>';
                     break;
                     case 'S':
                       // drop down select
