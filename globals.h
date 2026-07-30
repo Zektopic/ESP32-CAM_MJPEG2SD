@@ -190,7 +190,7 @@ void replaceChar(char* s, char c, char r);
 void resetCrashLoop();
 void reset_log();
 void resetWatchDog(int wdIndex, uint32_t wdTimeout = 1);
-bool retrieveConfigVal(const char* variable, char* value);
+bool retrieveConfigVal(const char* variable, char* value, size_t valueSize);
 void runTaskStats(bool _onceOnly = false);
 void saveRamLog(const char* ramLogName);
 esp_err_t sendChunks(File df, httpd_req_t *req, bool endChunking = true);

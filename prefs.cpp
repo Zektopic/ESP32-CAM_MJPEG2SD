@@ -90,11 +90,12 @@ bool updateConfigVect(const char* variable, const char* value) {
   return false;
 }
 
-bool retrieveConfigVal(const char* variable, char* value) {
+bool retrieveConfigVal(const char* variable, char* value, size_t valueSize) {
   std::string thisKey(variable);
   int keyPos = getKeyPos(thisKey);
   if (keyPos >= 0) {
-    strcpy(value, configs[keyPos][1].c_str());
+    strncpy(value, configs[keyPos][1].c_str(), valueSize - 1);
+    value[valueSize - 1] = 0;
     return true;
   } else {
     value[0] = 0; // empty string
@@ -102,7 +103,6 @@ bool retrieveConfigVal(const char* variable, char* value) {
   }
   return false;
 }
-
 static void loadVectItem(const std::string& keyValGrpLabel) {
   // extract a config tokens from input and load into configs vector
   // comprises key : val : group : type : label
@@ -566,12 +566,12 @@ static bool checkConfigFile() {
   } else {
     // check file contents are valid
     loadConfigVect();
-    if (!retrieveConfigVal("cfgVer", appId)) goodFile = false; // obsolete config file
+    if (!retrieveConfigVal("cfgVer", appId, sizeof(appId))) goodFile = false; // obsolete config file
     else if (atoi(appId) != CFG_VER) goodFile = false; // outdated config file
     if (!goodFile) LOG_WRN("Delete old %s", CONFIG_FILE_PATH);
     else {
       // cleanup storage if config file for different app
-      retrieveConfigVal("appId", appId);
+      retrieveConfigVal("appId", appId, sizeof(appId));
       if (strcmp(appId, APP_NAME)) {
         LOG_WRN("Delete invalid %s, expected %s, got %s", CONFIG_FILE_PATH, APP_NAME, appId);
         savePrefs(false);
