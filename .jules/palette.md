@@ -22,3 +22,6 @@
 ## 2025-01-20 - Dynamic Tooltips for Disabled States
 **Learning:** When interactive elements (like buttons) are disabled, removing their tooltip or leaving a default action tooltip is confusing. Users need to know *why* an element is disabled.
 **Action:** Update the `disable()` JavaScript helper to accept and set an optional `title` parameter explaining the disabled state, and update `enable()` to restore the original action tooltip.
+## 2024-07-29 - Missing Enter Key Support in Standalone Inputs
+**Learning:** In HTML interfaces that don't wrap inputs in standard `<form>` tags, users lose the default 'Enter to submit' behavior, causing frustrating interaction dead-ends.
+**Action:** Always explicitly bind `onkeydown` event handlers checking for `event.key === 'Enter'` to critical standalone input fields to restore expected keyboard behavior.
