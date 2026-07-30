@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 // Simple SMTP client for sending email message with attachment
 //
@@ -172,7 +173,7 @@ void emailAlert(const char* _subject, const char* _message) {
   if (smtpUse) {
     if (alertBuffer != NULL) {
       if (emailHandle == NULL) {
-        // ⚡ Bolt optimization: Combine into a single snprintf call to avoid O(N) strlen overhead and O(N^2) formatting behavior
+        // ⚡ Bolt optimization: Combine string building into a single snprintf to eliminate O(N) strlen overhead and zero-padding
         snprintf(subject, sizeof(subject), "%s from %s", _subject, hostName);
         strncpy(message, _message, sizeof(message)-1);
         xTaskCreateWithCaps(&emailTask, "emailTask", EMAIL_STACK_SIZE, NULL, EMAIL_PRI, &emailHandle, STACK_MEM);
@@ -190,4 +191,134 @@ void prepSMTP() {
   }
 }
 
+    // incorrect response code
+    LOG_ERR("Command %s got wrong response: %s", cmd, rspBuf);
+    return false;
+  }
+	return true;
+}
+
+static bool emailSend(const char* mimeType = MIME_TYPE, const char* fileName = ATTACH_NAME) {
+  // send email to defined smtp server
+  char content[100];
+  
+  NetworkClientSecure client;
+  bool res = remoteServerConnect(client, smtp_server, smtp_port, smtp_rootCACertificate, EMAILCONN); 
+  if (!res) return false;
+  
+  while (true) { // fake non loop to enable breaks
+    res = false;
+    if (!sendSmtpCommand(client, "", "220")) break;
+  
+    snprintf(content, sizeof(content), "HELO %s: ", APP_NAME);
+    if (!sendSmtpCommand(client, content, "250")) break;
+    
+    if (!sendSmtpCommand(client, "AUTH LOGIN", "334")) break; 
+    if (!sendSmtpCommand(client, encode64(smtp_login), "334")) break;
+    if (!sendSmtpCommand(client, encode64(SMTP_Pass), "235")) break;
+  
+    // send email header
+    snprintf(content, sizeof(content), "MAIL FROM: <%s>", APP_NAME);
+    if (!sendSmtpCommand(client, content, "250")) break;
+    snprintf(content, sizeof(content), "RCPT TO: <%s>", smtp_email);
+    if (!sendSmtpCommand(client, content, "250")) break;
+  
+    // send message body header
+    if (!sendSmtpCommand(client, "DATA", "354")) break;
+    snprintf(content, sizeof(content), "From: \"%s\" <%s>", APP_NAME, smtp_login);
+    client.println(content);
+    snprintf(content, sizeof(content), "To: <%s>", smtp_email);
+    client.println(content);
+    snprintf(content, sizeof(content), "Subject: %s", subject);
+    client.println(content);
+  
+    // send message
+    client.println("MIME-Version: 1.0");
+    snprintf(content, sizeof(content), "Content-Type: Multipart/mixed; boundary=%s", BOUNDARY_VAL);
+    client.println(content);
+    snprintf(content, sizeof(content), "--%s", BOUNDARY_VAL);
+    client.println(content);
+    client.println("Content-Type: text/plain; charset=UTF-8");
+    client.println("Content-Transfer-Encoding: quoted-printable");
+    client.println("Content-Disposition: inline");
+    client.println();
+    client.println(message);
+    client.println();
+    
+    if (alertBufferSize) {
+      // send attachment
+      client.println(content); // boundary
+      snprintf(content, sizeof(content), "Content-Type: %s", mimeType);
+      client.println(content);
+      client.println("Content-Transfer-Encoding: base64");
+      snprintf(content, sizeof(content), "Content-Disposition: attachment; filename=\"%s\"; size=%zu;", fileName, alertBufferSize);
+      
+      client.println(content); 
+      // base64 encode attachment and buffer for output
+      size_t chunkSize = 3;
+      uint8_t* outBuf = (uint8_t*)ps_malloc(1024); // Buffer for batched output
+      if (outBuf) {
+        size_t outLen = 0;
+        for (size_t i = 0; i < alertBufferSize; i += chunkSize) {
+          memcpy(outBuf + outLen, encode64chunk(alertBuffer + i, min(alertBufferSize - i, chunkSize)), 4);
+          outLen += 4;
+          if (outLen >= 1024) {
+            client.write(outBuf, outLen);
+            outLen = 0;
+          }
+        }
+        if (outLen > 0) client.write(outBuf, outLen);
+        free(outBuf);
+      } else LOG_ERR("Unable to alloc outBuf");
+    }
+    client.println("\n"); // two lines to finish header
+        
+    // close message data and quit
+    if (!sendSmtpCommand(client, ".", "250")) break;
+    if (!sendSmtpCommand(client, "QUIT", "221")) break;
+    res = true;
+    break;
+  }
+  // cleanly terminate connection
+  remoteServerClose(client);
+  alertBufferSize = 0;
+  return res;
+}
+
+static void emailTask(void* parameter) {
+  //  send email
+  if (emailCount < alertMax) { 
+    // send email if under daily limit
+    if (emailSend()) LOG_ALT("Sent daily email %u", emailCount + 1);
+    else LOG_WRN("Failed to send email");
+  }
+  if (++emailCount >= alertMax) LOG_WRN("Daily email limit %u reached", alertMax);
+  emailHandle = NULL;
+  vTaskDelete(NULL);
+}
+
+void emailAlert(const char* _subject, const char* _message) {
+  // send email to alert on required event
+  if (smtpUse) {
+    if (alertBuffer != NULL) {
+      if (emailHandle == NULL) {
+        // ⚡ Bolt optimization: Combine string building into a single snprintf to eliminate O(N) strlen overhead and zero-padding
+        snprintf(subject, sizeof(subject), "%s from %s", _subject, hostName);
+        strncpy(message, _message, sizeof(message)-1);
+        xTaskCreateWithCaps(&emailTask, "emailTask", EMAIL_STACK_SIZE, NULL, EMAIL_PRI, &emailHandle, STACK_MEM);
+        debugMemory("emailAlert");
+      } else LOG_WRN("Email alert already in progress");
+    } else LOG_WRN("Need to restart to setup email");
+  }
+}
+
+void prepSMTP() {
+  if (smtpUse) {
+    emailCount = 0;
+    if (alertBuffer == NULL) alertBuffer = psramFound() ? (byte*)ps_malloc(maxAlertBuffSize) : (byte*)malloc(maxAlertBuffSize);
+   LOG_INF("Email alerts active");
+  } 
+}
+
 #endif
+>>>>>>> pr-298
