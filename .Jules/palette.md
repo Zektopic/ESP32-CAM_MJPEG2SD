@@ -1,3 +1,6 @@
 ## 2025-01-29 - Mobile Input and A11y Redundancy
 **Learning:** Mobile keyboards can erroneously autocorrect or autocapitalize configuration inputs like hostnames and passwords. Also, range sliders inherently announce their values to screen readers, so visually displaying the bounds and current value as separate DOM elements without `aria-hidden="true"` creates redundant and confusing speech output.
 **Action:** Always add `autocorrect="off" autocapitalize="none" spellcheck="false"` to non-prose text inputs (like configurations or URLs). Always add `aria-hidden="true"` to visual labels associated with input elements that already provide their own a11y semantics (like range sliders).
+## 2024-05-24 - Improve mobile accessibility for inputs and screen readers
+**Learning:** Configuration text inputs (like hostnames and passwords) should disable autocorrect, autocapitalize, and spellcheck to improve mobile usability. Visual bound labels for range sliders should include `aria-hidden="true"` to prevent redundant screen reader announcements, as the input element already possesses semantic value.
+**Action:** Always add `autocorrect="off" autocapitalize="none" spellcheck="false"` to configuration inputs, and hide redundant visual labels from screen readers.
