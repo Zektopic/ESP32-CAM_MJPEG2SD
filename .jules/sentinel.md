@@ -175,3 +175,8 @@
 **Vulnerability:** A critical buffer overflow risk existed in `prefs.cpp` where `strcpy(value, configs[keyPos][1].c_str())` was used to copy configuration strings into a statically sized `value` buffer. This function was called across different parts of the code with varying sized destination buffers (e.g., `appId[16]`, `fsizePtrStr[4]`). Since configuration values from flash/SD are essentially untrusted input, a maliciously crafted config file could overflow these local arrays on the stack or BSS, potentially achieving remote code execution.
 **Learning:** Centralized configuration retrieval functions (`retrieveConfigVal`) must always enforce buffer bounds, because the size of the destination buffer is not known at the function definition site and changes depending on the caller context.
 **Prevention:** Always mandate a `size_t bufferSize` parameter for configuration retrieval functions and use bounded string operations (`strncpy` followed by explicit null termination) to ensure the destination buffer is never overflowed, regardless of how large the stored configuration value is.
+
+## 2024-06-25 - [HIGH] Buffer Overflow in mqtt_uri
+**Vulnerability:** In `mqtt.cpp`, an unbounded `sprintf` was used to concatenate `mqtt_broker` and `mqtt_port` into `mqtt_uri`. While `mqtt_uri` was correctly sized `FILE_NAME_LEN`, `sprintf` does not inherently enforce boundaries.
+**Learning:** `sprintf` inherently lacks bounds checking on the destination buffer. External inputs like MQTT payloads should never be copied into bounded arrays without proper length checks.
+**Prevention:** In C/C++, `sprintf` should be aggressively deprecated in favor of `snprintf` which guarantees bounds are respected.
