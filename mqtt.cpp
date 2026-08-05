@@ -253,7 +253,7 @@ void startMqttClient(void){
   }
   
   char mqtt_uri[FILE_NAME_LEN];
-  sprintf(mqtt_uri, "mqtt://%s:%s", mqtt_broker, mqtt_port);
+  snprintf(mqtt_uri, sizeof(mqtt_uri), "mqtt://%s:%s", mqtt_broker, mqtt_port);
   snprintf(lwt_topic, FILE_NAME_LEN, "%ssensor/%s/lwt", mqtt_topic_prefix, hostName);
   snprintf(cmd_topic, FILE_NAME_LEN, "%ssensor/%s/cmd", mqtt_topic_prefix, hostName);
   snprintf(image_topic, FILE_NAME_LEN, "%ssensor/%s/still", mqtt_topic_prefix, hostName);
