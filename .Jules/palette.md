@@ -8,3 +8,7 @@
 ## 2024-05-24 - Improve Input Accessibility
 **Learning:** Adding aria-hidden to visual bounds reduces screen reader clutter for range sliders. Disabling auto-correct/capitalize for password inputs improves mobile UX.
 **Action:** Always verify decorative UI elements have aria-hidden and configuration inputs don't try to autocorrect on mobile.
+
+## 2025-01-29 - Mobile Input Redundancy
+**Learning:** Adding `autocorrect="off" autocapitalize="none" spellcheck="false"` to non-prose text inputs improves mobile accessibility.
+**Action:** Always add `autocorrect="off" autocapitalize="none" spellcheck="false"` to non-prose text inputs (like configurations or URLs).
