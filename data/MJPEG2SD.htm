@@ -1000,11 +1000,11 @@
                 <nav class="quick-nav" id="accSettings" name="access-settings" title="Access Settings" aria-label="Access Settings" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">🔧</nav>
                 <div class="micContainer">
                   <button class="quick-nav audButtons disabled" id="micRem" title="Microphone Control" aria-label="Microphone Control" disabled aria-disabled="true">🎤</button>
-                  <canvas id="micLevel" role="meter" aria-label="Microphone volume level"></canvas>
+                  <canvas id="micLevel" role="meter" aria-hidden="true" aria-label="Microphone volume level"></canvas>
                 </div>
                 <div class="spkrContainer">
                   <button class="quick-nav audButtons disabled" id="spkrRem" title="Speaker Control" aria-label="Speaker Control" disabled aria-disabled="true">🔈</button>
-                  <canvas id="spkrLevel" role="meter" aria-label="Speaker volume level"></canvas>
+                  <canvas id="spkrLevel" role="meter" aria-hidden="true" aria-label="Speaker volume level"></canvas>
                 </div>
               </nav>
               <div id="menu-top" class="menu-pinned">
@@ -1106,7 +1106,7 @@
                     </div>
                     <div class="input-group" id="denoise-group">
                       <label for="denoise">De-Noise</label>
-                      <div name="rangeMin">Auto</div>
+                      <div name="rangeMin" aria-hidden="true">Auto</div>
                       <input title="Set image de-noise level" type="range" id="denoise" min="0" max="8" value="0">
                     </div>
                   </div>
@@ -1145,9 +1145,9 @@
                   </div>
                   <div class="input-group hidden" id="agc_gain-group">
                     <label for="agc_gain" id="agc_gain_lab">Gain</label>
-                    <div name="rangeMin">1x</div>
+                    <div name="rangeMin" aria-hidden="true">1x</div>
                     <input title="Set automatic gain control limit" type="range" id="agc_gain" min="0" max="30" value="5">
-                    <div name="rangeMax">31x</div>
+                    <div name="rangeMax" aria-hidden="true">31x</div>
                   </div>
                   <div class="input-group" id="hmirror-group">
                     <label for="hmirror">H-Mirror</label>
@@ -1205,9 +1205,9 @@
                     </div>
                     <div class="input-group" id="gainceiling-group">
                       <label for="gainceiling">Gain Ceiling</label>
-                      <div name="rangeMin">2x</div>
+                      <div name="rangeMin" aria-hidden="true">2x</div>
                       <input title="Set gain ceiling limit" type="range" id="gainceiling" min="0" max="6" value="0">
-                      <div name="rangeMax">128x</div>
+                      <div name="rangeMax" aria-hidden="true">128x</div>
                     </div>
                     <div class="input-group" id="lenc-group">
                       <label for="lenc">Lens Correction</label>
@@ -1378,7 +1378,7 @@
                   <div class="input-group wifi-only" id="wifi-group">
                     <label for="ST_Pass">Password</label>
                     <div class="password-wrapper">
-                      <input type="password" id="ST_Pass" name="ST_Pass" maxlength=64 placeholder="Router password" style="padding-right:30px; width:100%">
+                      <input type="password" id="ST_Pass" name="ST_Pass" autocorrect="off" autocapitalize="none" spellcheck="false" maxlength=64 placeholder="Router password" style="padding-right:30px; width:100%">
                       <span class="password-toggle local" onclick="togglePassword(this, 'ST_Pass')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0" aria-label="Toggle password visibility for ST_Pass" title="Show password">👁️</span>
                     </div>
                   </div>
@@ -1421,7 +1421,7 @@
                   <div class="input-group" id="ftp-group">
                     <label for="FS_Pass">FS password</label>
                     <div class="password-wrapper">
-                      <input type="password" id="FS_Pass" name="FS_Pass" maxlength=32 placeholder="File server password" style="padding-right:30px; width:100%">
+                      <input type="password" id="FS_Pass" name="FS_Pass" autocorrect="off" autocapitalize="none" spellcheck="false" maxlength=32 placeholder="File server password" style="padding-right:30px; width:100%">
                       <span class="password-toggle local" onclick="togglePassword(this, 'FS_Pass')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0" aria-label="Toggle password visibility for FS_Pass" title="Show password">👁️</span>
                     </div>
                   </div>
@@ -1453,7 +1453,7 @@
                   <div class="input-group" id="smtp-group">
                     <label for="SMTP_Pass">SMTP password</label>
                     <div class="password-wrapper">
-                      <input type="password" id="SMTP_Pass" name="SMTP_Pass" maxlength=32 placeholder="smtp password" style="padding-right:30px; width:100%">
+                      <input type="password" id="SMTP_Pass" name="SMTP_Pass" autocorrect="off" autocapitalize="none" spellcheck="false" maxlength=32 placeholder="smtp password" style="padding-right:30px; width:100%">
                       <span class="password-toggle local" onclick="togglePassword(this, 'SMTP_Pass')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0" aria-label="Toggle password visibility for SMTP_Pass" title="Show password">👁️</span>
                     </div>
                   </div>
@@ -1470,7 +1470,7 @@
                   <div class="input-group" id="auth-group">
                       <label for="Auth_Pass">Web password</label>
                       <div class="password-wrapper">
-                      <input type="password" id="Auth_Pass" name="Auth_Pass" maxlength=32 placeholder="Authentication password" style="padding-right:30px; width:100%">
+                      <input type="password" id="Auth_Pass" name="Auth_Pass" autocorrect="off" autocapitalize="none" spellcheck="false" maxlength=32 placeholder="Authentication password" style="padding-right:30px; width:100%">
                       <span class="password-toggle local" onclick="togglePassword(this, 'Auth_Pass')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0" aria-label="Toggle password visibility for Auth_Pass" title="Show password">👁️</span>
                     </div>
                   </div>
@@ -1571,11 +1571,11 @@
               </div>
               <div class="RCcontrolFmt RCsteerFmt">
                 <input title="Control RC steering" type="range" id="steerDirection" aria-label="Steer Direction" class="RCcontrol immed bigThumb ignore" value=0>
-                <div name="rangeVal" style="top: 2px" class="rvThumb">0</div>
+                <div name="rangeVal" aria-hidden="true" style="top: 2px" class="rvThumb">0</div>
               </div>
               <div class="RCcontrolFmt RCmotorFmt">
                 <input title="Control RC speed" type="range" id="motorSpeed" aria-label="Motor Speed" class="RCcontrol immed bigThumb ignore" value=0>
-                <div name="rangeVal" class="rvThumb">0</div>
+                <div name="rangeVal" aria-hidden="true" class="rvThumb">0</div>
               </div>
             </div>
             <img id="stream" src="" crossorigin alt="Live camera stream">
