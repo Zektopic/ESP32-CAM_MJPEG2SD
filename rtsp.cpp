@@ -99,15 +99,19 @@ static void sendRTSPVideo(void* p) {
 }
 
 void sendRTSPSubtitles(void* arg) { 
-  char data[100];
+  char data[256];
   time_t currEpoch = getEpoch();
   size_t len = strftime(data, 12, "%H:%M:%S  ", localtime(&currEpoch));
-  len += sprintf(data + len, "FPS: %lu", rtspServer.rtpFps);
+  int written = snprintf(data + len, sizeof(data) - len, "FPS: %lu", rtspServer.rtpFps);
+  if (written > 0 && written < sizeof(data) - len) len += written;
 #if INCLUDE_TELEM
   // add telemetry data 
   if (teleUse) {
     storeSensorData(true);
-    if (srtBytes) len += sprintf(data + len, "%s", (const char*)srtBuffer);
+    if (srtBytes) {
+      int written = snprintf(data + len, sizeof(data) - len, "%s", (const char*)srtBuffer);
+      if (written > 0 && written < sizeof(data) - len) len += written;
+    }
     srtBytes = 0;
   }
 #endif
