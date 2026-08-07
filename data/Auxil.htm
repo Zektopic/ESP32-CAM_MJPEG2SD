@@ -864,16 +864,16 @@
                   </div>
                   <div class="input-group" id="wifi-group">
                     <label for="hostName">Host Name</label>
-                    <input id="hostName" name="hostName" maxlength=32 placeholder="Host name">
+                    <input autocorrect="off" autocapitalize="none" spellcheck="false" id="hostName" name="hostName" maxlength=32 placeholder="Host name">
                   </div>
                   <div class="input-group wifi-only" id="wifi-group">
                     <label for="ST_SSID">SSID</label>
-                    <input id="ST_SSID" name="ST_SSID" maxlength=32 placeholder="Router SSID">
+                    <input autocorrect="off" autocapitalize="none" spellcheck="false" id="ST_SSID" name="ST_SSID" maxlength=32 placeholder="Router SSID">
                   </div>
                   <div class="input-group wifi-only" id="wifi-group">
                     <label for="ST_Pass">Password</label>
                     <div class="password-wrapper">
-                      <input type="password" id="ST_Pass" name="ST_Pass" maxlength=64 placeholder="Router password" style="padding-right:30px; width:100%">
+                      <input type="password" autocorrect="off" autocapitalize="none" spellcheck="false" id="ST_Pass" name="ST_Pass" maxlength=64 placeholder="Router password" style="padding-right:30px; width:100%">
                       <span class="password-toggle local" onclick="const p=document.getElementById('ST_Pass'); if(p.type==='password'){p.type='text';this.innerText='🙈';this.title='Hide password';}else{p.type='password';this.innerText='👁️';this.title='Show password';}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0" aria-label="Toggle password visibility for ST_Pass" title="Show password">👁️</span>
                     </div>
                   </div>
@@ -885,7 +885,7 @@
                   <div class="subheader">Clock settings</div>
                   <div class="input-group" id="time-group">
                     <label for="timezone">Time Zone</label>
-                    <input id="timezone" name="timezone" maxlength=64 placeholder="Time zone string">
+                    <input autocorrect="off" autocapitalize="none" spellcheck="false" id="timezone" name="timezone" maxlength=64 placeholder="Time zone string">
                   </div>
                   <div class="input-group" id="time-group">
                     <label for="regionSel">Select Region</label>
@@ -903,26 +903,26 @@
                   <div class="subheader">FTP / HTTPS settings</div>
                   <div class="input-group" id="ftp-group">
                     <label for="fsServer">File Server</label>
-                    <input id="fsServer" name="fsServer" maxlength=32 placeholder="File server name">
+                    <input autocorrect="off" autocapitalize="none" spellcheck="false" id="fsServer" name="fsServer" maxlength=32 placeholder="File server name">
                   </div>
                   <div class="input-group" id="ftp-group">
                     <label for="fsPort">FS port</label>
-                    <input id="fsPort" name="fsPport" maxlength=6 placeholder="File server port">
+                    <input autocorrect="off" autocapitalize="none" spellcheck="false" id="fsPort" name="fsPport" maxlength=6 placeholder="File server port">
                   </div>
                   <div class="input-group" id="ftp-group">
                     <label for="ftpUser">FTP user name</label>
-                    <input id="ftpUser" name="ftpUser" maxlength=32 placeholder="FTP user name">
+                    <input autocorrect="off" autocapitalize="none" spellcheck="false" id="ftpUser" name="ftpUser" maxlength=32 placeholder="FTP user name">
                   </div>
                   <div class="input-group" id="ftp-group">
                     <label for="FS_Pass">FS password</label>
                     <div class="password-wrapper">
-                      <input type="password" id="FS_Pass" name="FS_Pass" maxlength=32 placeholder="File server password" style="padding-right:30px; width:100%">
+                      <input type="password" autocorrect="off" autocapitalize="none" spellcheck="false" id="FS_Pass" name="FS_Pass" maxlength=32 placeholder="File server password" style="padding-right:30px; width:100%">
                       <span class="password-toggle local" onclick="const p=document.getElementById('FS_Pass'); if(p.type==='password'){p.type='text';this.innerText='🙈';this.title='Hide password';}else{p.type='password';this.innerText='👁️';this.title='Show password';}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0" aria-label="Toggle password visibility for FS_Pass" title="Show password">👁️</span>
                     </div>
                   </div>
                   <div class="input-group" id="ftp-group">
                     <label for="fsWd">FS root dir</label>
-                    <input id="fsWd" name="fsWd" maxlength=64 placeholder="Working directory path">
+                    <input autocorrect="off" autocapitalize="none" spellcheck="false" id="fsWd" name="fsWd" maxlength=64 placeholder="Working directory path">
                   </div>
                   <div class="input-group" id="ftp-group">
                     <label for="fsUse">Upload method:</label>FTP&nbsp;
@@ -935,37 +935,37 @@
                   <div class="subheader">SMTP settings</div>
                   <div class="input-group" id="smtp-group">
                     <label for="smtp_server">SMTP server</label>
-                    <input id="smtp_server" name="smtp_server" maxlength=32 placeholder="smtp server name">
+                    <input autocorrect="off" autocapitalize="none" spellcheck="false" id="smtp_server" name="smtp_server" maxlength=32 placeholder="smtp server name">
                   </div>
                   <div class="input-group" id="smtp-group">
                     <label for="smtp_port">SMTP port</label>
-                    <input id="smtp_port" name="smtp_port" maxlength=6 placeholder="smtp port">
+                    <input autocorrect="off" autocapitalize="none" spellcheck="false" id="smtp_port" name="smtp_port" maxlength=6 placeholder="smtp port">
                   </div>
                   <div class="input-group" id="smtp-group">
                     <label for="smtp_login">SMTP login</label>
-                    <input id="smtp_login" name="smtp_login" maxlength=32 placeholder="smtp login email">
+                    <input autocorrect="off" autocapitalize="none" spellcheck="false" id="smtp_login" name="smtp_login" maxlength=32 placeholder="smtp login email">
                   </div>
                   <div class="input-group" id="smtp-group">
                     <label for="SMTP_Pass">SMTP password</label>
                     <div class="password-wrapper">
-                      <input type="password" id="SMTP_Pass" name="SMTP_Pass" maxlength=32 placeholder="smtp password" style="padding-right:30px; width:100%">
+                      <input type="password" autocorrect="off" autocapitalize="none" spellcheck="false" id="SMTP_Pass" name="SMTP_Pass" maxlength=32 placeholder="smtp password" style="padding-right:30px; width:100%">
                       <span class="password-toggle local" onclick="const p=document.getElementById('SMTP_Pass'); if(p.type==='password'){p.type='text';this.innerText='🙈';this.title='Hide password';}else{p.type='password';this.innerText='👁️';this.title='Show password';}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0" aria-label="Toggle password visibility for SMTP_Pass" title="Show password">👁️</span>
                     </div>
                   </div>
                   <div class="input-group" id="ftp-group">
                     <label for="smtp_email">SMTP email</label>
-                    <input id="smtp_email" name="smtp_email" maxlength=64 placeholder="smtp email to">
+                    <input autocorrect="off" autocapitalize="none" spellcheck="false" id="smtp_email" name="smtp_email" maxlength=64 placeholder="smtp email to">
                   </div>
                   <br>
                   <div class="subheader">Authentication settings</div>
                   <div class="input-group" id="auth-group">
                       <label for="Auth_Name">Web login</label>
-                      <input id="Auth_Name" name="Auth_Name" maxlength=32 placeholder="Authentication user name">
+                      <input autocorrect="off" autocapitalize="none" spellcheck="false" id="Auth_Name" name="Auth_Name" maxlength=32 placeholder="Authentication user name">
                   </div>
                   <div class="input-group" id="auth-group">
                       <label for="Auth_Pass">Web password</label>
                       <div class="password-wrapper">
-                      <input type="password" id="Auth_Pass" name="Auth_Pass" maxlength=32 placeholder="Authentication password" style="padding-right:30px; width:100%">
+                      <input type="password" autocorrect="off" autocapitalize="none" spellcheck="false" id="Auth_Pass" name="Auth_Pass" maxlength=32 placeholder="Authentication password" style="padding-right:30px; width:100%">
                       <span class="password-toggle local" onclick="const p=document.getElementById('Auth_Pass'); if(p.type==='password'){p.type='text';this.innerText='🙈';this.title='Hide password';}else{p.type='password';this.innerText='👁️';this.title='Show password';}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0" aria-label="Toggle password visibility for Auth_Pass" title="Show password">👁️</span>
                     </div>
                   </div>

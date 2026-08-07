@@ -1761,7 +1761,7 @@
       <div id="buttonContainer">
         <!-- Input field for users to enter individual IPs -->
         <label for="ipInput">Enter IP address:&nbsp;</label>
-        <input type="text" id="ipInput" class="local" placeholder="e.g. 192.168.1.100" onkeydown="if(event.key === 'Enter') addIP()">
+        <input type="text" autocorrect="off" autocapitalize="none" spellcheck="false" id="ipInput" class="local" placeholder="e.g. 192.168.1.100" onkeydown="if(event.key === 'Enter') addIP()">
         <button id="addIpButton" class="local" onclick="addIP()" title="Add a new camera to the Hub" aria-label="Add entered IP address to Camera Hub">Add IP</button>
         <button id="clearStorageButton" class="local" onclick="clearLocalStorage()" title="Remove all saved cameras" aria-label="Delete all saved camera IP addresses">Delete All</button>
         <button id="refreshAllButton" class="local" onclick="refreshAllContainers(true)" title="Refresh all camera streams" aria-label="Refresh all camera images">Refresh</button>
