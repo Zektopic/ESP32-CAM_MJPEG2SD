@@ -4,3 +4,7 @@
 ## 2024-05-24 - Improve mobile accessibility for inputs and screen readers
 **Learning:** Configuration text inputs (like hostnames and passwords) should disable autocorrect, autocapitalize, and spellcheck to improve mobile usability. Visual bound labels for range sliders should include `aria-hidden="true"` to prevent redundant screen reader announcements, as the input element already possesses semantic value.
 **Action:** Always add `autocorrect="off" autocapitalize="none" spellcheck="false"` to configuration inputs, and hide redundant visual labels from screen readers.
+
+## 2024-05-24 - Improve Input Accessibility
+**Learning:** Adding aria-hidden to visual bounds reduces screen reader clutter for range sliders. Disabling auto-correct/capitalize for password inputs improves mobile UX.
+**Action:** Always verify decorative UI elements have aria-hidden and configuration inputs don't try to autocorrect on mobile.
