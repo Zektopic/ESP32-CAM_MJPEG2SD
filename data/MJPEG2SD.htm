@@ -1556,7 +1556,7 @@
             <div class="iconSize" id="saveImage" title="Download screenshot" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-label="Download screenshot">⬇</div>
             <div id="RCenable" class="hidden">
               <div class="RCcontrolFmt RCbuttonFmt" title="Switch RC controls on / off" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-label="Switch RC controls on / off">
-                <svg class="svgIcon">
+                <svg aria-hidden="true" class="svgIcon">
                   <rect class="RCoff"/>
                   <text class="RCbutton local" id="RCcontrols">🎮</text>
                 </svg>
@@ -1564,7 +1564,7 @@
             </div>
             <div id="RCdisplay" class="hidden touchDisabled">
               <div class="RCcontrolFmt RClightsFmt" title="Switch RC lights on / off" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-label="Switch RC lights on / off">
-                <svg class="svgIcon">
+                <svg aria-hidden="true" class="svgIcon">
                   <rect class="RCoff"/>
                   <text class="RCcontrol local" id="RClights">💡</text>
                 </svg>
@@ -1619,32 +1619,32 @@
           </div>
         </div>
         <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="showsys">
-          <svg>
+          <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text id="showsys" class="midText">System</text>
           </svg>
         </div>
         <div style="grid-column: span 4"><br></div>
         <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="refreshLog">
-          <svg>
+          <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local" id="refreshLog">Refresh Log</text>
           </svg>
         </div>
         <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="clearLog">
-          <svg>
+          <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local" id="clearLog">Clear Log</text>
           </svg>
         </div>
         <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="save">
-          <svg>
+          <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text id="save" class="midText">Save</text>
           </svg>
         </div>
         <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="reset">
-          <svg>
+          <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text id="reset" class="midText">Reboot ESP</text>
           </svg>
@@ -1661,25 +1661,25 @@
       <br>
       <div class="grid-cols4">
         <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="save">
-          <svg>
+          <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text id="save" class="midText">Save</text>
           </svg>
         </div>
         <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="reset">
-          <svg>
+          <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text id="reset" class="midText">Reboot ESP</text>
           </svg>
         </div>
         <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="deldata">
-          <svg>
+          <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text id="deldata" class="midText">Reload /data</text>
           </svg>
         </div>
         <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="clear">
-          <svg>
+          <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text id="clear" class="midText">Clear NVS</text>
           </svg>
@@ -1692,61 +1692,61 @@
           <br>
         </div>
         <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="wifi">
-          <svg>
+          <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local midText" id="wifi">Network</text>
           </svg>
         </div>
         <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="streaming">
-          <svg>
+          <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local midText" id="streaming">Streaming</text>
           </svg>
         </div>
         <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="motion">
-          <svg>
+          <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local midText" id="motion">Motion</text>
           </svg>
         </div>
         <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="peripherals">
-          <svg>
+          <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local midText" id="peripherals">Peripherals</text>
           </svg>
         </div>
         <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="other">
-          <svg>
+          <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local midText" id="other">Other</text>
           </svg>
         </div>
         <div id="AudconfigBtn" class="hidden" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="Audconfig">
-          <svg>
+          <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local midText" id="Audconfig">Audio</text>
           </svg>
         </div>
         <div id="EthconfigBtn" class="hidden" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="Ethconfig">
-          <svg>
+          <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local midText" id="Ethconfig">Ethernet</text>
           </svg>
         </div>
         <div id="RCconfigBtn" class="hidden" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="RCconfig">
-          <svg>
+          <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local midText" id="RCconfig">RC Config</text>
           </svg>
         </div>
         <div id="SVconfigBtn" class="hidden" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="SVconfig">
-          <svg>
+          <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local midText" id="SVconfig">Servos</text>
           </svg>
         </div>
         <div id="PGconfigBtn" class="hidden" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="PGconfig">
-          <svg>
+          <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local midText" id="PGconfig">PG Control</text>
           </svg>
