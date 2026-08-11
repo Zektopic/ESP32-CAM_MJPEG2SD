@@ -12,3 +12,6 @@
 ## 2025-01-29 - Mobile Input Redundancy
 **Learning:** Adding `autocorrect="off" autocapitalize="none" spellcheck="false"` to non-prose text inputs improves mobile accessibility.
 **Action:** Always add `autocorrect="off" autocapitalize="none" spellcheck="false"` to non-prose text inputs (like configurations or URLs).
+## 2025-01-29 - Redundant ARIA attributes on buttons
+**Learning:** Adding an `aria-label` to a native `<button>` that already has exact matching text content (e.g., `<button aria-label="Save Settings">Save Settings</button>`) is a redundant accessibility anti-pattern. While tooltips (`title`) are good for sighted users, redundant ARIA labels bloat the markup and occasionally cause some screen readers to double-announce.
+**Action:** Avoid adding `aria-label` attributes to native buttons when the text content already provides the exact same descriptive label. Focus on using `title` for visual tooltips if the text content is clear enough for screen readers.
