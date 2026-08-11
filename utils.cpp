@@ -568,7 +568,8 @@ static uint8_t failCounts[REMFAILCNT] = {0};
 
 void remoteServerClose(Client& client) {
   uint32_t startAttempt = millis();
-  while (client.available() > 0 && (millis() - startAttempt < 1000)) client.read();
+  uint8_t flushBuf[64];
+  while (client.available() > 0 && (millis() - startAttempt < 1000)) client.read(flushBuf, sizeof(flushBuf));
   if (client.connected()) client.stop();
 }
 

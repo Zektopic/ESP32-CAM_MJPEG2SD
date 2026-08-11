@@ -127,3 +127,6 @@
 ## 2024-11-20 - Replace redundant strncpy+strlen with a single snprintf
 **Learning:** Using `strncpy` followed by `snprintf` with `strlen()` to append strings (e.g., `strncpy(subject, _subject, sizeof(subject)-1); snprintf(subject+strlen(subject), ...);`) causes redundant O(N) string traversals and creates potential buffer overruns.
 **Action:** Combine multi-step string building operations into a single bounded `snprintf(dest, sizeof(dest), "%s from %s", _subject, hostName)` to eliminate redundant string length calculations.
+## 2024-05-24 - Optimize network buffer flushing
+**Learning:** In ESP32/Arduino codebases, flushing network buffers with byte-by-byte reads (e.g., `while (client.available()) client.read();`) is inefficient and causes high network I/O latency and function call overhead.
+**Action:** Replace inefficient byte-by-byte reads with block reads using a local buffer (e.g., `uint8_t buf[64]; while (client.available()) client.read(buf, sizeof(buf));`) to reduce function call overhead and network I/O latency.
