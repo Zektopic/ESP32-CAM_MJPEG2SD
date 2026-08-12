@@ -700,7 +700,7 @@ mjpegStruct getNextFrame(bool firstCall) {
     mjpegData.buffLen = mjpegData.buffOffset = 0; // signal end of jpeg
   }
   hTime = millis();
-  delay(1);
+  vTaskDelay(pdMS_TO_TICKS(1));
   return mjpegData;
 }
 
@@ -710,7 +710,7 @@ void stopPlaying() {
     stopPlayback = true;
     // wait till stopped cleanly, but prevent infinite loop
     uint32_t timeOut = millis();
-    while (doPlayback && millis() - timeOut < MAX_FRAME_WAIT) delay(10);
+    while (doPlayback && millis() - timeOut < MAX_FRAME_WAIT) vTaskDelay(pdMS_TO_TICKS(10));
     if (doPlayback) {
       // not yet closed, so force close
       logLine();

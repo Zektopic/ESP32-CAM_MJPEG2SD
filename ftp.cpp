@@ -142,7 +142,7 @@ static bool sendFtpCommand(const char* cmd, const char* param, const char* respC
   
   // wait for ftp server response
   uint32_t start = millis();
-  while (!rclient.available() && millis() < start + (responseTimeoutSecs * 1000)) delay(1);
+  while (!rclient.available() && millis() < start + (responseTimeoutSecs * 1000)) vTaskDelay(pdMS_TO_TICKS(1));
   if (!rclient.available()) {
     LOG_WRN("FTP server response timeout");
     return false;
@@ -152,7 +152,8 @@ static bool sendFtpCommand(const char* cmd, const char* param, const char* respC
   respCodeRx[3] = 0; // terminator
   int readLen = rclient.read((uint8_t*)rspBuf, 255);
   if (readLen >= 0) rspBuf[readLen] = 0;
-  while (rclient.available()) rclient.read(); // bin the rest of response
+  uint8_t flushBuf[64];
+  while (rclient.available()) rclient.read(flushBuf, sizeof(flushBuf)); // bin the rest of response
 
   // check response code with expected
   LOG_VRB("Rx code: %s, resp: %s", respCodeRx, rspBuf);

@@ -46,7 +46,7 @@ static bool sendSmtpCommand(NetworkClientSecure& client, const char* cmd, const 
   if (cmd[0] != '\0') client.println(cmd);
 
 	uint32_t start = millis();
-  while (!client.available() && millis() < start + (responseTimeoutSecs * 1000)) delay(1);
+  while (!client.available() && millis() < start + (responseTimeoutSecs * 1000)) vTaskDelay(pdMS_TO_TICKS(1));
   if (!client.available()) {
     LOG_WRN("SMTP server response timeout");
     return false;
@@ -57,7 +57,8 @@ static bool sendSmtpCommand(NetworkClientSecure& client, const char* cmd, const 
   respCodeRx[3] = 0; // terminator
   int readLen = client.read((uint8_t*)rspBuf, 255);
   rspBuf[readLen] = 0;
-  while (client.available()) client.read(); // bin the rest of response
+  uint8_t flushBuf[64];
+  while (client.available()) client.read(flushBuf, sizeof(flushBuf)); // bin the rest of response
 
   // check response code with expected
   LOG_VRB("Rx code: %s, resp: %s", respCodeRx, rspBuf);

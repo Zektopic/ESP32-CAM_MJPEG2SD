@@ -127,3 +127,6 @@
 ## 2024-11-20 - Replace redundant strncpy+strlen with a single snprintf
 **Learning:** Using `strncpy` followed by `snprintf` with `strlen()` to append strings (e.g., `strncpy(subject, _subject, sizeof(subject)-1); snprintf(subject+strlen(subject), ...);`) causes redundant O(N) string traversals and creates potential buffer overruns.
 **Action:** Combine multi-step string building operations into a single bounded `snprintf(dest, sizeof(dest), "%s from %s", _subject, hostName)` to eliminate redundant string length calculations.
+## 2024-05-31 - Optimize network block reads and delays
+**Learning:** Single byte reads (e.g., `client.read()`) to flush network buffers introduce unnecessary overhead. Blocking `delay()` calls in ESP32 block FreeRTOS task scheduling.
+**Action:** Replace `while (client.available()) client.read()` with `client.read(flushBuf, sizeof(flushBuf))`. Replace `delay(ms)` with `vTaskDelay(pdMS_TO_TICKS(ms))`.
