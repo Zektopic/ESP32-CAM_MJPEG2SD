@@ -872,13 +872,13 @@
                       // format checkbox as slider
                       inputHtml = '<div class="switch"><input type="checkbox" class="configItem" id="' + saveKey;
                       inputHtml += '" value="'+ saveVal +'"' + (saveVal == 1 ? ' checked' : '') + '>';
-                      inputHtml += '<label class="slider" title="Toggle ' + saveKey + '" for="' + saveKey + '"></label></div>';
+                      inputHtml += '<label class="slider" title="Toggle ' + saveKey + '" for="' + saveKey + '" aria-hidden="true"></label></div>';
                     break;
                     case 'D': // display only
-                      inputHtml = '<input type="text" class="configItem" id="' + saveKey + '" value="'+ saveVal +'" readonly style="background-color: var(--menuBackground);">';
+                      inputHtml = '<input type="text" class="configItem" id="' + saveKey + '" value="'+ saveVal +'" readonly style="background-color: var(--menuBackground);" autocorrect="off" autocapitalize="none" spellcheck="false">';
                     break;
                     case 'L': // binary string input
-                      inputHtml = `<input type="text" oninput="this.value = this.value.replace(/[^01]/g, '')" placeholder="0101..." class="configItem" id="` + saveKey + `" value="`+ saveVal +`" >`;
+                      inputHtml = `<input type="text" oninput="this.value = this.value.replace(/[^01]/g, '')" placeholder="0101..." class="configItem" id="` + saveKey + `" value="`+ saveVal +`"  autocorrect="off" autocapitalize="none" spellcheck="false">`;
                     break;
                     case 'N': // number input
                       inputHtml = '<input type="number" class="configItem" id="' + saveKey + '" value="'+ saveVal +'" >';
@@ -901,10 +901,10 @@
                       inputHtml += '</select>';
                     break;
                     case 'T': // text input
-                      inputHtml = '<input type="text" class="configItem" id="' + saveKey + '" value="'+ saveVal +'" >';
+                      inputHtml = '<input type="text" class="configItem" id="' + saveKey + '" value="'+ saveVal +'"  autocorrect="off" autocapitalize="none" spellcheck="false">';
                     break;
                     case 'X': // text input field not updated by app
-                      inputHtml = '<input type="text" class="configItem nochange" id="' + saveKey + '" value="'+ saveVal +'" >';
+                      inputHtml = '<input type="text" class="configItem nochange" id="' + saveKey + '" value="'+ saveVal +'"  autocorrect="off" autocapitalize="none" spellcheck="false">';
                     break;
                     default:
                       alert("Unhandled config input type " + value);
