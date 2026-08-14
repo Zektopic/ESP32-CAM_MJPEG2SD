@@ -230,15 +230,15 @@ static void expandReason() {
   if (!btReason[0]) strcpy(btReason, "unknown");
 #if CONFIG_IDF_TARGET_ARCH_RISCV
   // riscV
-  else if (strstr(btReason, "Breakpoint") != NULL) sprintf(btReason, "probably printf format"); // usually misplaced or misformatted vsnprintf()
-  else if (strstr(btReason, "Stack protection fault") != NULL) sprintf(btReason, "stack overflow after HWM: %lu bytes", btHWM);  
+  else if (strstr(btReason, "Breakpoint") != NULL) snprintf(btReason, sizeof(btReason), "probably printf format"); // usually misplaced or misformatted vsnprintf()
+  else if (strstr(btReason, "Stack protection fault") != NULL) snprintf(btReason, sizeof(btReason), "stack overflow after HWM: %lu bytes", btHWM);
   else if (!strcmp(btReason, "LoadAccessFault") || !strcmp(btReason, "StoreAccessFault") || !strcmp(btReason, "InstructionAccessFault")) strcat(btReason, " (pointer issue)");
 #else
   // Xtensa
   else if (strstr(btReason, "Unhandled debug exception") != NULL) {
-    if (btHWM < HWM_MIN) sprintf(btReason, "probably stack overflow @ HWM: %lu bytes", btHWM);
-    else if (btHWM > HWM_MAX) sprintf(btReason, "probably printf format"); // usually misplaced or misformatted vsnprintf()
-    else sprintf(btReason, "stack overflow / printf format. HWM: %lu bytes", btHWM); 
+    if (btHWM < HWM_MIN) snprintf(btReason, sizeof(btReason), "probably stack overflow @ HWM: %lu bytes", btHWM);
+    else if (btHWM > HWM_MAX) snprintf(btReason, sizeof(btReason), "probably printf format"); // usually misplaced or misformatted vsnprintf()
+    else snprintf(btReason, sizeof(btReason), "stack overflow / printf format. HWM: %lu bytes", btHWM);
   }
   else if (!strcmp(btReason, "LoadProhibited") || !strcmp(btReason, "StoreProhibited") || !strcmp(btReason, "InstructionFetchError")) strcat(btReason, " (pointer issue)");
 #endif
@@ -368,7 +368,7 @@ static void boardInfo() {
 #endif
   char memInfo[100] = "none";
 #if !CONFIG_IDF_TARGET_ESP32C3
-  if (psramFound()) sprintf(memInfo, "%s, mode %s @ %dMhz", fmtSize(ESP.getPsramSize()), psramMode, CONFIG_SPIRAM_SPEED);
+  if (psramFound()) snprintf(memInfo, sizeof(memInfo), "%s, mode %s @ %dMhz", fmtSize(ESP.getPsramSize()), psramMode, CONFIG_SPIRAM_SPEED);
 #endif
   LOG_INF("PSRAM %s", memInfo);
 }
@@ -550,21 +550,33 @@ static void printGpioInfo() {
 
     char gpioInf[100];
     char* p = gpioInf;
+    size_t rem = sizeof(gpioInf);
+    int n;
+
+#define APPEND_SNPRINTF(...) \
+    do { \
+        n = snprintf(p, rem, __VA_ARGS__); \
+        if (n > 0 && n < rem) { p += n; rem -= n; } \
+    } while(0)
+
 #if defined(BOARD_HAS_PIN_REMAP)
     int dpin = gpioNumberToDigitalPin(i);
     if (dpin < 0) continue;  //pin is not exported
-    else p+= sprintf(p, "  D%-3d|%4u : ", dpin, i);
+    else APPEND_SNPRINTF("  D%-3d|%4u : ", dpin, i);
 #else
-    p+= sprintf(p, "  %4u : ", i);
+    APPEND_SNPRINTF("  %4u : ", i);
 #endif
     const char *extra_type = perimanGetPinBusExtraType(i);
-    if (extra_type) p+= sprintf(p, "%s", extra_type);
-    else p+= sprintf(p, "%s", perimanGetTypeName(type));
+    if (extra_type) APPEND_SNPRINTF("%s", extra_type);
+    else APPEND_SNPRINTF("%s", perimanGetTypeName(type));
+
     int8_t bus_number = perimanGetPinBusNum(i);
-    if (bus_number != -1) p+= sprintf(p, "[%u]", bus_number);
+    if (bus_number != -1) APPEND_SNPRINTF("[%u]", bus_number);
 
     int8_t bus_channel = perimanGetPinBusChannel(i);
-    if (bus_channel != -1) p+= sprintf(p, "[%u]", bus_channel);
+    if (bus_channel != -1) APPEND_SNPRINTF("[%u]", bus_channel);
+
+#undef APPEND_SNPRINTF
     *p = 0;
     LOG_SEND("%s\n", gpioInf);
   }
