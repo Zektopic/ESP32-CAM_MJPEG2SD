@@ -227,7 +227,10 @@ static void appPanicHandler(arduino_panic_info_t *info, void *arg) {
 }
 
 static void expandReason() {
-  if (!btReason[0]) strcpy(btReason, "unknown");
+  if (!btReason[0]) {
+    strncpy(btReason, "unknown", sizeof(btReason) - 1);
+    btReason[sizeof(btReason) - 1] = '\0';
+  }
 #if CONFIG_IDF_TARGET_ARCH_RISCV
   // riscV
   else if (strstr(btReason, "Breakpoint") != NULL) sprintf(btReason, "probably printf format"); // usually misplaced or misformatted vsnprintf()
