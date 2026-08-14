@@ -134,3 +134,6 @@
 ## 2024-05-31 - Optimize network block reads and delays
 **Learning:** Single byte reads (e.g., `client.read()`) to flush network buffers introduce unnecessary overhead. Blocking `delay()` calls in ESP32 block FreeRTOS task scheduling.
 **Action:** Replace `while (client.available()) client.read()` with `client.read(flushBuf, sizeof(flushBuf))`. Replace `delay(ms)` with `vTaskDelay(pdMS_TO_TICKS(ms))`.
+## 2024-05-24 - [HIGH] Missing Callsites Update when Changing Function Signatures
+**Learning:** The code review flagged that the `identifyMPU` function signature was modified in `appGlobals.h` and `periphsI2C.cpp`, but if there were other usages of this function across the codebase, they wouldn't compile because they are expecting the old arguments. Even though my regex confirmed there are no other invocations in this codebase currently, it is a crucial pattern to ensure the codebase remains sound.
+**Action:** Always search the codebase for all occurrences of a function (`grep -rnw`) when modifying its signature to ensure no broken call sites remain.

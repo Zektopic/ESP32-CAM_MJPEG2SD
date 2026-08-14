@@ -274,7 +274,7 @@ bool getPIRval();
 
 bool haveWavFile(bool isTL = false);
 bool identifyBMx();
-bool identifyMPU(char* _mpuModel);
+bool identifyMPU(char* _mpuModel, size_t maxLen);
 void intercom();
 bool isNight(uint8_t nightSwitch);
 void laserLevel() ;
