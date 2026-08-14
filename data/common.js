@@ -1025,13 +1025,15 @@
       }
 
       function refreshAllContainers(uniq = false) {
-        const containers = document.querySelectorAll('.ipContainer');
-        containers.forEach((container) => {
-          const ip = container.querySelector('.ipUrl').textContent;
-          const hubImg = container.querySelector('img');
-          hubImg.src = `http://${ip}`;
-          if (uniq) hubImg.src += Date.now();
-        });
+        const ipUrls = document.querySelectorAll('.ipContainer .ipUrl');
+        const hubImgs = document.querySelectorAll('.ipContainer img');
+        const len = ipUrls.length;
+        for (let i = 0; i < len; i++) {
+          const ip = ipUrls[i].textContent;
+          let src = `http://${ip}`;
+          if (uniq) src += Date.now();
+          hubImgs[i].src = src;
+        }
       }
 
       // Function to create remote device image link when the "Add IP" button is clicked
