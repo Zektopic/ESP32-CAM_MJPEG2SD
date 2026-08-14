@@ -233,15 +233,12 @@ static void appPanicHandler(arduino_panic_info_t *info, void *arg) {
 }
 
 static void expandReason() {
-  if (!btReason[0]) {
-    strncpy(btReason, "unknown", sizeof(btReason) - 1);
-    btReason[sizeof(btReason) - 1] = '\0';
-  }
+  if (!btReason[0]) snprintf(btReason, sizeof(btReason), "unknown");
 #if CONFIG_IDF_TARGET_ARCH_RISCV
   // riscV
   else if (strstr(btReason, "Breakpoint") != NULL) snprintf(btReason, sizeof(btReason), "probably printf format"); // usually misplaced or misformatted vsnprintf()
   else if (strstr(btReason, "Stack protection fault") != NULL) snprintf(btReason, sizeof(btReason), "stack overflow after HWM: %lu bytes", btHWM);
-  else if (!strcmp(btReason, "LoadAccessFault") || !strcmp(btReason, "StoreAccessFault") || !strcmp(btReason, "InstructionAccessFault")) strcat(btReason, " (pointer issue)");
+  else if (!strcmp(btReason, "LoadAccessFault") || !strcmp(btReason, "StoreAccessFault") || !strcmp(btReason, "InstructionAccessFault")) strncat(btReason, " (pointer issue)", sizeof(btReason) - strlen(btReason) - 1);
 #else
   // Xtensa
   else if (strstr(btReason, "Unhandled debug exception") != NULL) {
@@ -249,7 +246,7 @@ static void expandReason() {
     else if (btHWM > HWM_MAX) snprintf(btReason, sizeof(btReason), "probably printf format"); // usually misplaced or misformatted vsnprintf()
     else snprintf(btReason, sizeof(btReason), "stack overflow / printf format. HWM: %lu bytes", btHWM);
   }
-  else if (!strcmp(btReason, "LoadProhibited") || !strcmp(btReason, "StoreProhibited") || !strcmp(btReason, "InstructionFetchError")) strcat(btReason, " (pointer issue)");
+  else if (!strcmp(btReason, "LoadProhibited") || !strcmp(btReason, "StoreProhibited") || !strcmp(btReason, "InstructionFetchError")) strncat(btReason, " (pointer issue)", sizeof(btReason) - strlen(btReason) - 1);
 #endif
 }
 
