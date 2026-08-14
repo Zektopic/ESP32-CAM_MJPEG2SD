@@ -208,12 +208,17 @@ static void srtStream(httpd_req_t* req, uint8_t taskNum) {
     srtSeqNo++;
     uint32_t startTime = millis();
     formatElapsedTime(timeStr, srtTime, true);
-    size_t srtPtr = sprintf(srtHdr, "%d\n%s --> ", srtSeqNo, timeStr);
+    size_t srtPtr = 0;
+    int written = snprintf(srtHdr, sizeof(srtHdr), "%d\n%s --> ", srtSeqNo, timeStr);
+    if (written > 0 && written < sizeof(srtHdr)) srtPtr += written;
     srtTime += sampleInterval;
     formatElapsedTime(timeStr, srtTime, true);
-    srtPtr += sprintf(srtHdr + srtPtr, "%s\n", timeStr);
+    written = snprintf(srtHdr + srtPtr, sizeof(srtHdr) - srtPtr, "%s\n", timeStr);
+    if (written > 0 && written < sizeof(srtHdr) - srtPtr) srtPtr += written;
     time_t currEpoch = getEpoch();
-    srtPtr += strftime(srtHdr + srtPtr, 12, "%H:%M:%S  ", localtime(&currEpoch));
+    if (srtPtr < sizeof(srtHdr)) {
+      srtPtr += strftime(srtHdr + srtPtr, sizeof(srtHdr) - srtPtr, "%H:%M:%S  ", localtime(&currEpoch));
+    }
     httpd_resp_send_chunk(req, (const char*)srtHdr, srtPtr);
 #if INCLUDE_TELEM
     // add telemetry data 
