@@ -142,3 +142,7 @@
 **Learning:** Using `snprintf` in a tight loop for simple hex conversion is highly inefficient due to format parsing overhead.
 **Action:** Replace `snprintf` calls inside loops with manual bitwise operations and array lookups for character conversion to drastically improve performance.
 
+## 2024-05-24 - [HIGH] Missing Callsites Update when Changing Function Signatures
+**Learning:** The code review flagged that the `identifyMPU` function signature was modified in `appGlobals.h` and `periphsI2C.cpp`, but if there were other usages of this function across the codebase, they wouldn't compile because they are expecting the old arguments. Even though my regex confirmed there are no other invocations in this codebase currently, it is a crucial pattern to ensure the codebase remains sound.
+**Action:** Always search the codebase for all occurrences of a function (`grep -rnw`) when modifying its signature to ensure no broken call sites remain.
+
