@@ -31,7 +31,30 @@ void test_partitionTypeToStr() {
     std::cout << "All partitionTypeToStr tests passed!" << std::endl;
 }
 
+void test_partitionSubtypeToStr() {
+    // App subtypes
+    assert(strcmp(partitionSubtypeToStr(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY), "Factory") == 0);
+    assert(strcmp(partitionSubtypeToStr(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_OTA_0), "OTA_0") == 0);
+    assert(strcmp(partitionSubtypeToStr(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_OTA_5), "OTA_5") == 0);
+    assert(strcmp(partitionSubtypeToStr(ESP_PARTITION_TYPE_APP, 0xFF), "App_Other") == 0); // Unknown app subtype
+
+    // Data subtypes
+    assert(strcmp(partitionSubtypeToStr(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_OTA), "OTA_Data") == 0);
+    assert(strcmp(partitionSubtypeToStr(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_PHY), "PHY") == 0);
+    assert(strcmp(partitionSubtypeToStr(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_NVS), "NVS") == 0);
+    assert(strcmp(partitionSubtypeToStr(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_NVS_KEYS), "NVS_Keys") == 0);
+    assert(strcmp(partitionSubtypeToStr(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_SPIFFS), "SPIFFS") == 0);
+    assert(strcmp(partitionSubtypeToStr(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_FAT), "FAT") == 0);
+    assert(strcmp(partitionSubtypeToStr(ESP_PARTITION_TYPE_DATA, 0xFF), "Data_Other") == 0); // Unknown data subtype
+
+    // Unknown type
+    assert(strcmp(partitionSubtypeToStr(0xFF, 0x00), "Unknown") == 0);
+
+    std::cout << "All partitionSubtypeToStr tests passed!" << std::endl;
+}
+
 int main() {
     test_partitionTypeToStr();
+    test_partitionSubtypeToStr();
     return 0;
 }
