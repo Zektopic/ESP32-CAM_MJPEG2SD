@@ -219,6 +219,7 @@ static void appPanicHandler(arduino_panic_info_t *info, void *arg) {
     const char* taskName = task ? pcTaskGetName(task) : "idle";
     strncpy(btTask, taskName, sizeof(btTask) - 1);
     strncpy(btReason, info->reason, sizeof(btReason) - 1);
+    btReason[sizeof(btReason) - 1] = '\0';
     btCore = info->core;
   btLen = info->backtrace_len;
   for (int i = 0; i < info->backtrace_len; i++) backtrace[i] = info->backtrace[i];
@@ -227,20 +228,27 @@ static void appPanicHandler(arduino_panic_info_t *info, void *arg) {
 }
 
 static void expandReason() {
-  if (!btReason[0]) strcpy(btReason, "unknown");
+  if (!btReason[0]) {
+    strncpy(btReason, "unknown", sizeof(btReason) - 1);
+    btReason[sizeof(btReason) - 1] = '\0';
+  }
 #if CONFIG_IDF_TARGET_ARCH_RISCV
   // riscV
-  else if (strstr(btReason, "Breakpoint") != NULL) sprintf(btReason, "probably printf format"); // usually misplaced or misformatted vsnprintf()
-  else if (strstr(btReason, "Stack protection fault") != NULL) sprintf(btReason, "stack overflow after HWM: %lu bytes", btHWM);  
-  else if (!strcmp(btReason, "LoadAccessFault") || !strcmp(btReason, "StoreAccessFault") || !strcmp(btReason, "InstructionAccessFault")) strcat(btReason, " (pointer issue)");
+  else if (strstr(btReason, "Breakpoint") != NULL) snprintf(btReason, sizeof(btReason), "probably printf format"); // usually misplaced or misformatted vsnprintf()
+  else if (strstr(btReason, "Stack protection fault") != NULL) snprintf(btReason, sizeof(btReason), "stack overflow after HWM: %lu bytes", btHWM);
+  else if (!strcmp(btReason, "LoadAccessFault") || !strcmp(btReason, "StoreAccessFault") || !strcmp(btReason, "InstructionAccessFault")) {
+    strncat(btReason, " (pointer issue)", sizeof(btReason) - strlen(btReason) - 1);
+  }
 #else
   // Xtensa
   else if (strstr(btReason, "Unhandled debug exception") != NULL) {
-    if (btHWM < HWM_MIN) sprintf(btReason, "probably stack overflow @ HWM: %lu bytes", btHWM);
-    else if (btHWM > HWM_MAX) sprintf(btReason, "probably printf format"); // usually misplaced or misformatted vsnprintf()
-    else sprintf(btReason, "stack overflow / printf format. HWM: %lu bytes", btHWM); 
+    if (btHWM < HWM_MIN) snprintf(btReason, sizeof(btReason), "probably stack overflow @ HWM: %lu bytes", btHWM);
+    else if (btHWM > HWM_MAX) snprintf(btReason, sizeof(btReason), "probably printf format"); // usually misplaced or misformatted vsnprintf()
+    else snprintf(btReason, sizeof(btReason), "stack overflow / printf format. HWM: %lu bytes", btHWM);
   }
-  else if (!strcmp(btReason, "LoadProhibited") || !strcmp(btReason, "StoreProhibited") || !strcmp(btReason, "InstructionFetchError")) strcat(btReason, " (pointer issue)");
+  else if (!strcmp(btReason, "LoadProhibited") || !strcmp(btReason, "StoreProhibited") || !strcmp(btReason, "InstructionFetchError")) {
+    strncat(btReason, " (pointer issue)", sizeof(btReason) - strlen(btReason) - 1);
+  }
 #endif
 }
 
@@ -368,7 +376,7 @@ static void boardInfo() {
 #endif
   char memInfo[100] = "none";
 #if !CONFIG_IDF_TARGET_ESP32C3
-  if (psramFound()) sprintf(memInfo, "%s, mode %s @ %dMhz", fmtSize(ESP.getPsramSize()), psramMode, CONFIG_SPIRAM_SPEED);
+  if (psramFound()) snprintf(memInfo, sizeof(memInfo), "%s, mode %s @ %dMhz", fmtSize(ESP.getPsramSize()), psramMode, CONFIG_SPIRAM_SPEED);
 #endif
   LOG_INF("PSRAM %s", memInfo);
 }
@@ -549,23 +557,39 @@ static void printGpioInfo() {
     if (type == ESP32_BUS_TYPE_INIT) continue;  //unused pin
 
     char gpioInf[100];
-    char* p = gpioInf;
+    size_t len = 0;
+    int written;
 #if defined(BOARD_HAS_PIN_REMAP)
     int dpin = gpioNumberToDigitalPin(i);
     if (dpin < 0) continue;  //pin is not exported
-    else p+= sprintf(p, "  D%-3d|%4u : ", dpin, i);
+    else {
+      written = snprintf(gpioInf + len, sizeof(gpioInf) - len, "  D%-3d|%4u : ", dpin, i);
+      if (written > 0 && written < sizeof(gpioInf) - len) len += written;
+    }
 #else
-    p+= sprintf(p, "  %4u : ", i);
+    written = snprintf(gpioInf + len, sizeof(gpioInf) - len, "  %4u : ", i);
+    if (written > 0 && written < sizeof(gpioInf) - len) len += written;
 #endif
     const char *extra_type = perimanGetPinBusExtraType(i);
-    if (extra_type) p+= sprintf(p, "%s", extra_type);
-    else p+= sprintf(p, "%s", perimanGetTypeName(type));
+    if (extra_type) {
+      written = snprintf(gpioInf + len, sizeof(gpioInf) - len, "%s", extra_type);
+      if (written > 0 && written < sizeof(gpioInf) - len) len += written;
+    } else {
+      written = snprintf(gpioInf + len, sizeof(gpioInf) - len, "%s", perimanGetTypeName(type));
+      if (written > 0 && written < sizeof(gpioInf) - len) len += written;
+    }
+
     int8_t bus_number = perimanGetPinBusNum(i);
-    if (bus_number != -1) p+= sprintf(p, "[%u]", bus_number);
+    if (bus_number != -1) {
+      written = snprintf(gpioInf + len, sizeof(gpioInf) - len, "[%u]", bus_number);
+      if (written > 0 && written < sizeof(gpioInf) - len) len += written;
+    }
 
     int8_t bus_channel = perimanGetPinBusChannel(i);
-    if (bus_channel != -1) p+= sprintf(p, "[%u]", bus_channel);
-    *p = 0;
+    if (bus_channel != -1) {
+      written = snprintf(gpioInf + len, sizeof(gpioInf) - len, "[%u]", bus_channel);
+      if (written > 0 && written < sizeof(gpioInf) - len) len += written;
+    }
     LOG_SEND("%s\n", gpioInf);
   }
 }
