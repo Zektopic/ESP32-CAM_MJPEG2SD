@@ -533,14 +533,14 @@ static bool setupMPU() {
     if (getI2Cdata(MPUaddr, WHOAMI_REG, 1)) {
       // determine IMU model using whoami register
       byte iData = I2CDATA[0];
-      if (iData == MPU6050_ID) strcpy(mpuModel, "MPU6050");
-      if (iData == MPU6500_ID) strcpy(mpuModel, "MPU6520");
+      if (iData == MPU6050_ID) snprintf(mpuModel, sizeof(mpuModel), "MPU6050");
+      if (iData == MPU6500_ID) snprintf(mpuModel, sizeof(mpuModel), "MPU6520");
       if (iData == MPU9250_ID) {
-        strcpy(mpuModel, "MPU9250");
+        snprintf(mpuModel, sizeof(mpuModel), "MPU9250");
         haveMag = true;
       }
       if (iData == MPU9255_ID) {
-        strcpy(mpuModel, "MPU9255");
+        snprintf(mpuModel, sizeof(mpuModel), "MPU9255");
         haveMag = true;
       }
     }
@@ -556,7 +556,7 @@ float* getMPUdata() {
 }
 
 bool identifyMPU(char* _mpuModel) {
-  strcpy(_mpuModel, mpuModel);
+  snprintf(_mpuModel, 10, "%s", mpuModel);
   return haveMag;
 }
 
