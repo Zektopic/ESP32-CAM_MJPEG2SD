@@ -12,3 +12,7 @@
 ## 2025-01-29 - Mobile Input Redundancy
 **Learning:** Adding `autocorrect="off" autocapitalize="none" spellcheck="false"` to non-prose text inputs improves mobile accessibility.
 **Action:** Always add `autocorrect="off" autocapitalize="none" spellcheck="false"` to non-prose text inputs (like configurations or URLs).
+
+## 2025-02-18 - Disable autocorrect on dynamic configuration text inputs
+**Learning:** Text inputs dynamically generated in JavaScript (e.g. for configuration settings) must also disable autocorrect and autocapitalize to ensure users can enter precise configuration data without mobile keyboard interference.
+**Action:** When auditing or implementing mobile accessibility for configuration interfaces, remember to check not only static HTML but also JavaScript strings that generate input elements.

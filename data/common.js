@@ -901,10 +901,10 @@
                       inputHtml += '</select>';
                     break;
                     case 'T': // text input
-                      inputHtml = '<input type="text" class="configItem" id="' + saveKey + '" value="'+ saveVal +'" >';
+                      inputHtml = '<input type="text" class="configItem" id="' + saveKey + '" value="'+ saveVal +'" autocorrect="off" autocapitalize="none" spellcheck="false" >';
                     break;
                     case 'X': // text input field not updated by app
-                      inputHtml = '<input type="text" class="configItem nochange" id="' + saveKey + '" value="'+ saveVal +'" >';
+                      inputHtml = '<input type="text" class="configItem nochange" id="' + saveKey + '" value="'+ saveVal +'" autocorrect="off" autocapitalize="none" spellcheck="false" >';
                     break;
                     default:
                       alert("Unhandled config input type " + value);
