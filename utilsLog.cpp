@@ -210,6 +210,7 @@ static void appPanicHandler(arduino_panic_info_t *info, void *arg) {
     const char* taskName = task ? pcTaskGetName(task) : "idle";
     strncpy(btTask, taskName, sizeof(btTask) - 1);
     strncpy(btReason, info->reason, sizeof(btReason) - 1);
+    btReason[sizeof(btReason) - 1] = '\0';
     btCore = info->core;
   btLen = info->backtrace_len;
   for (int i = 0; i < info->backtrace_len; i++) backtrace[i] = info->backtrace[i];
