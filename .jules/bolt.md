@@ -134,3 +134,6 @@
 ## 2024-05-31 - Optimize network block reads and delays
 **Learning:** Single byte reads (e.g., `client.read()`) to flush network buffers introduce unnecessary overhead. Blocking `delay()` calls in ESP32 block FreeRTOS task scheduling.
 **Action:** Replace `while (client.available()) client.read()` with `client.read(flushBuf, sizeof(flushBuf))`. Replace `delay(ms)` with `vTaskDelay(pdMS_TO_TICKS(ms))`.
+## 2024-08-14 - Optimized Hex Formatting Loop
+**Learning:** Using `snprintf` in a tight loop for simple hex conversion is highly inefficient due to format parsing overhead.
+**Action:** Replace `snprintf` calls inside loops with manual bitwise operations and array lookups for character conversion to drastically improve performance.
