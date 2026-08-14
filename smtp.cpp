@@ -57,7 +57,7 @@ static bool sendSmtpCommand(NetworkClientSecure& client, const char* cmd, const 
   respCodeRx[3] = 0; // terminator
   int readLen = client.read((uint8_t*)rspBuf, 255);
   rspBuf[readLen] = 0;
-  while (client.available()) client.read(); // bin the rest of response
+  { uint8_t buf[64]; while (client.available()) client.read(buf, sizeof(buf)); } // bin the rest of response
 
   // check response code with expected
   LOG_VRB("Rx code: %s, resp: %s", respCodeRx, rspBuf);

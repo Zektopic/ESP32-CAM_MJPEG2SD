@@ -152,7 +152,7 @@ static bool sendFtpCommand(const char* cmd, const char* param, const char* respC
   respCodeRx[3] = 0; // terminator
   int readLen = rclient.read((uint8_t*)rspBuf, 255);
   if (readLen >= 0) rspBuf[readLen] = 0;
-  while (rclient.available()) rclient.read(); // bin the rest of response
+  { uint8_t buf[64]; while (rclient.available()) rclient.read(buf, sizeof(buf)); } // bin the rest of response
 
   // check response code with expected
   LOG_VRB("Rx code: %s, resp: %s", respCodeRx, rspBuf);
