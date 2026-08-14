@@ -549,22 +549,42 @@ static void printGpioInfo() {
     if (type == ESP32_BUS_TYPE_INIT) continue;  //unused pin
 
     char gpioInf[100];
+    size_t rem = sizeof(gpioInf);
     char* p = gpioInf;
+    int written;
+
 #if defined(BOARD_HAS_PIN_REMAP)
     int dpin = gpioNumberToDigitalPin(i);
     if (dpin < 0) continue;  //pin is not exported
-    else p+= sprintf(p, "  D%-3d|%4u : ", dpin, i);
+    else {
+      written = snprintf(p, rem, "  D%-3d|%4u : ", dpin, i);
+      if (written > 0 && written < (int)rem) { p += written; rem -= written; }
+    }
 #else
-    p+= sprintf(p, "  %4u : ", i);
+    written = snprintf(p, rem, "  %4u : ", i);
+    if (written > 0 && written < (int)rem) { p += written; rem -= written; }
 #endif
+
     const char *extra_type = perimanGetPinBusExtraType(i);
-    if (extra_type) p+= sprintf(p, "%s", extra_type);
-    else p+= sprintf(p, "%s", perimanGetTypeName(type));
+    if (extra_type) {
+      written = snprintf(p, rem, "%s", extra_type);
+      if (written > 0 && written < (int)rem) { p += written; rem -= written; }
+    } else {
+      written = snprintf(p, rem, "%s", perimanGetTypeName(type));
+      if (written > 0 && written < (int)rem) { p += written; rem -= written; }
+    }
+
     int8_t bus_number = perimanGetPinBusNum(i);
-    if (bus_number != -1) p+= sprintf(p, "[%u]", bus_number);
+    if (bus_number != -1) {
+      written = snprintf(p, rem, "[%u]", bus_number);
+      if (written > 0 && written < (int)rem) { p += written; rem -= written; }
+    }
 
     int8_t bus_channel = perimanGetPinBusChannel(i);
-    if (bus_channel != -1) p+= sprintf(p, "[%u]", bus_channel);
+    if (bus_channel != -1) {
+      written = snprintf(p, rem, "[%u]", bus_channel);
+      if (written > 0 && written < (int)rem) { p += written; rem -= written; }
+    }
     *p = 0;
     LOG_SEND("%s\n", gpioInf);
   }
