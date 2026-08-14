@@ -128,6 +128,11 @@ bool checkAuth(httpd_req_t* req) {
 
 static esp_err_t indexHandler(httpd_req_t* req) {
   strcpy(inFileName, INDEX_PAGE_PATH);
+  if (isPathTraversal(inFileName)) {
+    LOG_WRN("Path traversal attempt detected in index: %s", inFileName);
+    httpd_resp_send_404(req);
+    return ESP_FAIL;
+  }
   httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
   // first check if a startup failure needs to be reported
   if (startupFailure[0] != '\0') {
