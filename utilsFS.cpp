@@ -281,7 +281,7 @@ bool listDir(const char* fname, char* jsonBuff, size_t jsonBuffLen, const char* 
     for (const auto& fileInfo : fileVec) {
       size_t infoLen = fileInfo.length();
       if (buffLen + infoLen < jsonBuffLen) {
-        strcpy(jsonBuff + buffLen, fileInfo.c_str());
+        snprintf(jsonBuff + buffLen, jsonBuffLen - buffLen, "%s", fileInfo.c_str());
         buffLen += infoLen;
       } else {
         LOG_WRN("Too many folders/files to list %u+%u in %u bytes", buffLen, infoLen, jsonBuffLen);

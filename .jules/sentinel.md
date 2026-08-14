@@ -188,3 +188,8 @@
 **Vulnerability:** In `webServer.cpp`, the `indexHandler` function copied `INDEX_PAGE_PATH` into `inFileName` but did not validate the path before attempting to open and serve it, allowing a potential path traversal if `INDEX_PAGE_PATH` was somehow influenced or misconfigured.
 **Learning:** Even internal macros or paths that seem static should be validated if they are directly passed into file system operations, especially if they are formatted or manipulated earlier. Consistent application of security checks is better than assuming safety.
 **Prevention:** Always validate paths with the centralized `isPathTraversal` utility immediately after they are copied or formatted into the final buffer (`inFileName`), even if the source is a macro, before proceeding with the file handler.
+
+## 2024-08-14 - Fix Buffer Overflow in listDir jsonBuff construction
+**Vulnerability:** The buffer boundary was checked loosely before `strcpy(jsonBuff + buffLen, fileInfo.c_str());`, but `strcpy` is inherently unsafe and can cause buffer overflows if the boundary logic is flawed or edge cases exist.
+**Learning:** `strcpy` should never be used, even if prior length checks seem sufficient, as it lacks inherent bounds checking and depends entirely on the surrounding logic to prevent overwrites.
+**Prevention:** Always use safe, bounds-checked formatting functions like `snprintf(dest, size, "%s", src)` or `strncpy(dest, src, size)` instead of `strcpy` to guarantee proper bounds checking and null-termination regardless of prior logic.
