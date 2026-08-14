@@ -194,21 +194,6 @@ int vprintfRedirect(const char* format, va_list args) {
   return len;
 }
 
-
-void formatHex(const char* inData, size_t inLen) {
-  // format data as hex bytes for output
-  char formatted[(inLen * 3) + 1];
-  const char hex_chars[] = "0123456789abcdef";
-  for (size_t i=0; i<inLen; i++) {
-    unsigned char c = inData[i];
-    formatted[i * 3] = hex_chars[c >> 4];
-    formatted[i * 3 + 1] = hex_chars[c & 0x0F];
-    formatted[i * 3 + 2] = ' ';
-  }
-  formatted[(inLen * 3)] = 0; // terminator
-  LOG_INF("Hex: %s", formatted);
-}
-
 const char* espErrMsg(esp_err_t errCode) {
   // convert esp error code to text
   // https://github.com/espressif/esp-idf/blob/master/components/esp_common/include/esp_err.h
@@ -597,6 +582,22 @@ static void printGpioInfo() {
 }
 
 #endif // TEST_ENV
+void formatHex(const char* inData, size_t inLen) {
+  // format data as hex bytes for output
+  char formatted[(inLen * 3) + 1];
+  const char hex_chars[] = "0123456789abcdef";
+  for (size_t i=0; i<inLen; i++) {
+    unsigned char c = inData[i];
+    formatted[i * 3] = hex_chars[c >> 4];
+    formatted[i * 3 + 1] = hex_chars[c & 0x0F];
+    formatted[i * 3 + 2] = ' ';
+  }
+  formatted[(inLen * 3)] = 0; // terminator
+  LOG_INF("Hex: %s", formatted);
+}
+
+
+
 // display partition map
 const char* partitionTypeToStr(uint8_t type) {
   // Map type to string
