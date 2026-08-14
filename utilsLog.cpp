@@ -227,20 +227,20 @@ static void appPanicHandler(arduino_panic_info_t *info, void *arg) {
 }
 
 static void expandReason() {
-  if (!btReason[0]) strcpy(btReason, "unknown");
+  if (!btReason[0]) snprintf(btReason, sizeof(btReason), "unknown");
 #if CONFIG_IDF_TARGET_ARCH_RISCV
   // riscV
-  else if (strstr(btReason, "Breakpoint") != NULL) sprintf(btReason, "probably printf format"); // usually misplaced or misformatted vsnprintf()
-  else if (strstr(btReason, "Stack protection fault") != NULL) sprintf(btReason, "stack overflow after HWM: %lu bytes", btHWM);  
-  else if (!strcmp(btReason, "LoadAccessFault") || !strcmp(btReason, "StoreAccessFault") || !strcmp(btReason, "InstructionAccessFault")) strcat(btReason, " (pointer issue)");
+  else if (strstr(btReason, "Breakpoint") != NULL) snprintf(btReason, sizeof(btReason), "probably printf format"); // usually misplaced or misformatted vsnprintf()
+  else if (strstr(btReason, "Stack protection fault") != NULL) snprintf(btReason, sizeof(btReason), "stack overflow after HWM: %lu bytes", btHWM);
+  else if (!strcmp(btReason, "LoadAccessFault") || !strcmp(btReason, "StoreAccessFault") || !strcmp(btReason, "InstructionAccessFault")) strncat(btReason, " (pointer issue)", sizeof(btReason) - strlen(btReason) - 1);
 #else
   // Xtensa
   else if (strstr(btReason, "Unhandled debug exception") != NULL) {
-    if (btHWM < HWM_MIN) sprintf(btReason, "probably stack overflow @ HWM: %lu bytes", btHWM);
-    else if (btHWM > HWM_MAX) sprintf(btReason, "probably printf format"); // usually misplaced or misformatted vsnprintf()
-    else sprintf(btReason, "stack overflow / printf format. HWM: %lu bytes", btHWM); 
+    if (btHWM < HWM_MIN) snprintf(btReason, sizeof(btReason), "probably stack overflow @ HWM: %lu bytes", btHWM);
+    else if (btHWM > HWM_MAX) snprintf(btReason, sizeof(btReason), "probably printf format"); // usually misplaced or misformatted vsnprintf()
+    else snprintf(btReason, sizeof(btReason), "stack overflow / printf format. HWM: %lu bytes", btHWM);
   }
-  else if (!strcmp(btReason, "LoadProhibited") || !strcmp(btReason, "StoreProhibited") || !strcmp(btReason, "InstructionFetchError")) strcat(btReason, " (pointer issue)");
+  else if (!strcmp(btReason, "LoadProhibited") || !strcmp(btReason, "StoreProhibited") || !strcmp(btReason, "InstructionFetchError")) strncat(btReason, " (pointer issue)", sizeof(btReason) - strlen(btReason) - 1);
 #endif
 }
 
