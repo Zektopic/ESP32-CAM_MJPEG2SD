@@ -130,3 +130,7 @@
 ## 2024-05-24 - Optimize Network Buffer Flushing with Block Reads
 **Learning:** Flushing a network buffer byte-by-byte using `while (client.available()) client.read();` introduces significant overhead due to per-byte timedRead delays in the ESP32 networking stack.
 **Action:** Replace single-byte `client.read()` calls in flushing loops with block reads (e.g., `uint8_t dumpBuf[64]; while (client.available()) client.read(dumpBuf, sizeof(dumpBuf));`) to efficiently clear out remaining bytes and reduce network I/O latency.
+
+## 2024-05-31 - Optimize network block reads and delays
+**Learning:** Single byte reads (e.g., `client.read()`) to flush network buffers introduce unnecessary overhead. Blocking `delay()` calls in ESP32 block FreeRTOS task scheduling.
+**Action:** Replace `while (client.available()) client.read()` with `client.read(flushBuf, sizeof(flushBuf))`. Replace `delay(ms)` with `vTaskDelay(pdMS_TO_TICKS(ms))`.
