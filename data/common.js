@@ -286,8 +286,8 @@
           // add commmon buttons to relevant sections
           $$('.addButtons').forEach(el => {
             el.innerHTML = '<section id="buttons">'
-              +'<button id="save" style="float:right;" value="1">Save Settings</button>'
-              +'<button id="reset" style="float:right;" value="1">Reboot ESP</button>'
+              +'<button id="save" style="float:right;" value="1" title="Save current settings to NVS">Save Settings</button>'
+              +'<button id="reset" style="float:right;" value="1" title="Reboot ESP device">Reboot ESP</button>'
             +'</section><br>'
           });
         }

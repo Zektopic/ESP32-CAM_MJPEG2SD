@@ -21,3 +21,7 @@
 ## 2025-02-18 - Disable autocorrect on dynamic configuration text inputs
 **Learning:** Text inputs dynamically generated in JavaScript (e.g. for configuration settings) must also disable autocorrect and autocapitalize to ensure users can enter precise configuration data without mobile keyboard interference.
 **Action:** When auditing or implementing mobile accessibility for configuration interfaces, remember to check not only static HTML but also JavaScript strings that generate input elements.
+
+## 2025-01-29 - Redundant ARIA attributes on buttons
+**Learning:** Adding an `aria-label` to a native `<button>` that already has exact matching text content (e.g., `<button aria-label="Save Settings">Save Settings</button>`) is a redundant accessibility anti-pattern. While tooltips (`title`) are good for sighted users, redundant ARIA labels bloat the markup and occasionally cause some screen readers to double-announce.
+**Action:** Avoid adding `aria-label` attributes to native buttons when the text content already provides the exact same descriptive label. Focus on using `title` for visual tooltips if the text content is clear enough for screen readers.
