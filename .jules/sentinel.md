@@ -193,3 +193,7 @@
 **Vulnerability:** The buffer boundary was checked loosely before `strcpy(jsonBuff + buffLen, fileInfo.c_str());`, but `strcpy` is inherently unsafe and can cause buffer overflows if the boundary logic is flawed or edge cases exist.
 **Learning:** `strcpy` should never be used, even if prior length checks seem sufficient, as it lacks inherent bounds checking and depends entirely on the surrounding logic to prevent overwrites.
 **Prevention:** Always use safe, bounds-checked formatting functions like `snprintf(dest, size, "%s", src)` or `strncpy(dest, src, size)` instead of `strcpy` to guarantee proper bounds checking and null-termination regardless of prior logic.
+## 2024-08-15 - Refactored buffer overflows in appSpecific.cpp using snprintf
+**Vulnerability:** A series of unsafe `sprintf` calls in `appSpecific.cpp` could result in buffer overflows, particularly when concatenating strings into a large JSON buffer via `p += sprintf(p, ...)`.
+**Learning:** Chained string concatenations using pointer manipulation (e.g. `p += sprintf(...)`) require careful attention to remain bounds-safe. A custom macro or inline check that tracks remaining space (`JSON_BUFF_LEN - (p - jsonBuff)`) and safely bounds the pointer increment using the return value of `snprintf` is required.
+**Prevention:** Always use `snprintf` when building dynamic strings in C++, particularly when writing sequentially into a fixed-length buffer using pointer arithmetic. Always bound the pointer increment to prevent overflow during truncation.

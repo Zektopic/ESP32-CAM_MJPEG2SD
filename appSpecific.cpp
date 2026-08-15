@@ -324,7 +324,7 @@ esp_err_t appSpecificWebHandler(httpd_req_t *req, const char* variable, const ch
   }
   else if (!strcmp(variable, "updateFPS")) {
     // requires response with updated default fps
-    sprintf(jsonBuff, "{\"fps\":\"%u\"}", setFPSlookup(fsizePtr));
+    snprintf(jsonBuff, JSON_BUFF_LEN, "{\"fps\":\"%u\"}", setFPSlookup(fsizePtr));
     httpd_resp_set_type(req, "application/json");
     httpd_resp_sendstr(req, jsonBuff);
   }
@@ -466,54 +466,59 @@ void appSpecificWsBinHandler(uint8_t* wsMsg, size_t wsMsgLen) {
 char* buildAppJsonString(bool filter) {
   // build app specific part of json string
   char* p = jsonBuff + 1;
-  p += sprintf(p, "\"llevel\":%u,", lightLevel);
-  p += sprintf(p, "\"night\":%s,", nightTime ? "\"Yes\"" : "\"No\"");
+#define APPEND_SNPRINTF(...) { \
+  int written = snprintf(p, JSON_BUFF_LEN - (p - jsonBuff), __VA_ARGS__); \
+  if (written > 0) p += (written < JSON_BUFF_LEN - (p - jsonBuff)) ? written : JSON_BUFF_LEN - (p - jsonBuff) - 1; \
+}
+  APPEND_SNPRINTF("\"llevel\":%u,", lightLevel)
+  APPEND_SNPRINTF("\"night\":%s,", nightTime ? "\"Yes\"" : "\"No\"")
   float aTemp = readTemperature(true);
-  if (aTemp > -127.0) p += sprintf(p, "\"atemp\":\"%0.1f\",", aTemp);
-  else p += sprintf(p, "\"atemp\":\"n/a\",");
+  if (aTemp > -127.0) APPEND_SNPRINTF("\"atemp\":\"%0.1f\",", aTemp)
+  else APPEND_SNPRINTF("\"atemp\":\"n/a\",")
   float currentVoltage = readVoltage();
-  if (currentVoltage < 0) p += sprintf(p, "\"battv\":\"n/a\",");
-  else p += sprintf(p, "\"battv\":\"%0.1fV\",", currentVoltage);
-  p += sprintf(p, "\"camModel\":\"%s\",", camModel);
+  if (currentVoltage < 0) APPEND_SNPRINTF("\"battv\":\"n/a\",")
+  else APPEND_SNPRINTF("\"battv\":\"%0.1fV\",", currentVoltage)
+  APPEND_SNPRINTF("\"camModel\":\"%s\",", camModel)
 #if INCLUDE_PERIPH
-  p += sprintf(p, "\"SVactive\":\"%d\",", SVactive);
+  APPEND_SNPRINTF("\"SVactive\":\"%d\",", SVactive)
  #if INCLUDE_AUDIO
-  p += sprintf(p, "\"AudActive\":\"%d\",", AudActive);
+  APPEND_SNPRINTF("\"AudActive\":\"%d\",", AudActive)
  #endif
  #if (INCLUDE_PGRAM)
-  p += sprintf(p, "\"PGactive\":\"%d\",", PGactive);
+  APPEND_SNPRINTF("\"PGactive\":\"%d\",", PGactive)
  #endif
 #endif
 #if INCLUDE_MCPWM
-  p += sprintf(p, "\"RCactive\":\"%d\",", RCactive);
-  p += sprintf(p, "\"heartbeatRC\":\"%d\",", heartbeatRC);
+  APPEND_SNPRINTF("\"RCactive\":\"%d\",", RCactive)
+  APPEND_SNPRINTF("\"heartbeatRC\":\"%d\",", heartbeatRC)
 #endif
-  p += sprintf(p, "\"sustainId\":\"%u\",", sustainId);
+  APPEND_SNPRINTF("\"sustainId\":\"%u\",", sustainId)
   // Extend info
 #ifndef AUXILIARY
   uint8_t cardType = 99; // not MMC
   if ((fs::SDMMCFS*)&STORAGE == &SD_MMC) cardType = SD_MMC.cardType();
-  if (cardType == CARD_NONE) p += sprintf(p, "\"card\":\"%s\",", "NO card");
+  if (cardType == CARD_NONE) APPEND_SNPRINTF("\"card\":\"%s\",", "NO card")
   else {
     if (!filter) {
-      if (cardType == CARD_MMC) p += sprintf(p, "\"card\":\"%s\",", "MMC");
-      else if (cardType == CARD_SD) p += sprintf(p, "\"card\":\"%s\",", "SDSC");
-      else if (cardType == CARD_SDHC) p += sprintf(p, "\"card\":\"%s\",", "SDHC");
-      else if (cardType == 99) p += sprintf(p, "\"card\":\"%s\",", "LittleFS");
+      if (cardType == CARD_MMC) APPEND_SNPRINTF("\"card\":\"%s\",", "MMC")
+      else if (cardType == CARD_SD) APPEND_SNPRINTF("\"card\":\"%s\",", "SDSC")
+      else if (cardType == CARD_SDHC) APPEND_SNPRINTF("\"card\":\"%s\",", "SDHC")
+      else if (cardType == 99) APPEND_SNPRINTF("\"card\":\"%s\",", "LittleFS")
     }
-    if ((fs::SDMMCFS*)&STORAGE == &SD_MMC) p += sprintf(p, "\"card_size\":\"%s\",", fmtSize(SD_MMC.cardSize()));
-    p += sprintf(p, "\"used_bytes\":\"%s\",", fmtSize(STORAGE.usedBytes()));
-    p += sprintf(p, "\"free_bytes\":\"%s\",", fmtSize(STORAGE.totalBytes() - STORAGE.usedBytes()));
-    p += sprintf(p, "\"total_bytes\":\"%s\",", fmtSize(STORAGE.totalBytes()));
+    if ((fs::SDMMCFS*)&STORAGE == &SD_MMC) APPEND_SNPRINTF("\"card_size\":\"%s\",", fmtSize(SD_MMC.cardSize()))
+    APPEND_SNPRINTF("\"used_bytes\":\"%s\",", fmtSize(STORAGE.usedBytes()))
+    APPEND_SNPRINTF("\"free_bytes\":\"%s\",", fmtSize(STORAGE.totalBytes() - STORAGE.usedBytes()))
+    APPEND_SNPRINTF("\"total_bytes\":\"%s\",", fmtSize(STORAGE.totalBytes()))
   }
-  p += sprintf(p, "\"free_psram\":\"%s\",", fmtSize(ESP.getFreePsram()));
+  APPEND_SNPRINTF("\"free_psram\":\"%s\",", fmtSize(ESP.getFreePsram()))
 #endif
 #if INCLUDE_FTP_HFS
-  p += sprintf(p, "\"progressBar\":%d,", percentLoaded);
+  APPEND_SNPRINTF("\"progressBar\":%d,", percentLoaded)
   if (percentLoaded == 100) percentLoaded = 0;
 #endif
-  //p += sprintf(p, "\"vcc\":\"%i V\",", ESP.getVcc() / 1023.0F; );
+  //APPEND_SNPRINTF("\"vcc\":\"%i V\",", ESP.getVcc() / 1023.0F; )
   *p = 0;
+#undef APPEND_SNPRINTF
   return p;
 }
 
@@ -763,17 +768,17 @@ void appSpecificTelegramTask(void* p) {
           doKeepFrame = true;
           delay(1000); // time to get frame
         }
-        sprintf(userCmd, "/snap from %s", hostName);
+        snprintf(userCmd, FILE_NAME_LEN, "/snap from %s", hostName);
         sendTgramPhoto(alertBuffer, alertBufferSize, userCmd);
       } else if (!strcmp(userCmd, "/log")) {
         // build unique ram log file name using time
         char ramLogName[FILE_NAME_LEN];
-        sprintf(ramLogName, "%s/ramlog_", DATA_DIR);
+        snprintf(ramLogName, FILE_NAME_LEN, "%s/ramlog_", DATA_DIR);
         time_t currEpoch = getEpoch();
         strftime(ramLogName + strlen(ramLogName), FILE_NAME_LEN - strlen(ramLogName), "%H%M%S", localtime(&currEpoch));
         strcat(ramLogName, TEXT_EXT);
         saveRamLog(ramLogName);
-        sprintf(userCmd, "/log from %s", hostName);
+        snprintf(userCmd, FILE_NAME_LEN, "/log from %s", hostName);
         sendTgramFile(ramLogName, "text/plain", userCmd);
         deleteFolderOrFile(ramLogName);
       } else if (!strcmp(userCmd, "/extIP")) {
