@@ -197,3 +197,8 @@
 **Vulnerability:** A series of unsafe `sprintf` calls in `appSpecific.cpp` could result in buffer overflows, particularly when concatenating strings into a large JSON buffer via `p += sprintf(p, ...)`.
 **Learning:** Chained string concatenations using pointer manipulation (e.g. `p += sprintf(...)`) require careful attention to remain bounds-safe. A custom macro or inline check that tracks remaining space (`JSON_BUFF_LEN - (p - jsonBuff)`) and safely bounds the pointer increment using the return value of `snprintf` is required.
 **Prevention:** Always use `snprintf` when building dynamic strings in C++, particularly when writing sequentially into a fixed-length buffer using pointer arithmetic. Always bound the pointer increment to prevent overflow during truncation.
+
+## 2024-05-27 - Chaining snprintf pointer bounds in C/C++
+**Vulnerability:** Pointer advancement using `sprintf` without bounds checking in HTTP POST header generation (`p += sprintf(...)`) risks buffer overflows if content like file names, folder paths, or passwords exceeds expected lengths.
+**Learning:** When using a pointer to build a concatenated string in a bounded buffer, checking bounds at each step requires safely calculating the remaining buffer space (`CHUNKSIZE - (p - fsBuff)`) and using `snprintf`. Since `snprintf` returns the length it *would* have written upon truncation, you must cap the increment to prevent the pointer from escaping the buffer bounds (`p += (w < rem) ? w : rem - 1`).
+**Prevention:** Always replace unbounded `sprintf` chains with bounded `snprintf` macro calls that track and calculate remaining buffer length securely before pointer advancement.

@@ -75,10 +75,15 @@ static void postHeader(const char* tmethod, const char* contentType, bool isFile
   // create http post header
   char* p = fsBuff + FORM_OFFSET; // leave space for http request data
   if (isFile) {
-    p += sprintf(p, FORM_DATA, "json", "", JSON_TYPE);
+    int w;
+    int rem = CHUNKSIZE - FORM_OFFSET;
+    w = snprintf(p, rem, FORM_DATA, "json", "", JSON_TYPE);
+    if (w > 0) { p += (w < rem) ? w : rem - 1; rem = CHUNKSIZE - (p - fsBuff); }
     // fsBuff initially contains folder name
-    p += sprintf(p, JSON_DATA, fsWd, folderPath, fileName, FS_Pass);
-    p += sprintf(p, "\r\n" FORM_DATA, FILE_NAME, fileName, BIN_TYPE); 
+    w = snprintf(p, rem, JSON_DATA, fsWd, folderPath, fileName, FS_Pass);
+    if (w > 0) { p += (w < rem) ? w : rem - 1; rem = CHUNKSIZE - (p - fsBuff); }
+    w = snprintf(p, rem, "\r\n" FORM_DATA, FILE_NAME, fileName, BIN_TYPE);
+    if (w > 0) { p += (w < rem) ? w : rem - 1; rem = CHUNKSIZE - (p - fsBuff); }
   } // else JSON data already loaded by hfsCreateFolder()
   size_t formLen = strlen(fsBuff + FORM_OFFSET);
   // create http request header
