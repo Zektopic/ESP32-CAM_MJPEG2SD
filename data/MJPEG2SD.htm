@@ -976,12 +976,12 @@
         <nav id="maintoolbar">
           <ul class="navtop">
             <li><span id="recording-indicator" class="hidden" style="float: right; display: none;"></span></li>
-            <li><button id="forceRecord" aria-label="Start Recording" style="float:right;">➤&nbsp;Start Recording</button></li>
+            <li><button id="forceRecord" style="float:right;">➤&nbsp;Start Recording</button></li>
             <li><div class="sep"></div></li>
-            <li><button id="forceStream" aria-label="Start Stream" class="local" style="float:right;">➤&nbsp;Start Stream</button></li>
-            <li><button id="get-still" class="local" style="float:right;" title="Capture a still image" aria-label="Capture a still image">Get Still</button></li>
+            <li><button id="forceStream" class="local" style="float:right;">➤&nbsp;Start Stream</button></li>
+            <li><button id="get-still" class="local" style="float:right;" title="Capture a still image">Get Still</button></li>
             <li><div class="sep"></div></li>
-            <li><button id="forcePlayback" aria-label="Start Playback" class="local disabled" style="float:right;" title="Select a video in 'Playback & File Transfers' to activate playback." disabled aria-disabled="true">➤&nbsp;Start Playback</button></li>
+            <li><button id="forcePlayback" class="local disabled" style="float:right;" title="Select a video in 'Playback & File Transfers' to activate playback." disabled aria-disabled="true">➤&nbsp;Start Playback</button></li>
           </ul>
         </nav>
       </section>
@@ -993,11 +993,11 @@
           <div id="sidebar">
             <div id="menu-container" class="menu-pinned">
               <nav id="menu-selector" class="menu-pinned menu-closed">
-                <nav class="quick-nav" id="camControl" name="camera-control" title="Camera Control" aria-label="Camera Control" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">📷</nav>
-                <nav class="quick-nav" id="motionRec" name="motion-record" title="Motion Detect & Recording" aria-label="Motion Detect & Recording" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">👀</nav>
-                <nav class="quick-nav" id="fileControl" name="playback-transfers" title="Playback & File Transfers" aria-label="Playback & File Transfers" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">🎥</nav>
-                <nav class="quick-nav" id="picSettings" name="picture-settings" title="Picture Settings" aria-label="Picture Settings" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">📺</nav>
-                <nav class="quick-nav" id="accSettings" name="access-settings" title="Access Settings" aria-label="Access Settings" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">🔧</nav>
+                <nav class="quick-nav" id="camControl" name="camera-control" title="Camera Control" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">📷</nav>
+                <nav class="quick-nav" id="motionRec" name="motion-record" title="Motion Detect & Recording" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">👀</nav>
+                <nav class="quick-nav" id="fileControl" name="playback-transfers" title="Playback & File Transfers" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">🎥</nav>
+                <nav class="quick-nav" id="picSettings" name="picture-settings" title="Picture Settings" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">📺</nav>
+                <nav class="quick-nav" id="accSettings" name="access-settings" title="Access Settings" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">🔧</nav>
                 <div class="micContainer">
                   <button class="quick-nav audButtons disabled" id="micRem" title="Microphone Control" aria-label="Microphone Control" disabled aria-disabled="true">🎤</button>
                   <canvas id="micLevel" role="meter" aria-hidden="true" aria-label="Microphone volume level"></canvas>
@@ -1010,7 +1010,7 @@
               <div id="menu-top" class="menu-pinned">
                 <nav class="menu panel" id="camera-control">
                   <input type="checkbox" id="control-cb" class="menu-action local" checked="checked">
-                  <div class="pin-menu" title="Pin / unpin menu" role="button" tabindex="0" aria-label="Pin / unpin menu" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">📌</div>
+                  <div class="pin-menu" title="Pin / unpin menu" role="button" tabindex="0"  onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">📌</div>
                   <label for="control-cb" class="nav-toggle">📷&nbsp;&nbsp;Camera Control&nbsp;&nbsp;</label>
                   <div class='addButtons'></div>
                   <div>
@@ -1077,7 +1077,7 @@
               </nav>
               <nav class="menu panel" id="picture-settings">
                 <input type="checkbox" id="settings-cb" class="menu-action local">
-                <div class="pin-menu" title="Pin / unpin menu" role="button" tabindex="0" aria-label="Pin / unpin menu" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">📌</div>
+                <div class="pin-menu" title="Pin / unpin menu" role="button" tabindex="0"  onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">📌</div>
                 <label for="settings-cb" class="nav-toggle">📺&nbsp;&nbsp;Picture Settings&nbsp;&nbsp;</label>
                 <div class='addButtons'></div>
                 <div>
@@ -1250,7 +1250,7 @@
               </nav>
               <nav class="menu panel" id="motion-record">
                 <input type="checkbox" id="motion-cb" class="menu-action local">
-                <div class="pin-menu" title="Pin / unpin menu" role="button" tabindex="0" aria-label="Pin / unpin menu" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">📌</div>
+                <div class="pin-menu" title="Pin / unpin menu" role="button" tabindex="0"  onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">📌</div>
                 <label for="motion-cb" class="nav-toggle">👀&nbsp;&nbsp;Motion Detect & Recording&nbsp;&nbsp;</label>
                 <div class='addButtons'></div>
                 <div>
@@ -1304,7 +1304,7 @@
               </nav>
               <nav class="menu panel" id="playback-transfers">
                 <input type="checkbox" id="files-cb" class="menu-action local">
-                <div class="pin-menu" title="Pin / unpin menu" role="button" tabindex="0" aria-label="Pin / unpin menu" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">📌</div>
+                <div class="pin-menu" title="Pin / unpin menu" role="button" tabindex="0"  onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">📌</div>
                 <label for="files-cb" class="nav-toggle">🎥&nbsp;&nbsp;Playback & File Transfers&nbsp;&nbsp;</label>
                 <div class='addButtons'></div>
                 <div>
@@ -1322,9 +1322,9 @@
                   </div>
                   <br>
                   <section id="buttons">
-                    <button class="local disabled" title="Download selected file from SD card" id="download" aria-label="Download selected file" style="float:right" value="1" disabled aria-disabled="true">Download</button>
-                    <button class="local disabled" title="Upload selected file/folder to Fileserver" id="upload" aria-label="Upload selected file" style="float:left" value="1" disabled aria-disabled="true">File Upload</button>
-                    <button class="local disabled" title="Delete selected file/folder from SD card" id="delete" aria-label="Delete selected file" style="float:right" value="1" disabled aria-disabled="true">Delete</button>
+                    <button class="local disabled" title="Download selected file from SD card" id="download" style="float:right" value="1" disabled aria-disabled="true">Download</button>
+                    <button class="local disabled" title="Upload selected file/folder to Fileserver" id="upload" style="float:left" value="1" disabled aria-disabled="true">File Upload</button>
+                    <button class="local disabled" title="Delete selected file/folder from SD card" id="delete" style="float:right" value="1" disabled aria-disabled="true">Delete</button>
                   </section>
   <!--
                   <div class="input-group" id="auth-group">
@@ -1354,7 +1354,7 @@
               </nav>
               <nav class="menu panel" id="access-settings">
                 <input type="checkbox" id="other-cb" class="menu-action local">
-                <div class="pin-menu" title="Pin / unpin menu" role="button" tabindex="0" aria-label="Pin / unpin menu" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">📌</div>
+                <div class="pin-menu" title="Pin / unpin menu" role="button" tabindex="0"  onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">📌</div>
                 <label for="other-cb" class="nav-toggle">🔧&nbsp;&nbsp;Access Settings&nbsp;&nbsp;</label>
                 <div class='addButtons'></div>
                 <div>
@@ -1618,32 +1618,32 @@
             <label title="Outputs log to SD card" class="slider" aria-hidden="true" for="sdLog"></label>
           </div>
         </div>
-        <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="showsys" aria-label="System">
+        <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="showsys">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text id="showsys" class="midText">System</text>
           </svg>
         </div>
         <div style="grid-column: span 4"><br></div>
-        <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="refreshLog" aria-label="Refresh Log">
+        <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="refreshLog">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local" id="refreshLog">Refresh Log</text>
           </svg>
         </div>
-        <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="clearLog" aria-label="Clear Log">
+        <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="clearLog">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local" id="clearLog">Clear Log</text>
           </svg>
         </div>
-        <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="save" aria-label="Save">
+        <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="save">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text id="save" class="midText">Save</text>
           </svg>
         </div>
-        <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="reset" aria-label="Reboot ESP">
+        <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="reset">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text id="reset" class="midText">Reboot ESP</text>
@@ -1660,25 +1660,25 @@
       <div class="header">Control</div>
       <br>
       <div class="grid-cols4">
-        <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="save" aria-label="Save">
+        <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="save">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text id="save" class="midText">Save</text>
           </svg>
         </div>
-        <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="reset" aria-label="Reboot ESP">
+        <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="reset">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text id="reset" class="midText">Reboot ESP</text>
           </svg>
         </div>
-        <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="deldata" aria-label="Reload /data">
+        <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="deldata">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text id="deldata" class="midText">Reload /data</text>
           </svg>
         </div>
-        <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="clear" aria-label="Clear NVS">
+        <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="clear">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text id="clear" class="midText">Clear NVS</text>
@@ -1691,61 +1691,61 @@
           <div class="subheader">Press Save button to make changes permanent</div>
           <br>
         </div>
-        <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="wifi" aria-label="Network">
+        <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="wifi">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local midText" id="wifi">Network</text>
           </svg>
         </div>
-        <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="streaming" aria-label="Streaming">
+        <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="streaming">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local midText" id="streaming">Streaming</text>
           </svg>
         </div>
-        <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="motion" aria-label="Motion">
+        <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="motion">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local midText" id="motion">Motion</text>
           </svg>
         </div>
-        <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="peripherals" aria-label="Peripherals">
+        <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="peripherals">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local midText" id="peripherals">Peripherals</text>
           </svg>
         </div>
-        <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="other" aria-label="Other">
+        <div tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="other">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local midText" id="other">Other</text>
           </svg>
         </div>
-        <div id="AudconfigBtn" class="hidden" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="Audconfig" aria-label="Audio">
+        <div id="AudconfigBtn" class="hidden" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="Audconfig">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local midText" id="Audconfig">Audio</text>
           </svg>
         </div>
-        <div id="EthconfigBtn" class="hidden" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="Ethconfig" aria-label="Ethernet">
+        <div id="EthconfigBtn" class="hidden" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="Ethconfig">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local midText" id="Ethconfig">Ethernet</text>
           </svg>
         </div>
-        <div id="RCconfigBtn" class="hidden" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="RCconfig" aria-label="RC Config">
+        <div id="RCconfigBtn" class="hidden" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="RCconfig">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local midText" id="RCconfig">RC Config</text>
           </svg>
         </div>
-        <div id="SVconfigBtn" class="hidden" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="SVconfig" aria-label="Servos">
+        <div id="SVconfigBtn" class="hidden" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="SVconfig">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local midText" id="SVconfig">Servos</text>
           </svg>
         </div>
-        <div id="PGconfigBtn" class="hidden" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="PGconfig" aria-label="PG Control">
+        <div id="PGconfigBtn" class="hidden" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-labelledby="PGconfig">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local midText" id="PGconfig">PG Control</text>
@@ -1762,9 +1762,9 @@
         <!-- Input field for users to enter individual IPs -->
         <label for="ipInput">Enter IP address:&nbsp;</label>
         <input type="text" autocorrect="off" autocapitalize="none" spellcheck="false" id="ipInput" class="local" placeholder="e.g. 192.168.1.100" onkeydown="if(event.key === 'Enter') addIP()">
-        <button id="addIpButton" class="local" onclick="addIP()" title="Add a new camera to the Hub" aria-label="Add entered IP address to Camera Hub">Add IP</button>
-        <button id="clearStorageButton" class="local" onclick="clearLocalStorage()" title="Remove all saved cameras" aria-label="Delete all saved camera IP addresses">Delete All</button>
-        <button id="refreshAllButton" class="local" onclick="refreshAllContainers(true)" title="Refresh all camera streams" aria-label="Refresh all camera images">Refresh</button>
+        <button id="addIpButton" class="local" onclick="addIP()" title="Add a new camera to the Hub">Add IP</button>
+        <button id="clearStorageButton" class="local" onclick="clearLocalStorage()" title="Remove all saved cameras">Delete All</button>
+        <button id="refreshAllButton" class="local" onclick="refreshAllContainers(true)" title="Refresh all camera streams">Refresh</button>
       </div>
       <!-- Container to hold the image elements -->
       <div id="imageContainer"></div>
