@@ -12,8 +12,11 @@ void urlDecode(char* inVal) {
   char* writer = inVal;
   while (*reader) {
     if (*reader == '%' && isxdigit((unsigned char)*(reader + 1)) && isxdigit((unsigned char)*(reader + 2))) {
-      char hex[3] = { *(reader + 1), *(reader + 2), 0 };
-      *writer++ = (char)strtoul(hex, nullptr, 16);
+      char h1 = *(reader + 1);
+      char h2 = *(reader + 2);
+      int v1 = (h1 <= '9') ? (h1 - '0') : ((h1 & 0xDF) - 'A' + 10);
+      int v2 = (h2 <= '9') ? (h2 - '0') : ((h2 & 0xDF) - 'A' + 10);
+      *writer++ = (char)((v1 << 4) | v2);
       reader += 3;
     } else {
       *writer++ = *reader++;

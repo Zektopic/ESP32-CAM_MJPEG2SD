@@ -766,8 +766,11 @@ void urlDecode(char* inVal) {
   char* writePtr = inVal;
   while (*readPtr) {
     if (*readPtr == '%' && isxdigit((unsigned char)readPtr[1]) && isxdigit((unsigned char)readPtr[2])) {
-      char hexStr[3] = { readPtr[1], readPtr[2], 0 };
-      *writePtr++ = (char)strtoul(hexStr, NULL, 16);
+      char h1 = readPtr[1];
+      char h2 = readPtr[2];
+      int v1 = (h1 <= '9') ? (h1 - '0') : ((h1 & 0xDF) - 'A' + 10);
+      int v2 = (h2 <= '9') ? (h2 - '0') : ((h2 & 0xDF) - 'A' + 10);
+      *writePtr++ = (char)((v1 << 4) | v2);
       readPtr += 3;
     } else if (*readPtr == '+') {
       // + is encoded space in form data
