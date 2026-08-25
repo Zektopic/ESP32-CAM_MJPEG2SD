@@ -23,9 +23,7 @@ void sendExternalHeartbeat() {
 
   // POST to external heartbeat address
   char uri[64 + 10 + EXTHB_LEN] = "";
-  strcpy(uri, external_heartbeat_uri);
-  strcat(uri, "?token=");
-  strcat(uri, external_heartbeat_token);
+  snprintf(uri, sizeof(uri), "%s?token=%s", external_heartbeat_uri, external_heartbeat_token);
 
   NetworkClientSecure hclient;
 
