@@ -24,19 +24,41 @@ bool changeExtension(char* fileName, const char* newExt) {
 
 bool urlEncode(const char* inVal, char* encoded, size_t maxSize) {
   int encodedLen = 0;
-  char hexTable[] = "0123456789ABCDEF";
+  static const char hexTable[] = "0123456789ABCDEF";
+  // Optimized: Use a lookup table to determine unreserved characters in O(1) time
+  // to avoid costly function calls (isalnum, strchr) inside a tight loop.
+  static const bool unreserved[256] = {
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
+      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1,
+      0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+  };
+
   while (*inVal) {
-    if (isalnum((unsigned char)*inVal) || strchr("$-_.+!*'(),:@~#", *inVal)) {
+    unsigned char c = (unsigned char)*inVal;
+    if (unreserved[c]) {
       encodedLen++;
       // Check considering null terminator
       if (encodedLen + 1 > maxSize) return false;
-      *encoded++ = *inVal;
+      *encoded++ = c;
     } else {
       encodedLen += 3;
       if (encodedLen + 1 > maxSize) return false;  // Buffer overflow
       *encoded++ = '%';
-      *encoded++ = hexTable[((unsigned char)*inVal) >> 4];
-      *encoded++ = hexTable[((unsigned char)*inVal) & 0xf];
+      *encoded++ = hexTable[c >> 4];
+      *encoded++ = hexTable[c & 0xf];
     }
     inVal++;
   }
