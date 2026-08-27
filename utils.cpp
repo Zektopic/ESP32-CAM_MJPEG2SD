@@ -766,11 +766,10 @@ void urlDecode(char* inVal) {
   char* writePtr = inVal;
   while (*readPtr) {
     if (*readPtr == '%' && isxdigit((unsigned char)readPtr[1]) && isxdigit((unsigned char)readPtr[2])) {
-      // ⚡ Bolt optimization: Replaced strtoul and temporary buffer with direct arithmetic for faster URL decoding
-      char c1 = readPtr[1];
-      char c2 = readPtr[2];
-      char v1 = (c1 <= '9') ? (c1 - '0') : ((c1 & 0xDF) - 'A' + 10);
-      char v2 = (c2 <= '9') ? (c2 - '0') : ((c2 & 0xDF) - 'A' + 10);
+      char h1 = readPtr[1];
+      char h2 = readPtr[2];
+      int v1 = (h1 <= '9') ? (h1 - '0') : ((h1 & 0xDF) - 'A' + 10);
+      int v2 = (h2 <= '9') ? (h2 - '0') : ((h2 & 0xDF) - 'A' + 10);
       *writePtr++ = (char)((v1 << 4) | v2);
       readPtr += 3;
     } else if (*readPtr == '+') {

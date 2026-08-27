@@ -146,3 +146,6 @@
 **Learning:** The code review flagged that the `identifyMPU` function signature was modified in `appGlobals.h` and `periphsI2C.cpp`, but if there were other usages of this function across the codebase, they wouldn't compile because they are expecting the old arguments. Even though my regex confirmed there are no other invocations in this codebase currently, it is a crucial pattern to ensure the codebase remains sound.
 **Action:** Always search the codebase for all occurrences of a function (`grep -rnw`) when modifying its signature to ensure no broken call sites remain.
 
+## 2024-11-26 - Optimize Hex Parsing Performance in Tight Loops
+**Learning:** In hot loops processing network input (like `urlDecode`), using standard library functions like `strtoul` requires temporary null-terminated string buffers (e.g., `char hexStr[3] = ...`) and involves generic parsing overhead. This is inefficient for simple 2-character hex conversions.
+**Action:** Replace `strtoul` with direct manual bitwise and arithmetic character conversion: `int v1 = (h1 <= '9') ? (h1 - '0') : ((h1 & 0xDF) - 'A' + 10);` combined with `(v1 << 4) | v2`. This avoids function call overhead and temporary stack array allocations, resulting in significantly faster execution.
