@@ -25,3 +25,6 @@
 ## 2025-01-29 - Redundant ARIA attributes on buttons
 **Learning:** Adding an `aria-label` to a native `<button>` that already has exact matching text content (e.g., `<button aria-label="Save Settings">Save Settings</button>`) is a redundant accessibility anti-pattern. While tooltips (`title`) are good for sighted users, redundant ARIA labels bloat the markup and occasionally cause some screen readers to double-announce.
 **Action:** Avoid adding `aria-label` attributes to native buttons when the text content already provides the exact same descriptive label. Focus on using `title` for visual tooltips if the text content is clear enough for screen readers.
+## 2024-05-25 - Custom Button Keyboard A11y
+**Learning:** When using `<div>` or other non-native button elements with `role="button"`, they do not inherently receive keyboard trigger events (`Enter` or `Space`), rendering them inaccessible to keyboard-only users.
+**Action:** Always add an explicit `onkeydown` handler to custom buttons to trigger a click on `Enter` or `Space` (e.g., `onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}"`).

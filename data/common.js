@@ -854,7 +854,7 @@
                   let valCntr = 0;
                   switch (value.charAt(0)) {
                     case 'A': // action button
-                      inputHtml = '<div tabindex="0" role="button" aria-labelledby="' + saveKey + '" style="display:inline-block;"><svg class="svgCols nochange"><rect class="buttonRect"/><text id="' + saveKey + '" class="midText" text-anchor="middle" dominant-baseline="middle">' + saveVal + '</text></svg></div>';
+                      inputHtml = '<div tabindex="0" role="button" aria-labelledby="' + saveKey + '" style="display:inline-block;" onkeydown="if(event.key===\\'Enter\\'||event.key===\\' \\'){event.preventDefault();this.click();}"><svg class="svgCols nochange" aria-hidden="true"><rect class="buttonRect"/><text id="' + saveKey + '" class="midText" text-anchor="middle" dominant-baseline="middle">' + saveVal + '</text></svg></div>';
                     break;
                     case 'B': // B:lab1:lab2:etc
                       // radio button group
@@ -878,10 +878,10 @@
                       inputHtml = '<input type="text" class="configItem" id="' + saveKey + '" value="'+ saveVal +'" readonly style="background-color: var(--menuBackground);">';
                     break;
                     case 'L': // binary string input
-                      inputHtml = `<input type="text" oninput="this.value = this.value.replace(/[^01]/g, '')" placeholder="0101..." class="configItem" id="` + saveKey + `" value="`+ saveVal +`" >`;
+                      inputHtml = `<input type="text" oninput="this.value = this.value.replace(/[^01]/g, \'\')" placeholder="0101..." class="configItem" id="` + saveKey + `" value="`+ saveVal +`" autocorrect="off" autocapitalize="none" spellcheck="false">`;
                     break;
                     case 'N': // number input
-                      inputHtml = '<input type="number" class="configItem" id="' + saveKey + '" value="'+ saveVal +'" >';
+                      inputHtml = \'<input type="number" class="configItem" id="\' + saveKey + \'" value="\'+ saveVal +\'" autocorrect="off" autocapitalize="none" spellcheck="false">\';
                     break;
                     case 'R': // R:min:max:step
                       // format number as range slider
@@ -977,6 +977,7 @@
           removeButton.setAttribute('role', 'button');
           removeButton.setAttribute('tabindex', '0');
           removeButton.setAttribute('aria-label', `Remove IP ${ipStr}`);
+          removeButton.setAttribute('onkeydown', 'if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}');
           removeButton.innerHTML = '×';
           removeButton.onclick = function (event) {
             event.stopPropagation(); // Prevent container click from triggering at the same time
