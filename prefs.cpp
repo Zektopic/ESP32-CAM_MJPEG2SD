@@ -530,7 +530,7 @@ static bool checkConfigFile() {
         p += toWrite;
         cfgLen -= toWrite;
       }
-      sprintf(hostName, "%s_%012llX", APP_NAME, ESP.getEfuseMac());
+      snprintf(hostName, MAX_HOST_LEN, "%s_%012llX", APP_NAME, ESP.getEfuseMac());
       char cfg[100];
       cfgLen = snprintf(cfg, 100, "appId~%s~99~~na\n", APP_NAME);
       if (cfgLen < 0) cfgLen = 0;
