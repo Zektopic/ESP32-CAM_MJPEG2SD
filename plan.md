@@ -1,22 +1,45 @@
-1. Add `title` attribute tooltips to the `brightness`, `contrast`, `saturation`, `sharpness`, and `denoise` range inputs in `data/MJPEG2SD.htm` via the `run_in_bash_session` tool using a python replacement script:
-```bash
-cat << 'PY_EOF' > patch.py
-with open('data/MJPEG2SD.htm', 'rb') as f:
-    content = f.read()
+1. **Fix the Vulnerability**
+   - Use `replace_with_git_merge_diff` to replace the insecure string operations with a safe implementation in `photogram.cpp`.
+   - The replacement will be:
+     ```cpp
+<<<<<<< SEARCH
+    char pName[FILE_NAME_LEN];
+    strcpy(pName, pFolder);
+    time_t currEpoch = getEpoch();
+    strftime(pName + strlen(pFolder), sizeof(pName) - strlen(pFolder), "/%Y%m%d_%H%M%S", localtime(&currEpoch));
+    strcat(pName, JPG_EXT);
+=======
+    char pName[FILE_NAME_LEN];
+    time_t currEpoch = getEpoch();
+    char timeStr[32];
+    strftime(timeStr, sizeof(timeStr), "/%Y%m%d_%H%M%S", localtime(&currEpoch));
+    snprintf(pName, sizeof(pName), "%s%s%s", pFolder, timeStr, JPG_EXT);
+>>>>>>> REPLACE
+     ```
 
-content = content.replace(b'<input type="range" id="brightness"', b'<input title="Set image brightness" type="range" id="brightness"')
-content = content.replace(b'<input type="range" id="contrast"', b'<input title="Set image contrast" type="range" id="contrast"')
-content = content.replace(b'<input type="range" id="saturation"', b'<input title="Set image saturation" type="range" id="saturation"')
-content = content.replace(b'<input type="range" id="sharpness"', b'<input title="Set image sharpness" type="range" id="sharpness"')
-content = content.replace(b'<input type="range" id="denoise"', b'<input title="Set image de-noise level" type="range" id="denoise"')
+2. **Verify Modification**
+   - Verify the file changes with exact command: `git diff photogram.cpp && git diff --staged photogram.cpp`
 
-with open('data/MJPEG2SD.htm', 'wb') as f:
-    f.write(content)
-PY_EOF
-python3 patch.py
-rm patch.py
-```
-2. Verify the changes visually using `git diff data/MJPEG2SD.htm` to ensure the tooltips were cleanly added.
-3. Run the repository tests to verify correctness: execute `pip install playwright pytest-playwright && playwright install chromium` and `python test_playwright.py`. Also run the C++ test suite with `g++ -o test_mock_bin test_mock.cpp && ./test_mock_bin`, and then delete the compiled binary with `rm test_mock_bin`. Finally remove cached python files `rm -rf __pycache__ .pytest_cache`.
-4. Complete pre-commit steps to ensure proper testing, verification, review, and reflection are done.
-5. Create a branch and submit the PR using the `submit` tool.
+3. **Verify Syntax Compilation**
+   - Verify syntax locally by compiling a dummy snippet:
+   - Command:
+     ```bash
+cat << 'EOF' > test_photogram_snippet.cpp
+#include <iostream>
+#include <string.h>
+#include <time.h>
+
+#define FILE_NAME_LEN 64
+#define JPG_EXT ".jpg"
+time_t getEpoch() { return time(NULL); }
+
+int main() {
+    const char* pFolder = "/sdcard/test";
+    char pName[FILE_NAME_LEN];
+    time_t currEpoch = getEpoch();
+    char timeStr[32];
+    strftime(timeStr, sizeof(timeStr), "/%Y%m%d_%H%M%S", localtime(&currEpoch));
+    snprintf(pName, sizeof(pName), "%s%s%s", pFolder, timeStr, JPG_EXT);
+    std::cout << pName << std::endl;
+    return 0;
+}

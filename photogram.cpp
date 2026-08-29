@@ -94,10 +94,10 @@ static void getPhoto() {
   if (!doKeepFrame && alertBufferSize) {
     // create file name 
     char pName[FILE_NAME_LEN];
-    strcpy(pName, pFolder);
     time_t currEpoch = getEpoch();
-    strftime(pName + strlen(pFolder), sizeof(pName) - strlen(pFolder), "/%Y%m%d_%H%M%S", localtime(&currEpoch));
-    strcat(pName, JPG_EXT);
+    char timeStr[32];
+    strftime(timeStr, sizeof(timeStr), "/%Y%m%d_%H%M%S", localtime(&currEpoch));
+    snprintf(pName, sizeof(pName), "%s%s%s", pFolder, timeStr, JPG_EXT);
     File pFile = STORAGE.open(pName, FILE_WRITE);
     // save file to SD
     pFile.write((uint8_t*)alertBuffer, alertBufferSize);
