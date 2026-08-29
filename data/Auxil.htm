@@ -559,11 +559,11 @@
         background: var(--buttonReady);
       }
 
-      nav.quick-nav:hover {
+      button.quick-nav:hover {
         background: var(--buttonHover);
       }
 
-      nav.quick-nav.active {
+      button.quick-nav.active {
         box-shadow: 0 0 0 var(--buttonQuart) var(--buttonActive);
         background: var(--buttonActive);
       }
@@ -747,6 +747,11 @@
         border: 1px solid var(--itemBorder);
       }
       .pin-menu {
+        background: none;
+        border: none;
+        padding: 0;
+        color: inherit;
+        font: inherit;
         width: calc(var(--buttonSize) * 3/2);
         height: calc(var(--buttonSize) * 3/2);
         float: right;
@@ -845,11 +850,11 @@
           <div id="sidebar">
             <div id="menu-container" class="menu-pinned">
               <nav id="menu-selector" class="menu-pinned menu-closed">
-                <nav class="quick-nav" id="accSettings" name="access-settings" title="Access Settings" role="button" tabindex="0">🔧</nav>
+                <button type="button" class="quick-nav" id="accSettings" name="access-settings" title="Access Settings" >🔧</button>
               </nav>
               <nav class="menu panel" id="access-settings">
                 <input type="checkbox" id="other-cb" class="menu-action">
-                <div class="pin-menu" title="Pin / unpin menu" role="button" tabindex="0" >📌</div>
+                <button type="button" class="pin-menu" title="Pin / unpin menu" >📌</button>
                 <label for="other-cb" class="nav-toggle">🔧&nbsp;&nbsp;Access Settings&nbsp;&nbsp;</label>
                 <div class='addButtons'></div>
                 <div>
@@ -1265,7 +1270,7 @@
 
         // toggle selected icon as active, others inactive
         i.classList.toggle('active');
-        $$('nav.quick-nav:not(#'+i.id+')').forEach(el => {el.classList.remove('active')});
+        $$('button.quick-nav:not(#'+i.id+')').forEach(el => {el.classList.remove('active')});
 
         // toggle menu attached to icon as active, others inactive
         m.classList.toggle('active');
