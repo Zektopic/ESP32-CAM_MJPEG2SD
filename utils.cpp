@@ -1,3 +1,4 @@
+#include <cstdint>
 
 
 // General utilities not specific to this app to support:
@@ -764,12 +765,26 @@ void urlDecode(char* inVal) {
   // replace url encoded characters in-place
   char* readPtr = inVal;
   char* writePtr = inVal;
+  // ⚡ Bolt optimization: Use a precomputed lookup table (LUT) to avoid branching
+  // and repeated character classification when parsing hex values in tight loops.
+  // This maps ASCII characters to their 0-15 hex integer values. Unused chars map to 0.
+  static const uint8_t hexDecodeLUT[256] = {
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, // 0-9
+      0, 10, 11, 12, 13, 14, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, // A-F
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 10, 11, 12, 13, 14, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, // a-f
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      // remaining 128 chars are 0
+  };
+
   while (*readPtr) {
     if (*readPtr == '%' && isxdigit((unsigned char)readPtr[1]) && isxdigit((unsigned char)readPtr[2])) {
-      char h1 = readPtr[1];
-      char h2 = readPtr[2];
-      int v1 = (h1 <= '9') ? (h1 - '0') : ((h1 & 0xDF) - 'A' + 10);
-      int v2 = (h2 <= '9') ? (h2 - '0') : ((h2 & 0xDF) - 'A' + 10);
+      // Look up hex values without branching or subtraction operations
+      uint8_t v1 = hexDecodeLUT[(unsigned char)readPtr[1]];
+      uint8_t v2 = hexDecodeLUT[(unsigned char)readPtr[2]];
       *writePtr++ = (char)((v1 << 4) | v2);
       readPtr += 3;
     } else if (*readPtr == '+') {
