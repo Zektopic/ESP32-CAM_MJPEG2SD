@@ -761,6 +761,27 @@ bool calcProgress(int progressVal, int totalVal, int percentReport, uint8_t &pcP
 
 
 void urlDecode(char* inVal) {
+  // Optimized: Precomputed constant-time lookup table (LUT) to eliminate generic bitwise
+  // and arithmetic operations in the hot loop, reducing CPU overhead during hex decoding.
+  static const uint8_t hexDecodeLUT[256] = {
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0,
+      0, 10, 11, 12, 13, 14, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 10, 11, 12, 13, 14, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  };
+
   // replace url encoded characters in-place
   char* readPtr = inVal;
   char* writePtr = inVal;
@@ -768,8 +789,8 @@ void urlDecode(char* inVal) {
     if (*readPtr == '%' && isxdigit((unsigned char)readPtr[1]) && isxdigit((unsigned char)readPtr[2])) {
       char h1 = readPtr[1];
       char h2 = readPtr[2];
-      int v1 = (h1 <= '9') ? (h1 - '0') : ((h1 & 0xDF) - 'A' + 10);
-      int v2 = (h2 <= '9') ? (h2 - '0') : ((h2 & 0xDF) - 'A' + 10);
+      int v1 = hexDecodeLUT[(unsigned char)h1];
+      int v2 = hexDecodeLUT[(unsigned char)h2];
       *writePtr++ = (char)((v1 << 4) | v2);
       readPtr += 3;
     } else if (*readPtr == '+') {

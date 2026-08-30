@@ -152,3 +152,7 @@
 ## 2024-11-26 - Optimize Character Checking in URL Encoding
 **Learning:** Calling `isalnum()` and `strchr()` sequentially inside a tight loop parsing strings (such as `urlEncode` processing network output) introduces high function call and generic string traversal overhead for every character.
 **Action:** Replace dynamic function calls with a precomputed static boolean lookup table (LUT) array (e.g., `static const bool unreserved[256] = {...}`). This enables O(1) checks for unreserved characters and avoids expensive standard library calls, resulting in a ~2.8x speedup.
+
+## 2024-05-18 - LUT optimization in urlDecode
+**Learning:** Found that `urlDecode` in `utils.cpp` was using arithmetic branching `(h1 <= '9') ? (h1 - '0') : ((h1 & 0xDF) - 'A' + 10)` which incurs overhead on every iteration inside a tight network parsing loop.
+**Action:** Replaced the generic bitwise and arithmetic calculations with a static lookup table (LUT) to decode hex sequences in constant O(1) time. Ensure comments are added to explain micro-optimizations as required by the instruction prompt.
