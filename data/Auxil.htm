@@ -12,6 +12,15 @@
     <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="80" font-size="80">📷</text></svg>'>
 
     <style>
+      .btn-reset {
+        background: none;
+        border: none;
+        padding: 0;
+        color: inherit;
+        font: inherit;
+        cursor: pointer;
+      }
+
       :root {
         /* colors used on web pages - see https://www.w3schools.com/colors/colors_names.asp */
         --buttonReady: crimson;
@@ -167,16 +176,12 @@
         ry: 15%;
       }
 
-      .buttonRect:focus, [role="button"]:focus .buttonRect {
+      .buttonRect:focus, .btn-reset:focus .buttonRect {
         fill: var(--buttonActive);
         outline: none; /* Remove focus outline if not needed */
       }
-      [role="button"]:focus {
-        outline: none;
-      }
-      [role="button"] {
-        cursor: pointer;
-      }
+
+
 
       rect:hover{
         fill: var(--buttonHover);
@@ -215,7 +220,7 @@
        background: var(--buttonActive);
       }
 
-      button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, .password-toggle:focus-visible, .iconSize:focus-visible {
+      button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, .password-toggle:focus-visible, .iconSize:focus-visible {
         outline: 2px solid var(--buttonActive);
         outline-offset: 2px;
       }
@@ -845,11 +850,11 @@
           <div id="sidebar">
             <div id="menu-container" class="menu-pinned">
               <nav id="menu-selector" class="menu-pinned menu-closed">
-                <nav class="quick-nav" id="accSettings" name="access-settings" title="Access Settings" aria-label="Access Settings" role="button" tabindex="0">🔧</nav>
+                <button type="button" class="quick-nav btn-reset" id="accSettings" name="access-settings" title="Access Settings" aria-label="Access Settings">🔧</button>
               </nav>
               <nav class="menu panel" id="access-settings">
                 <input type="checkbox" id="other-cb" class="menu-action">
-                <div class="pin-menu" title="Pin / unpin menu" aria-label="Pin / unpin menu" role="button" tabindex="0" >📌</div>
+                <button type="button" class="pin-menu btn-reset" title="Pin / unpin menu" aria-label="Pin / unpin menu">📌</button>
                 <label for="other-cb" class="nav-toggle">🔧&nbsp;&nbsp;Access Settings&nbsp;&nbsp;</label>
                 <div class='addButtons'></div>
                 <div>
@@ -1057,37 +1062,37 @@
           </div>
         </div>
         <br>
-        <div tabindex="0" role="button" aria-labelledby="showsys" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}">
+        <button type="button" aria-labelledby="showsys" class="btn-reset">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text id="showsys" class="midText">System</text>
           </svg>
-        </div>
+        </button>
         <div style="grid-column: span 4"><br></div>
-        <div tabindex="0" role="button" aria-labelledby="refreshLog" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}">
+        <button type="button" aria-labelledby="refreshLog" class="btn-reset">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local" id="refreshLog">Refresh Log</text>
           </svg>
-        </div>
-        <div tabindex="0" role="button" aria-labelledby="clearLog" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}">
+        </button>
+        <button type="button" aria-labelledby="clearLog" class="btn-reset">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local" id="clearLog">Clear Log</text>
           </svg>
-        </div>
-        <div tabindex="0" role="button" aria-labelledby="save" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}">
+        </button>
+        <button type="button" aria-labelledby="save" class="btn-reset">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text id="save" class="midText">Save</text>
           </svg>
-        </div>
-        <div tabindex="0" role="button" aria-labelledby="reset" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}">
+        </button>
+        <button type="button" aria-labelledby="reset" class="btn-reset">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text id="reset" class="midText">Reboot ESP</text>
           </svg>
-        </div>
+        </button>
       </div>
       <br>
       <div id="appLog"></div>
@@ -1099,30 +1104,30 @@
       <div class="header">Control</div>
       <br>
       <div class="grid-cols4">
-        <div tabindex="0" role="button" aria-labelledby="save" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}">
+        <button type="button" aria-labelledby="save" class="btn-reset">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text id="save" class="midText">Save</text>
           </svg>
-        </div>
-        <div tabindex="0" role="button" aria-labelledby="reset" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}">
+        </button>
+        <button type="button" aria-labelledby="reset" class="btn-reset">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text id="reset" class="midText">Reboot ESP</text>
           </svg>
-        </div>
-        <div tabindex="0" role="button" aria-labelledby="deldata" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}">
+        </button>
+        <button type="button" aria-labelledby="deldata" class="btn-reset">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text id="deldata" class="midText">Reload /data</text>
           </svg>
-        </div>
-        <div tabindex="0" role="button" aria-labelledby="clear" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}">
+        </button>
+        <button type="button" aria-labelledby="clear" class="btn-reset">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text id="clear" class="midText">Clear NVS</text>
           </svg>
-        </div>
+        </button>
         <div class="cfgTitle">
           <br>
           <div class="header">Settings</div>
@@ -1130,36 +1135,36 @@
           <div class="subheader">Press Save button to make changes permanent</div>
           <br>
         </div>
-        <div tabindex="0" role="button" aria-labelledby="wifi" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}">
+        <button type="button" aria-labelledby="wifi" class="btn-reset">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local midText" id="wifi">Network</text>
           </svg>
-        </div>
-        <div tabindex="0" role="button" aria-labelledby="peripherals" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}">
+        </button>
+        <button type="button" aria-labelledby="peripherals" class="btn-reset">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local midText" id="peripherals">Peripherals</text>
           </svg>
-        </div>
-        <div id="RCconfigBtn" class="hidden" tabindex="0" role="button" aria-labelledby="RCconfig" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}">
+        </button>
+        <button type="button" id="RCconfigBtn" class="hidden btn-reset" aria-labelledby="RCconfig">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local midText" id="RCconfig">RC Config</text>
           </svg>
-        </div>
-        <div id="SVconfigBtn" class="hidden" tabindex="0" role="button" aria-labelledby="SVconfig" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}">
+        </button>
+        <button type="button" id="SVconfigBtn" class="hidden btn-reset" aria-labelledby="SVconfig">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local midText" id="SVconfig">Servos</text>
           </svg>
-        </div>
-        <div id="PGconfigBtn" class="hidden" tabindex="0" role="button" aria-labelledby="PGconfig" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}">
+        </button>
+        <button type="button" id="PGconfigBtn" class="hidden btn-reset" aria-labelledby="PGconfig">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local midText" id="PGconfig">PG Control</text>
           </svg>
-        </div>
+        </button>
       </div>
       <div>
         <p class='config-group' id='Cfg'></p>

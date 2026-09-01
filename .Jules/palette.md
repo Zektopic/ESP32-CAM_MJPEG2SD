@@ -28,3 +28,6 @@
 ## 2024-05-25 - Custom Button Keyboard A11y
 **Learning:** When using `<div>` or other non-native button elements with `role="button"`, they do not inherently receive keyboard trigger events (`Enter` or `Space`), rendering them inaccessible to keyboard-only users.
 **Action:** Always add an explicit `onkeydown` handler to custom buttons to trigger a click on `Enter` or `Space` (e.g., `onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}"`).
+## 2025-03-09 - Native Button Replacement
+**Learning:** While custom buttons (e.g. `<div role="button">`) require manual `tabindex` and `onkeydown` handlers for Space/Enter keys, converting them to native `<button>` elements inherently provides these accessibility features natively. A CSS reset class is useful to preserve existing visual styles when migrating faux buttons to native buttons.
+**Action:** When improving accessibility, replace interactive `<span>` or `<div>` elements with native `<button type="button">` elements to automatically benefit from browser-level accessibility semantics and keyboard event handling, while keeping styling intact.

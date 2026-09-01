@@ -854,7 +854,7 @@
                   let valCntr = 0;
                   switch (value.charAt(0)) {
                     case 'A': // action button
-                      inputHtml = '<div tabindex="0" role="button" aria-labelledby="' + saveKey + '" style="display:inline-block;" onkeydown="if(event.key===\\'Enter\\'||event.key===\\' \\'){event.preventDefault();this.click();}"><svg class="svgCols nochange" aria-hidden="true"><rect class="buttonRect"/><text id="' + saveKey + '" class="midText" text-anchor="middle" dominant-baseline="middle">' + saveVal + '</text></svg></div>';
+                      inputHtml = '<button type=\"button\" class=\"btn-reset\" aria-labelledby=\"' + saveKey + '\" style=\"display:inline-block;\"><svg class=\"svgCols nochange\" aria-hidden=\"true\"><rect class=\"buttonRect\"/><text id=\"' + saveKey + '\" class=\"midText\" text-anchor=\"middle\" dominant-baseline=\"middle\">' + saveVal + '</text></svg></button>';
                     break;
                     case 'B': // B:lab1:lab2:etc
                       // radio button group
