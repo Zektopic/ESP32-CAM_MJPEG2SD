@@ -773,10 +773,11 @@ void appSpecificTelegramTask(void* p) {
       } else if (!strcmp(userCmd, "/log")) {
         // build unique ram log file name using time
         char ramLogName[FILE_NAME_LEN];
-        snprintf(ramLogName, FILE_NAME_LEN, "%s/ramlog_", DATA_DIR);
         time_t currEpoch = getEpoch();
-        strftime(ramLogName + strlen(ramLogName), FILE_NAME_LEN - strlen(ramLogName), "%H%M%S", localtime(&currEpoch));
-        strcat(ramLogName, TEXT_EXT);
+        char timeStr[16];
+        strftime(timeStr, sizeof(timeStr), "%H%M%S", localtime(&currEpoch));
+        // ⚡ Bolt optimization: Combine multi-step string building operations into a single bounded snprintf to eliminate redundant string length calculations.
+        snprintf(ramLogName, FILE_NAME_LEN, "%s/ramlog_%s%s", DATA_DIR, timeStr, TEXT_EXT);
         saveRamLog(ramLogName);
         snprintf(userCmd, FILE_NAME_LEN, "/log from %s", hostName);
         sendTgramFile(ramLogName, "text/plain", userCmd);
