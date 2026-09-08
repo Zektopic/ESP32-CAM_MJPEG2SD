@@ -971,13 +971,12 @@
           hubImg.alt = `Camera feed from ${ipStr}`;
 
           // Create a remove button for each container
-          const removeButton = document.createElement('span');
+          const removeButton = document.createElement('button');
+          removeButton.type = 'button';
           removeButton.classList.add('removeButton');
           removeButton.classList.add('iconSize');
-          removeButton.setAttribute('role', 'button');
-          removeButton.setAttribute('tabindex', '0');
+          removeButton.classList.add('btn-reset'); // .btn-reset exists in CSS
           removeButton.setAttribute('aria-label', `Remove IP ${ipStr}`);
-          removeButton.setAttribute('onkeydown', 'if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}');
           removeButton.innerHTML = '×';
           removeButton.onclick = function (event) {
             event.stopPropagation(); // Prevent container click from triggering at the same time
@@ -988,12 +987,7 @@
               createImageElements(updatedIPs);
             }
           };
-          removeButton.onkeydown = function(event) {
-            if (event.key === 'Enter' || event.key === ' ') {
-              event.preventDefault();
-              removeButton.click();
-            }
-          };
+
 
           // Append the image, IP text, and remove button to the container
           ipContainer.appendChild(ipUrl);
