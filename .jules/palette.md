@@ -25,3 +25,6 @@
 ## 2024-07-29 - Missing Enter Key Support in Standalone Inputs
 **Learning:** In HTML interfaces that don't wrap inputs in standard `<form>` tags, users lose the default 'Enter to submit' behavior, causing frustrating interaction dead-ends.
 **Action:** Always explicitly bind `onkeydown` event handlers checking for `event.key === 'Enter'` to critical standalone input fields to restore expected keyboard behavior.
+## 2024-09-08 - Fixed Faux Buttons Accessibility in common.js
+**Learning:** Replaced `span` and `div` elements with `role="button"` and custom keyboard handlers with semantic `<button type="button">` elements to ensure full keyboard navigation support and native accessibility semantics in JavaScript generated content. Custom `onkeydown` handlers for Space and Enter on `role="button"` were causing issues when attempting to interact via screen readers or keyboards.
+**Action:** Always prefer native `<button>` tags when generating clickable interactive UI elements dynamically in JS to leverage built-in keyboard accessibility and reduce fragile event listener logic. Avoid faux buttons (`role="button"`) unless strictly necessary for custom composite widgets.
