@@ -206,3 +206,7 @@
 **Vulnerability:** Found a buffer overflow vulnerability in `prefs.cpp` where `sprintf(hostName, "%s_%012llX", APP_NAME, ESP.getEfuseMac());` was used to initialize the `hostName` array without bounds checking against `MAX_HOST_LEN`. If the `APP_NAME` macro was unexpectedly large, it could overflow the buffer.
 **Learning:** Even statically sized buffers meant for deterministic initialization strings (like a hostname concatenated with a MAC address) should use bounded string formatting. `sprintf` provides no safety for this.
 **Prevention:** Always use `snprintf(dest, sizeof(dest), ...)` or `snprintf(dest, MAX_LEN, ...)` instead of `sprintf` when formatting strings into bounded arrays.
+## 2025-02-23 - [HIGH] Buffer Overflow in camModel string formatting
+**Vulnerability:** Found a buffer overflow vulnerability in `mjpeg2sd.cpp` where `sprintf(camModel, "PID=0x%X", s->id.PID);` was used to copy an incoming camera PID into a statically sized array `camModel` (11 bytes). Because the PID value is an integer and hex formatting with `%X` could exceed the remaining space, a buffer overflow could occur, potentially corrupting stack memory.
+**Learning:** Formatting arbitrary integers or IDs into small static buffers using `sprintf` is unsafe. While a typical PID might fit, larger or unexpected values could exceed the 11-byte limit.
+**Prevention:** Always use bounds-checked string formatting like `snprintf` with `sizeof()` for static arrays to prevent stack-based buffer overflows.

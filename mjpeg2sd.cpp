@@ -1021,7 +1021,7 @@ bool prepCam() {
           break;
         default:
           // not recognised
-          sprintf(camModel, "PID=0x%X", s->id.PID);
+          snprintf(camModel, sizeof(camModel), "PID=0x%X", s->id.PID);
           break;
       }
       // set frame size to configured value
