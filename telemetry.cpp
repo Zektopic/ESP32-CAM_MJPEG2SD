@@ -210,7 +210,10 @@ bool startTelemetry() {
 
 void stopTelemetry(const char* fileName) {
   // called when camera recording stopped
-  if (teleUse) strcpy(teleFileName, fileName); 
+  if (teleUse) {
+    strncpy(teleFileName, fileName, FILE_NAME_LEN - 1);
+    teleFileName[FILE_NAME_LEN - 1] = '\0';
+  }
   capturing = false; // stop task
 }
 

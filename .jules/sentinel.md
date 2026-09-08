@@ -206,3 +206,7 @@
 **Vulnerability:** Found a buffer overflow vulnerability in `prefs.cpp` where `sprintf(hostName, "%s_%012llX", APP_NAME, ESP.getEfuseMac());` was used to initialize the `hostName` array without bounds checking against `MAX_HOST_LEN`. If the `APP_NAME` macro was unexpectedly large, it could overflow the buffer.
 **Learning:** Even statically sized buffers meant for deterministic initialization strings (like a hostname concatenated with a MAC address) should use bounded string formatting. `sprintf` provides no safety for this.
 **Prevention:** Always use `snprintf(dest, sizeof(dest), ...)` or `snprintf(dest, MAX_LEN, ...)` instead of `sprintf` when formatting strings into bounded arrays.
+## 2024-09-08 - [HIGH] Buffer overflow in telemetry filename
+**Vulnerability:** In `telemetry.cpp`, `stopTelemetry` used `strcpy(teleFileName, fileName);` to copy an external/unbounded input `fileName` into the statically sized `teleFileName` array (`FILE_NAME_LEN`), resulting in a potential stack buffer overflow.
+**Learning:** `strcpy` should never be used, even if the filename is expected to be safe, because it lacks bounds checking and an unexpectedly large `fileName` could cause memory corruption.
+**Prevention:** Always use safe bounded string manipulation operations like `strncpy(dest, src, size - 1)` followed by an explicit `dest[size - 1] = '\0'` to guarantee null-termination and prevent buffer overflows when dealing with bounded string arrays.
