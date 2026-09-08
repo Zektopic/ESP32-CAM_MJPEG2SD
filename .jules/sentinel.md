@@ -210,3 +210,8 @@
 **Vulnerability:** Found a buffer overflow vulnerability in `mjpeg2sd.cpp` where `sprintf(camModel, "PID=0x%X", s->id.PID);` was used to copy an incoming camera PID into a statically sized array `camModel` (11 bytes). Because the PID value is an integer and hex formatting with `%X` could exceed the remaining space, a buffer overflow could occur, potentially corrupting stack memory.
 **Learning:** Formatting arbitrary integers or IDs into small static buffers using `sprintf` is unsafe. While a typical PID might fit, larger or unexpected values could exceed the 11-byte limit.
 **Prevention:** Always use bounds-checked string formatting like `snprintf` with `sizeof()` for static arrays to prevent stack-based buffer overflows.
+
+## 2024-09-08 - [HIGH] Buffer overflow in telemetry filename
+**Vulnerability:** In `telemetry.cpp`, `stopTelemetry` used `strcpy(teleFileName, fileName);` to copy an external/unbounded input `fileName` into the statically sized `teleFileName` array (`FILE_NAME_LEN`), resulting in a potential stack buffer overflow.
+**Learning:** `strcpy` should never be used, even if the filename is expected to be safe, because it lacks bounds checking and an unexpectedly large `fileName` could cause memory corruption.
+**Prevention:** Always use safe bounded string manipulation operations like `strncpy(dest, src, size - 1)` followed by an explicit `dest[size - 1] = '\0'` to guarantee null-termination and prevent buffer overflows when dealing with bounded string arrays.
