@@ -673,6 +673,7 @@
             // trigger click for elements with role="button" or SVG rects when Enter or Space is pressed
             if (keyPress === 13 || keyPress === 32) {
               const e = event.target;
+              if (e.nodeName === 'BUTTON') return;
               if (e.getAttribute('role') === 'button' || e.nodeName === 'rect' || e.classList.contains('iconSize')) {
                 event.preventDefault(); // prevent scrolling for Space
                 if (e.nodeName === 'DIV') {
@@ -1008,6 +1009,7 @@
             window.open(`http://${ipStr}`, '_blank');
           };
           ipContainer.onkeydown = function(event) {
+            if (event.target !== ipContainer) return;
             if (event.key === 'Enter' || event.key === ' ') {
               event.preventDefault();
               ipContainer.click();
