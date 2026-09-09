@@ -298,7 +298,8 @@ static void deleteOthers(const char* baseFile) {
 #ifdef ISCAM
   // delete corresponding csv and srt files if exist
   char otherDeleteName[FILE_NAME_LEN];
-  strcpy(otherDeleteName, baseFile);
+  strncpy(otherDeleteName, baseFile, FILE_NAME_LEN - 1);
+  otherDeleteName[FILE_NAME_LEN - 1] = 0;
   changeExtension(otherDeleteName, CSV_EXT);
   if (STORAGE.remove(otherDeleteName)) LOG_INF("File %s deleted", otherDeleteName);
   changeExtension(otherDeleteName, SRT_EXT);
