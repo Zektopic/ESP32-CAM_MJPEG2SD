@@ -219,3 +219,8 @@
 **Vulnerability:** A critical buffer overflow vulnerability was identified in `utilsFS.cpp` within the `deleteOthers` function. A `strcpy(otherDeleteName, baseFile);` was used to copy the filename argument directly into a statically sized `otherDeleteName` array (`FILE_NAME_LEN`). Because `baseFile` could potentially originate from untrusted sources or exceed the array bounds (especially considering the maximum possible path lengths in ESP32 SPIFFS/SD implementations), this permitted a stack buffer overflow.
 **Learning:** Functions that manipulate paths or filenames using statically sized buffers must always use bounded string copying operations (`strncpy`, `snprintf`), even for seemingly safe internal functions.
 **Prevention:** Always use bounds checking when extracting or copying strings into local arrays: `strncpy(dest, src, size - 1)` followed by explicit null termination `dest[size - 1] = 0`.
+
+## 2026-09-11 - [HIGH] Buffer Overflow in mjpeg2sd JSON payload construction
+**Vulnerability:** Unbounded `sprintf` was used in `mjpeg2sd.cpp` to construct MQTT JSON payloads dynamically (`sprintf(jsonBuff, "{\"RECORD\":\"ON\", \"TIME\":\"%s\"}", esp_log_system_timestamp());`). The dynamic timestamp component could hypothetically exceed the allocated bounds, leading to memory corruption.
+**Learning:** `sprintf` should never be used to format dynamic runtime values directly into bounded buffers, even if the buffer is large (`JSON_BUFF_LEN`). It provides no inherent bounds checking.
+**Prevention:** In C/C++, always deprecate `sprintf` in favor of `snprintf` combined with the maximum buffer size (e.g., `JSON_BUFF_LEN`), ensuring strict bounds enforcement and null-termination.

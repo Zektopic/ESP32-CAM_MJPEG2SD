@@ -28,3 +28,6 @@
 ## 2024-09-08 - Fixed Faux Buttons Accessibility in common.js
 **Learning:** Replaced `span` and `div` elements with `role="button"` and custom keyboard handlers with semantic `<button type="button">` elements to ensure full keyboard navigation support and native accessibility semantics in JavaScript generated content. Custom `onkeydown` handlers for Space and Enter on `role="button"` were causing issues when attempting to interact via screen readers or keyboards.
 **Action:** Always prefer native `<button>` tags when generating clickable interactive UI elements dynamically in JS to leverage built-in keyboard accessibility and reduce fragile event listener logic. Avoid faux buttons (`role="button"`) unless strictly necessary for custom composite widgets.
+## 2026-09-11 - Hide decorative icons in buttons from screen readers
+**Learning:** Raw Unicode symbols (like ➤ or ▢) used as decorative icons inside buttons can be read aloud verbatim or confusingly by screen readers unless explicitly hidden.
+**Action:** Wrap decorative glyphs or icons inside buttons with `<span aria-hidden="true">` to prevent screen reader noise.
