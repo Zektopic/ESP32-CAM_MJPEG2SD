@@ -604,13 +604,26 @@
         function setListeners() {
           // click events
           document.addEventListener("click", function (event) {
+            const btn = event.target.closest('button');
+            if (btn) {
+              if (btn.classList.contains('quick-nav')) {
+                processStatus(CLASS, btn.classList.value, btn.id);
+              } else if (btn.classList.contains('pin-menu')) {
+                processStatus(CLASS, 'pin-menu', '');
+              } else if (btn.classList.contains('iconSize')) {
+                processStatus(CLASS, 'iconSize', btn.id);
+              } else {
+                const textChild = btn.querySelector('text[id]');
+                const keyId = btn.id || (textChild ? textChild.id : '');
+                if (keyId) processStatus(ID, keyId, btn.value || 1);
+              }
+              return;
+            }
             const e = event.target;
             // svg rect elements, use id of its following text node
             if (e.nodeName == 'rect') processStatus(ID, e.nextElementSibling.id, 1);
             // tab buttons, use name as target id
             else if (e.classList.contains('tablinks')) openTab(e);
-            // other buttons
-            else if (e.tagName == 'BUTTON') processStatus(ID, e.id, e.value);
             // navigation and presentation icons
             else if (e.tagName == 'NAV' || e.tagName == 'DIV') processStatus(CLASS, e.classList.value, e.id);
             else if (e.nodeName == 'INPUT') {

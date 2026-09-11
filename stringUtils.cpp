@@ -12,9 +12,11 @@ bool isPathTraversal(const char* path) {
 // removeChar is defined in utils.cpp and declared in globals.h
 bool changeExtension(char* fileName, const char* newExt) {
   // replace original file extension with supplied extension (buffer must be large enough)
-  size_t inNamePtr = strlen(fileName);
-  // find '.' before extension text
-  while (inNamePtr > 0 && fileName[inNamePtr] != '.') inNamePtr--;
+  if (!fileName || !newExt) return false;
+  int inNamePtr = (int)strlen(fileName) - 1;
+  // find '.' before extension text, stopping at path separators
+  while (inNamePtr >= 0 && fileName[inNamePtr] != '.' && fileName[inNamePtr] != '/' && fileName[inNamePtr] != '\\') inNamePtr--;
+  if (inNamePtr < 0 || fileName[inNamePtr] != '.') return false; // No extension found, do not corrupt buffer
   inNamePtr++;
   size_t extLen = strlen(newExt);
   memcpy(fileName + inNamePtr, newExt, extLen);
@@ -23,7 +25,7 @@ bool changeExtension(char* fileName, const char* newExt) {
 }
 
 bool urlEncode(const char* inVal, char* encoded, size_t maxSize) {
-  int encodedLen = 0;
+  size_t encodedLen = 0;
   static const char hexTable[] = "0123456789ABCDEF";
   // Optimized: Use a lookup table to determine unreserved characters in O(1) time
   // to avoid costly function calls (isalnum, strchr) inside a tight loop.

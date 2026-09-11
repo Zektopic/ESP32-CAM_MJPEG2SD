@@ -1,1 +1,4 @@
 node_modules/
+build/
+test_stringUtils
+*.bin

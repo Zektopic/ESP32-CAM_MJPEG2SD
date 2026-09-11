@@ -116,7 +116,10 @@ static bool getTgramResponse() {
       size_t availLen = tclient.available();
       // ⚡ Bolt optimization: Use block read() instead of readBytes() to bypass per-byte timedRead() overhead
       if (availLen) {
-        readLen += tclient.read((uint8_t*)tgramBuff + readLen, availLen);
+        size_t toRead = min(availLen, (size_t)(contentLen - readLen));
+        int bytesRead = tclient.read((uint8_t*)tgramBuff + readLen, toRead);
+        if (bytesRead <= 0) break;
+        readLen += (size_t)bytesRead;
       } else {
         vTaskDelay(pdMS_TO_TICKS(10));
       }

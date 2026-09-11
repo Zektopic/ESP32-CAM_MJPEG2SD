@@ -1270,7 +1270,7 @@
 
         // toggle selected icon as active, others inactive
         i.classList.toggle('active');
-        $$('nav.quick-nav:not(#'+i.id+')').forEach(el => {el.classList.remove('active')});
+        $$('.quick-nav:not(#'+i.id+')').forEach(el => {el.classList.remove('active')});
 
         // toggle menu attached to icon as active, others inactive
         m.classList.toggle('active');

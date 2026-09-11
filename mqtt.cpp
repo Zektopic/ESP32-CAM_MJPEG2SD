@@ -413,28 +413,28 @@ void sendMqttHasDiscovery(){
   mqttPublishPath("motion", "off"); 
 }
 void sendMqttHasState(){  
-  char* p = jsonBuff;
-  size_t rem = JSON_BUFF_LEN;
+  char valBuff[64];
   char timeBuff[20];
+  time_t currEpoch = getEpoch();
   strftime(timeBuff, 20, "%Y-%m-%d %H:%M:%S", localtime(&currEpoch));
   mqttPublishPath("clock", timeBuff);
   formatElapsedTime(timeBuff, millis());
   mqttPublishPath("up_time", timeBuff);
   float aTemp = readTemperature(true);
   if (aTemp > -127.0){    
-    snprintf(p, rem, "%0.1f", aTemp);
-    mqttPublishPath("atemp", p);
+    snprintf(valBuff, sizeof(valBuff), "%0.1f", aTemp);
+    mqttPublishPath("atemp", valBuff);
   }
-  snprintf(p, rem, "%i", netRSSI());
-  mqttPublishPath("wifi_rssi", p);
-  snprintf(p, rem, "%s", formatIPstr());
-  mqttPublishPath("wifi_ip", p);
-  snprintf(p, rem, "%s", fmtSize(ESP.getFreeHeap()) );
-  mqttPublishPath("free_heap", p);
-  snprintf(p, rem, "%s", fmtSize(ESP.getFreePsram()) );
-  mqttPublishPath("free_psram", p);
-  snprintf(p, rem, "%s", fmtSize(STORAGE.totalBytes() - STORAGE.usedBytes()) );
-  mqttPublishPath("free_bytes", p);
+  snprintf(valBuff, sizeof(valBuff), "%i", netRSSI());
+  mqttPublishPath("wifi_rssi", valBuff);
+  snprintf(valBuff, sizeof(valBuff), "%s", formatIPstr());
+  mqttPublishPath("wifi_ip", valBuff);
+  snprintf(valBuff, sizeof(valBuff), "%s", fmtSize(ESP.getFreeHeap()) );
+  mqttPublishPath("free_heap", valBuff);
+  snprintf(valBuff, sizeof(valBuff), "%s", fmtSize(ESP.getFreePsram()) );
+  mqttPublishPath("free_psram", valBuff);
+  snprintf(valBuff, sizeof(valBuff), "%s", fmtSize(STORAGE.totalBytes() - STORAGE.usedBytes()) );
+  mqttPublishPath("free_bytes", valBuff);
 }
 #endif // INCLUDE_HASIO
 #endif // INCLUDE_MQTT

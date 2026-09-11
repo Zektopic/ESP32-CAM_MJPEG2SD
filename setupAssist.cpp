@@ -138,7 +138,7 @@ function updateDropdown(){
   const scanButton=document.createElement('button');
   scanButton.id='scan-button';
   scanButton.textContent='Scan';
-  canButton.classList.add('center-button');
+  scanButton.classList.add('center-button');
   scanButton.onclick=fetchSSIDs;
   dropdownContent.appendChild(scanButton);
 }
@@ -248,7 +248,7 @@ const char* otaPage_html = R"~(
       async function otaUploadFile() {
         // notify server to start ota 
         let file = $("#otafile").files[0];
-        const response = await fetch('/control?startOTA=' + file.name);
+        const response = await fetch('/control?startOTA=' + encodeURIComponent(file.name));
         if (response.ok) {
           // submit file for uploading
           let xhr = new XMLHttpRequest();

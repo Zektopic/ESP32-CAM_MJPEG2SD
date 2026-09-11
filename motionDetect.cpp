@@ -229,7 +229,7 @@ static bool tinyMLclassify(size_t (RESIZE_DIM) {
 bool checkMotion(camera_fb_t* fb, bool motionStatus, bool lightLevelOnly) {
   // check difference between current and previous image (subtract background)
   // convert image from JPEG to downscaled RGB888 or 8 bit grayscale bitmap
-  size_t RESIZE_DIM = 96;  // dimensions of resized motion bitmap
+  static size_t RESIZE_DIM = 96;  // dimensions of resized motion bitmap
   static bool firstCall = true;
   if (firstCall) {
     if (ESP.getPsramSize() < 3 * ONEMEG) RESIZE_DIM = 64; // otherwise insufficient PSRAM (issue #706)

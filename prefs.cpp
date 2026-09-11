@@ -108,11 +108,15 @@ static void loadVectItem(const std::string& keyValGrpLabel) {
   // comprises key : val : group : type : label
   const int tokens = 5;
   std::string token[tokens];
-  int i = 0;
+  int count = 0;
   if (keyValGrpLabel.length()) {
     std::istringstream ss(keyValGrpLabel);
-    while (std::getline(ss, token[i++], DELIM));
-    if (i != tokens+1) LOG_ERR("Unable to parse '%s', len %u", keyValGrpLabel.c_str(), keyValGrpLabel.length());
+    std::string temp;
+    while (std::getline(ss, temp, DELIM)) {
+      if (count < tokens) token[count] = temp;
+      count++;
+    }
+    if (count != tokens) LOG_ERR("Unable to parse '%s', len %u", keyValGrpLabel.c_str(), keyValGrpLabel.length());
     else {
       if (!ALLOW_SPACES) token[1].erase(std::remove(token[1].begin(), token[1].end(), ' '), token[1].end());
       if (token[tokens-1][token[tokens-1].size() - 1] == '\r') token[tokens-1].erase(token[tokens-1].size() - 1);
@@ -267,8 +271,8 @@ void updateStatus(const char* variable, const char* _value, bool fromUser) {
 
   int intVal = atoi(value);
   if (!strcmp(variable, "hostName")) strncpy(hostName, value, MAX_HOST_LEN-1);
-  else if (!strcmp(variable, "ST_SSID")) strncpy(ST_SSID, value, MAX_HOST_LEN-1);
-  else if (!strcmp(variable, "ST_Pass") && value[0] != '*') strncpy(ST_Pass, value, MAX_PWD_LEN-1);
+  else if (!strcmp(variable, "ST_SSID")) { if (value[0] != '\0') strncpy(ST_SSID, value, MAX_HOST_LEN-1); }
+  else if (!strcmp(variable, "ST_Pass") && value[0] != '*') { if (value[0] != '\0') strncpy(ST_Pass, value, MAX_PWD_LEN-1); }
 
   else if (!strcmp(variable, "ST_ip")) strncpy(ST_ip, value, MAX_IP_LEN-1);
   else if (!strcmp(variable, "ST_gw")) strncpy(ST_gw, value, MAX_IP_LEN-1);

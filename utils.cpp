@@ -857,13 +857,15 @@ void replaceChar(char* s, char c, char r) {
 
 char* fmtSize (uint64_t sizeVal) {
   // format size according to magnitude
-  // only one call per format string
-  static char returnStr[20];
-  if (sizeVal < 50 * 1024) sprintf(returnStr, "%llu bytes", sizeVal);
-  else if (sizeVal < ONEMEG) sprintf(returnStr, "%lluKB", sizeVal / 1024);
-  else if (sizeVal < ONEMEG * 1024) sprintf(returnStr, "%0.1fMB", (double)(sizeVal) / ONEMEG);
-  else sprintf(returnStr, "%0.1fGB", (double)(sizeVal) / (ONEMEG * 1024));
-  return returnStr;
+  // rotating buffer pool to support multiple calls per format string
+  static char returnStr[4][24];
+  static uint8_t idx = 0;
+  char* buf = returnStr[idx++ & 3];
+  if (sizeVal < 50 * 1024) snprintf(buf, sizeof(returnStr[0]), "%llu bytes", (unsigned long long)sizeVal);
+  else if (sizeVal < ONEMEG) snprintf(buf, sizeof(returnStr[0]), "%lluKB", (unsigned long long)(sizeVal / 1024));
+  else if (sizeVal < ONEMEG * 1024) snprintf(buf, sizeof(returnStr[0]), "%0.1fMB", (double)(sizeVal) / ONEMEG);
+  else snprintf(buf, sizeof(returnStr[0]), "%0.1fGB", (double)(sizeVal) / (ONEMEG * 1024));
+  return buf;
 }
 
 char* trim(char* str) {

@@ -300,6 +300,8 @@ static bool handleMove() {
       return false;
     }
     memmove(dest, pos + (sizeof(WEBDAV) - 1), strlen(pos + (sizeof(WEBDAV) - 1)) + 1);
+    size_t destLen = strlen(dest);
+    if (destLen > 0 && dest[destLen - 1] == '/') dest[destLen - 1] = '\0';
 
     // only allow renaming if a folder
     if (isFolder()) res = checkSamePath(pathName, dest);

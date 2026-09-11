@@ -48,6 +48,8 @@
 #define NO_SD
 #endif
 
+#define NO_SD
+
 #ifndef TEST_ENV
 #if !defined(CONFIG_IDF_TARGET_ESP32S3) && !defined(CONFIG_IDF_TARGET_ESP32) && !defined(AUXILIARY)
 #error "Must select ESP32 or ESP32S3 board for camera"
@@ -165,7 +167,7 @@
 #else
 #define STORAGE SD_MMC
 #endif
-#define GITHUB_PATH "/s60sc/ESP32-CAM_MJPEG2SD/master"
+#define GITHUB_PATH ""
 #define RAMSIZE (1024 * 8) // set this to multiple of SD card sector size (512 or 1024 bytes)
 #define CHUNKSIZE (1024 * 4)
 #define ISCAM // cam specific code in generic cpp files

@@ -209,8 +209,14 @@ void test_changeExtension() {
     // File with multiple dots
     test_changeExtension_helper("path.with.dots.jpg", "png", true, "path.with.dots.png");
 
-    // File without extension
-    test_changeExtension_helper("no_extension_file", "txt", false, "ntxt");
+    // File without extension (should not corrupt buffer)
+    test_changeExtension_helper("no_extension_file", "txt", false, "no_extension_file");
+
+    // File without extension inside directory with dot (should not corrupt path)
+    test_changeExtension_helper("dir.foo/file_no_ext", "txt", false, "dir.foo/file_no_ext");
+
+    // File with extension inside directory with dot
+    test_changeExtension_helper("dir.foo/file.jpg", "png", true, "dir.foo/file.png");
 
     // File starting with a dot
     test_changeExtension_helper(".hidden", "txt", false, ".txt");
