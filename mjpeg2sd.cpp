@@ -337,7 +337,7 @@ static bool closeAvi() {
   uint32_t hTime = millis();
 #if INCLUDE_MQTT
   if (mqtt_active) {
-    sprintf(jsonBuff, "{\"RECORD\":\"OFF\", \"TIME\":\"%s\"}", esp_log_system_timestamp());
+    snprintf(jsonBuff, JSON_BUFF_LEN, "{\"RECORD\":\"OFF\", \"TIME\":\"%s\"}", esp_log_system_timestamp());
     mqttPublish(jsonBuff);
     mqttPublishPath("record", "off");
   }
@@ -470,7 +470,7 @@ static boolean processFrame() {
     if (!dashCamOn) LOG_ALT("Capture started by %s%s%s%s", reasonId == 0 ? "Button" : "", reasonId == 1 ? "Camera " : "", reasonId == 2 ? "PIR" : "", reasonId == 3 ? "Accelerometer" : "");
 #if INCLUDE_MQTT
     if (mqtt_active) {
-      sprintf(jsonBuff, "{\"RECORD\":\"ON\", \"TIME\":\"%s\"}", esp_log_system_timestamp());
+      snprintf(jsonBuff, JSON_BUFF_LEN, "{\"RECORD\":\"ON\", \"TIME\":\"%s\"}", esp_log_system_timestamp());
       mqttPublish(jsonBuff);
       mqttPublishPath("record", "on");
     }

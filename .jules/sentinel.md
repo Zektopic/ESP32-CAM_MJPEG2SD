@@ -215,3 +215,7 @@
 **Vulnerability:** In `telemetry.cpp`, `stopTelemetry` used `strcpy(teleFileName, fileName);` to copy an external/unbounded input `fileName` into the statically sized `teleFileName` array (`FILE_NAME_LEN`), resulting in a potential stack buffer overflow.
 **Learning:** `strcpy` should never be used, even if the filename is expected to be safe, because it lacks bounds checking and an unexpectedly large `fileName` could cause memory corruption.
 **Prevention:** Always use safe bounded string manipulation operations like `strncpy(dest, src, size - 1)` followed by an explicit `dest[size - 1] = '\0'` to guarantee null-termination and prevent buffer overflows when dealing with bounded string arrays.
+## $(date +%Y-%m-%d) - [HIGH] Buffer Overflow in mjpeg2sd JSON payload construction
+**Vulnerability:** Unbounded `sprintf` was used in `mjpeg2sd.cpp` to construct MQTT JSON payloads dynamically (`sprintf(jsonBuff, "{\"RECORD\":\"ON\", \"TIME\":\"%s\"}", esp_log_system_timestamp());`). The dynamic timestamp component could hypothetically exceed the allocated bounds, leading to memory corruption.
+**Learning:** `sprintf` should never be used to format dynamic runtime values directly into bounded buffers, even if the buffer is large (`JSON_BUFF_LEN`). It provides no inherent bounds checking.
+**Prevention:** In C/C++, always deprecate `sprintf` in favor of `snprintf` combined with the maximum buffer size (e.g., `JSON_BUFF_LEN`), ensuring strict bounds enforcement and null-termination.
