@@ -2,3 +2,5 @@ node_modules/
 build/
 test_stringUtils
 *.bin
+wifi_credentials.h
+src/wifi_credentials.h

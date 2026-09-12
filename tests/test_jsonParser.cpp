@@ -3,7 +3,7 @@
 #include <cassert>
 
 #define TEST_ENV
-#include "../jsonParser.cpp"
+#include "../src/jsonParser.cpp"
 
 void test_getJsonValue_edge_cases() {
     char value[FILE_NAME_LEN];

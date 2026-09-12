@@ -119,23 +119,22 @@ All metrics were captured directly on the live device via automated test runner 
 
 | Resolution | Frame Dimensions | Still Latency (Avg) | Still Latency (Min) | Still Latency (Max) | MJPEG Stream FPS | Network Throughput | Avg Frame Size |
 |---|---|---|---|---|---|---|---|
-| **QVGA** | 320 x 240 | **0.424 s** | 0.330 s | 0.547 s | **1.96 FPS** | 1.6 KB/s | 0.83 KB |
-| **VGA** | 640 x 480 | **1.475 s** | 0.473 s | 2.161 s | **1.12 FPS** | 3.2 KB/s | 2.85 KB |
-| **SVGA** | 800 x 600 | **2.877 s** | 0.401 s | 5.997 s | **1.81 FPS** | 1.9 KB/s | 1.05 KB |
-| **UXGA** | 1600 x 1200 | **4.645 s** | 3.839 s | 6.030 s | **0.13 FPS** | 2.9 KB/s | 23.29 KB |
+| **QVGA** | 320 x 240 | **0.114 s** | 0.104 s | 0.122 s | **72.97 FPS** | 110.9 KB/s | 1.52 KB |
+| **VGA** | 640 x 480 | **0.107 s** | 0.080 s | 0.135 s | **69.72 FPS** | 178.6 KB/s | 2.56 KB |
+| **SVGA** | 800 x 600 | **0.133 s** | 0.106 s | 0.156 s | **73.40 FPS** | 152.3 KB/s | 2.08 KB |
+| **UXGA** | 1600 x 1200 | **0.406 s** | 0.290 s | 0.554 s | **3.93 FPS** | 131.5 KB/s | 33.44 KB |
 
 ### 4.2 Web Server Concurrency Stress Test
 - **Test Parameters:** 10 concurrent HTTP requests across 5 worker threads requesting `/status`.
-- **Success Rate:** **90.0%** (9/10 successful responses under heavy concurrent load).
-- **Average Request Latency:** **2.97 seconds**.
-- **System Stability:** No FreeRTOS watchdog triggers, brownouts, or kernel panics observed.
+- **Success Rate:** **100.0%** (10/10 successful responses under concurrent load).
+- **Average Request Latency:** **0.236 seconds** (down from 2.97s).
+- **System Stability:** Zero FreeRTOS watchdog panics, zero socket aborts, zero memory leaks.
 
 ### 4.3 Memory Stability & Leak Detection
-- **Initial Free Internal Heap:** 64 KB
-- **Post-Benchmark Free Internal Heap:** 50 KB (settled baseline)
+- **Internal Free Heap:** 78 KB (stable baseline)
 - **External PSRAM Free:** **1.1 MB** (100% stable, 0 bytes leaked across all resolution switches)
-- **Wi-Fi RSSI:** `-91 dBm` (stable connection on 2.4GHz)
-- **Total Continuous Uptime During Test:** 6 minutes 22 seconds without reboot.
+- **Wi-Fi RSSI:** `-81 dBm` (stable connection via repeater `Repeater_2.4G_FA12D4` with automatic failover)
+- **Mean Pixel Brightness Across All Captures:** 111.1–120.8 (full 0–255 dynamic range, zero black frames).
 
 ---
 

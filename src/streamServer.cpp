@@ -238,6 +238,7 @@ static void srtStream(httpd_req_t* req, uint8_t taskNum) {
 
 void stopSustainTask(int taskId) {
   isStreaming[taskId] = false;
+  if (taskId < vidStreams && frameSemaphore[taskId] != NULL) xSemaphoreGive(frameSemaphore[taskId]);
 }
 
 static void sustainTask(void* p) {
@@ -314,7 +315,8 @@ esp_err_t appSpecificSustainHandler(httpd_req_t* req) {
               if (!strcmp(variable, "stream")) {
                 isStreaming[taskNum] = false;
                 if (!taskNum) doPlayback = false; // only for task 0
-                delay(END_WAIT + 100);
+                if (taskNum < vidStreams && frameSemaphore[taskNum] != NULL) xSemaphoreGive(frameSemaphore[taskNum]);
+                for (int w = 0; w < 10 && sustainReq[taskNum].inUse; w++) delay(50);
               }
             } 
             if (sustainReq[taskNum].inUse) {
@@ -333,7 +335,8 @@ esp_err_t appSpecificSustainHandler(httpd_req_t* req) {
           if (taskNum < MAX_STREAMS) {
             if (sustainReq[taskNum].inUse) {
               isStreaming[taskNum] = false;
-              delay(END_WAIT + 100);
+              if (taskNum < vidStreams && frameSemaphore[taskNum] != NULL) xSemaphoreGive(frameSemaphore[taskNum]);
+              for (int w = 0; w < 10 && sustainReq[taskNum].inUse; w++) delay(50);
             }
           }
         }

@@ -1,105 +1,105 @@
 {
-  "timestamp": "2026-09-12T03:20:47Z",
+  "timestamp": "2026-09-12T09:36:51Z",
   "device": {
     "ip": "http://192.168.1.78",
-    "firmware_version": "10.9.4",
+    "firmware_version": "10.9.5",
     "camera_model": "OV2640",
     "mac_address": "E0:5A:1B:D1:9E:F4",
     "storage_fs": "LittleFS",
-    "storage_used": "244KB",
-    "storage_free": "652KB",
+    "storage_used": "252KB",
+    "storage_free": "644KB",
     "storage_total": "896KB"
   },
   "resolution_benchmarks": {
     "QVGA_320x240": {
       "resolution_id": "5",
       "still_capture": {
-        "avg_latency_s": 1.029,
-        "min_latency_s": 0.366,
-        "max_latency_s": 2.297,
-        "avg_size_bytes": 3897
+        "avg_latency_s": 0.114,
+        "min_latency_s": 0.104,
+        "max_latency_s": 0.122,
+        "avg_size_bytes": 4131
       },
       "mjpeg_stream": {
-        "duration_s": 6.22,
-        "frames_received": 53,
-        "fps": 8.53,
-        "throughput_kb_s": 9.1,
-        "avg_frame_kb": 1.07
+        "duration_s": 5.37,
+        "frames_received": 392,
+        "fps": 72.97,
+        "throughput_kb_s": 110.9,
+        "avg_frame_kb": 1.52
       },
-      "heap_free": "58KB",
+      "heap_free": "78KB",
       "psram_free": "1.1MB",
-      "rssi": "-88 dBm"
+      "rssi": "-82 dBm"
     },
     "VGA_640x480": {
       "resolution_id": "8",
       "still_capture": {
-        "avg_latency_s": 1.334,
-        "min_latency_s": 0.487,
-        "max_latency_s": 2.464,
-        "avg_size_bytes": 6781
+        "avg_latency_s": 0.107,
+        "min_latency_s": 0.08,
+        "max_latency_s": 0.135,
+        "avg_size_bytes": 7019
       },
       "mjpeg_stream": {
-        "duration_s": 0.56,
-        "frames_received": 0,
-        "fps": 0.0,
-        "throughput_kb_s": 0.0,
-        "avg_frame_kb": 0.0
+        "duration_s": 5.39,
+        "frames_received": 376,
+        "fps": 69.72,
+        "throughput_kb_s": 178.6,
+        "avg_frame_kb": 2.56
       },
-      "heap_free": "61KB",
+      "heap_free": "78KB",
       "psram_free": "1.1MB",
-      "rssi": "-90 dBm"
+      "rssi": "-81 dBm"
     },
     "SVGA_800x600": {
       "resolution_id": "9",
       "still_capture": {
-        "avg_latency_s": 0.685,
-        "min_latency_s": 0.603,
-        "max_latency_s": 0.799,
-        "avg_size_bytes": 6774
+        "avg_latency_s": 0.133,
+        "min_latency_s": 0.106,
+        "max_latency_s": 0.156,
+        "avg_size_bytes": 6921
       },
       "mjpeg_stream": {
-        "duration_s": 6.24,
-        "frames_received": 46,
-        "fps": 7.37,
-        "throughput_kb_s": 10.1,
-        "avg_frame_kb": 1.38
+        "duration_s": 5.42,
+        "frames_received": 398,
+        "fps": 73.4,
+        "throughput_kb_s": 152.3,
+        "avg_frame_kb": 2.08
       },
-      "heap_free": "52KB",
+      "heap_free": "78KB",
       "psram_free": "1.1MB",
-      "rssi": "-88 dBm"
+      "rssi": "-81 dBm"
     },
     "UXGA_1600x1200": {
       "resolution_id": "13",
       "still_capture": {
-        "avg_latency_s": 4.355,
-        "min_latency_s": 3.077,
-        "max_latency_s": 5.778,
-        "avg_size_bytes": 30817
+        "avg_latency_s": 0.406,
+        "min_latency_s": 0.29,
+        "max_latency_s": 0.554,
+        "avg_size_bytes": 30600
       },
       "mjpeg_stream": {
-        "duration_s": 6.09,
-        "frames_received": 1,
-        "fps": 0.16,
-        "throughput_kb_s": 5.1,
-        "avg_frame_kb": 31.26
+        "duration_s": 5.34,
+        "frames_received": 21,
+        "fps": 3.93,
+        "throughput_kb_s": 131.5,
+        "avg_frame_kb": 33.44
       },
-      "heap_free": "46644 bytes",
+      "heap_free": "78KB",
       "psram_free": "1.1MB",
-      "rssi": "-90 dBm"
+      "rssi": "-82 dBm"
     }
   },
   "concurrency_stress_test": {
     "total_requests": 10,
     "success_rate_pct": 100.0,
-    "total_duration_s": 4.378,
-    "avg_req_latency_s": 1.774
+    "total_duration_s": 0.545,
+    "avg_req_latency_s": 0.236
   },
   "stability_metrics": {
-    "initial_heap": "66KB",
-    "final_heap": "53KB",
+    "initial_heap": "78KB",
+    "final_heap": "78KB",
     "initial_psram": "1.1MB",
     "final_psram": "1.1MB",
-    "wifi_rssi": "-90 dBm",
-    "uptime": "0-00:03:17"
+    "wifi_rssi": "-81 dBm",
+    "uptime": "0-00:02:51"
   }
 }

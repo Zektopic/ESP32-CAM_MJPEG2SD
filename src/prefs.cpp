@@ -229,27 +229,58 @@ static bool loadPrefs() {
     savePrefs(); // if prefs do not yet exist
     return false;
   }
-  if (ST_SSID[0] == '\0') {
-     // first call only after instal
-    prefs.getString("ST_SSID", ST_SSID, MAX_HOST_LEN);
-    updateConfigVect("ST_SSID", ST_SSID);
+  char tempVal[MAX_PWD_LEN];
+  if (prefs.isKey("ST_SSID")) {
+    tempVal[0] = '\0';
+    prefs.getString("ST_SSID", tempVal, MAX_HOST_LEN);
+    if (tempVal[0] != '\0') strncpy(ST_SSID, tempVal, MAX_HOST_LEN - 1);
   }
+  updateConfigVect("ST_SSID", ST_SSID);
 
-  prefs.getString("ST_Pass", ST_Pass, MAX_PWD_LEN);
+  if (prefs.isKey("ST_Pass")) {
+    tempVal[0] = '\0';
+    prefs.getString("ST_Pass", tempVal, MAX_PWD_LEN);
+    if (tempVal[0] != '\0') strncpy(ST_Pass, tempVal, MAX_PWD_LEN - 1);
+  }
   updateConfigVect("ST_Pass", ST_Pass);
-  prefs.getString("AP_Pass", AP_Pass, MAX_PWD_LEN);
-  prefs.getString("Auth_Pass", Auth_Pass, MAX_PWD_LEN);
+
+  if (prefs.isKey("AP_Pass")) {
+    tempVal[0] = '\0';
+    prefs.getString("AP_Pass", tempVal, MAX_PWD_LEN);
+    if (tempVal[0] != '\0') strncpy(AP_Pass, tempVal, MAX_PWD_LEN - 1);
+  }
+  if (prefs.isKey("Auth_Pass")) {
+    tempVal[0] = '\0';
+    prefs.getString("Auth_Pass", tempVal, MAX_PWD_LEN);
+    if (tempVal[0] != '\0') strncpy(Auth_Pass, tempVal, MAX_PWD_LEN - 1);
+  }
 #if INCLUDE_FTP_HFS
-  prefs.getString("FS_Pass", FS_Pass, MAX_PWD_LEN);
+  if (prefs.isKey("FS_Pass")) {
+    tempVal[0] = '\0';
+    prefs.getString("FS_Pass", tempVal, MAX_PWD_LEN);
+    if (tempVal[0] != '\0') strncpy(FS_Pass, tempVal, MAX_PWD_LEN - 1);
+  }
 #endif
 #if INCLUDE_SMTP
-  prefs.getString("SMTP_Pass", SMTP_Pass, MAX_PWD_LEN);
+  if (prefs.isKey("SMTP_Pass")) {
+    tempVal[0] = '\0';
+    prefs.getString("SMTP_Pass", tempVal, MAX_PWD_LEN);
+    if (tempVal[0] != '\0') strncpy(SMTP_Pass, tempVal, MAX_PWD_LEN - 1);
+  }
 #endif
 #if INCLUDE_MQTT
-  prefs.getString("mqtt_user_Pass", mqtt_user_Pass, MAX_PWD_LEN);
+  if (prefs.isKey("mqtt_user_Pass")) {
+    tempVal[0] = '\0';
+    prefs.getString("mqtt_user_Pass", tempVal, MAX_PWD_LEN);
+    if (tempVal[0] != '\0') strncpy(mqtt_user_Pass, tempVal, MAX_PWD_LEN - 1);
+  }
 #endif
 #if INCLUDE_RTSP
-  prefs.getString("RTSP_Pass", RTSP_Pass, MAX_PWD_LEN);
+  if (prefs.isKey("RTSP_Pass")) {
+    tempVal[0] = '\0';
+    prefs.getString("RTSP_Pass", tempVal, MAX_PWD_LEN);
+    if (tempVal[0] != '\0') strncpy(RTSP_Pass, tempVal, MAX_PWD_LEN - 1);
+  }
 #endif
   prefs.end();
   return true;

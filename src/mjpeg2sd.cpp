@@ -427,6 +427,7 @@ static boolean processFrame() {
   if (doKeepFrame) {
     keepFrame(fb);
     doKeepFrame = false;
+    if (keepFrameSemaphore != NULL) xSemaphoreGive(keepFrameSemaphore);
   }
 
   // determine if time to check for motion change
@@ -759,6 +760,7 @@ bool prepRecording() {
   playbackSemaphore = xSemaphoreCreateBinary();
   aviMutex = xSemaphoreCreateMutex();
   motionSemaphore = xSemaphoreCreateBinary();
+  keepFrameSemaphore = xSemaphoreCreateBinary();
   for (int i = 0; i < vidStreams; i++) frameSemaphore[i] = xSemaphoreCreateBinary();
   reloadConfigs(); // apply camera config
   if (!startSDtasks()) return false;

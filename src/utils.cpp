@@ -32,14 +32,26 @@ uint32_t deepSleepTimer = 0;
 
 #ifndef TEST_ENV
 #include <esp_task_wdt.h>
+#include <esp_wifi.h>
 #endif
  
 /** Do not hard code anything below here unless you know what you are doing **/
 /** Use the web interface to configure wifi settings **/
 
+#if __has_include("wifi_credentials.h")
+#include "wifi_credentials.h"
+#endif
+
+#ifndef WIFI_ST_SSID
+#define WIFI_ST_SSID ""
+#endif
+#ifndef WIFI_ST_PASS
+#define WIFI_ST_PASS ""
+#endif
+
 char hostName[MAX_HOST_LEN] = ""; // Default Host name
-char ST_SSID[MAX_HOST_LEN]  = ""; //Default router ssid
-char ST_Pass[MAX_PWD_LEN] = ""; //Default router passd
+char ST_SSID[MAX_HOST_LEN]  = WIFI_ST_SSID; //Default router ssid
+char ST_Pass[MAX_PWD_LEN] = WIFI_ST_PASS; //Default router passd
 
 // leave following blank for dhcp
 char ST_ip[MAX_IP_LEN]  = ""; // Static IP
@@ -69,10 +81,10 @@ char Auth_Pass[MAX_PWD_LEN] = "";
 
 int responseTimeoutSecs = 10; // time to wait for FTP or SMTP response
 bool allowAP = true;  // set to true to allow AP to startup if cannot connect to STA (router)
-uint32_t wifiTimeoutSecs = 30; // how often to check wifi status
+uint32_t wifiTimeoutSecs = 60; // how often to check wifi status
 static bool APstarted = false;
 esp_ping_handle_t pingHandle = NULL;
-bool usePing = true;
+bool usePing = false;
 
 static void startPing();
 static bool getLocalNTP();
@@ -152,7 +164,7 @@ static void onNetEvent(arduino_event_id_t event, arduino_event_info_t info) {
     case ARDUINO_EVENT_WIFI_STA_LOST_IP: LOG_INF("Wifi Station lost IP"); break;
     case ARDUINO_EVENT_WIFI_AP_STAIPASSIGNED: break;
     case ARDUINO_EVENT_WIFI_STA_CONNECTED: LOG_INF("WiFi Station connection to %s, using hostname: %s", ST_SSID, hostName); break;
-    case ARDUINO_EVENT_WIFI_STA_DISCONNECTED: LOG_INF("WiFi Station disconnected"); break;
+    case ARDUINO_EVENT_WIFI_STA_DISCONNECTED: LOG_INF("WiFi Station disconnected, reason: %d", info.wifi_sta_disconnected.reason); break;
     case ARDUINO_EVENT_WIFI_AP_STACONNECTED: LOG_INF("WiFi AP client connection"); break;
     case ARDUINO_EVENT_WIFI_AP_STADISCONNECTED: LOG_INF("WiFi AP client disconnection"); break;
     case ARDUINO_EVENT_WIFI_AP_PROBEREQRECVED: break;
@@ -215,6 +227,11 @@ static void setWifiSTA() {
       LOG_INF("Wifi Station set static IP");
     } 
   } else LOG_INF("Wifi Station IP from DHCP");
+#if __has_include("wifi_credentials.h")
+  if (ST_SSID[0] == '\0' || !strcmp(ST_SSID, "SLT-Fiber-2.4G_6f48")) strncpy(ST_SSID, WIFI_ST_SSID, MAX_HOST_LEN - 1);
+  if (ST_Pass[0] == '\0') strncpy(ST_Pass, WIFI_ST_PASS, MAX_PWD_LEN - 1);
+#endif
+  LOG_INF("Connecting to SSID: '%s', passLen: %u", ST_SSID, strlen(ST_Pass));
   WiFi.STA.enableIPv6(USE_IP6); 
   WiFi.STA.begin();
   WiFi.STA.connect(ST_SSID, ST_Pass);
@@ -319,7 +336,7 @@ static bool startWifi(bool firstcall = true) {
   if (firstcall) {
     WiFi.mode(WIFI_AP_STA);
     WiFi.persistent(false); // prevent the flash storage WiFi credentials
-    WiFi.STA.setAutoReconnect(false); // Set whether module will attempt to reconnect to an access point in case it is disconnected
+    WiFi.STA.setAutoReconnect(true); // Enable auto-reconnect
     WiFi.AP.clear();
     WiFi.AP.end(); // kill rogue AP on startup
     WiFi.STA.setHostname(hostName);
@@ -331,8 +348,6 @@ static bool startWifi(bool firstcall = true) {
     // connect to Wifi station
     setWifiSTA();
     uint32_t startAttemptTime = millis();
-    // Stop trying on failure timeout, will try to reconnect later by ping
-    wlStat = WL_NO_SSID_AVAIL;
     if (ST_SSID[0] != '\0') {
       while (wlStat = WiFi.STA.status(), wlStat != WL_CONNECTED && millis() - startAttemptTime < (wifiTimeoutSecs * 1000))  {
         LOG_SEND(".");
@@ -344,6 +359,16 @@ static bool startWifi(bool firstcall = true) {
     for (int i=0; i < numNetworks; i++) {
       if (WiFi.SSID(i) == ST_SSID)
         LOG_INF("Wifi stats for %s - signal strength: %ld dBm; Encryption: %s; channel: %ld",  ST_SSID, WiFi.RSSI(i), getEncType(i), WiFi.channel(i));
+    }
+    if (wlStat != WL_CONNECTED && strcmp(ST_SSID, "Repeater_2.4G_FA12D4") != 0) {
+      LOG_WRN("SSID %s not connected %s, attempting fallback to Repeater_2.4G_FA12D4...", ST_SSID, wifiStatusStr(wlStat));
+      strncpy(ST_SSID, "Repeater_2.4G_FA12D4", MAX_HOST_LEN - 1);
+      WiFi.STA.connect(ST_SSID, ST_Pass);
+      startAttemptTime = millis();
+      while (wlStat = WiFi.STA.status(), wlStat != WL_CONNECTED && millis() - startAttemptTime < 12000) {
+        LOG_SEND(".");
+        delay(500);
+      }
     }
     if (wlStat != WL_CONNECTED) LOG_WRN("SSID %s not connected %s", ST_SSID, wifiStatusStr(wlStat));
   }
@@ -475,15 +500,11 @@ static void pingTimeout(esp_ping_handle_t hdl, void *args) {
     if (ST_SSID[0] != '\0') {
       wl_status_t wStat = WiFi.STA.status();
       if (wStat != WL_NO_SSID_AVAIL && wStat != WL_NO_SHIELD) {
-        if (usePing) {
-          LOG_WRN("Failed to ping gateway, restart wifi ...");
-          startWifi(false);
+        if (wStat == WL_CONNECTED) {
+          statusCheck();
         } else {
-          if (wStat == WL_CONNECTED) statusCheck();
-          else {
-            LOG_WRN("Disconnected, restart wifi ...");
-            startWifi(false);
-          }
+          LOG_WRN("Disconnected, restart wifi ...");
+          startWifi(false);
         }
       }
     }

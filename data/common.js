@@ -18,6 +18,7 @@
         const wsServers = [wsServer, null];
         let hbTimer = null;
         let refreshTimer = null;
+        let refreshInterval = 5000;
         let updateData = {}; // receives json for status data as key val pairs
         let statusData = {}; // stores all status data as key val pairs
         let cfgGroupNow = -1;
@@ -37,7 +38,8 @@
 
         async function initialise() {
           try {
-            await sleep(500);
+            await sleep(50);
+            initObservers();
             addButtons();
             addRangeData();
             if (doCustomInit) customInit();
@@ -48,7 +50,7 @@
             if (doRefreshTimer && refreshTimer == null) refreshStatus();
           } catch (error) {
             showLog("Initialise -  " + error.message);
-            alert("Initialise - " + error.message);
+            console.error("Initialise error:", error);
           }
         }
 
@@ -117,7 +119,7 @@
                 // event.codes:
                 //   1006 if server not available, or another web page is already open
                 //   1005 if closed from app
-                if (pageVisible) setTimeout(initWebSocket(index), 100);
+                if (pageVisible) setTimeout(() => initWebSocket(index), 3000);
               }
             }
             return wsSkt[index] ? true : false;
@@ -269,18 +271,25 @@
           } else rangeVal.style.left = el.offsetLeft + position - (rangeVal.offsetWidth - rangeThumbSize)/2 + 'px'; // default horizontal
         }
 
-        const rangeObserver = new IntersectionObserver ( function(entries) {
-          // recalc each range slider that becomes visible
-            entries.forEach(el => { if (el.isIntersecting === true) rangeSlider(el['target']); });
-          }, { threshold: [0] }
-        );
-        $$('input[type=range]').forEach(el => { rangeObserver.observe(el); });
+        let rangeObserver = null;
+        let logObserver = null;
 
-        const logObserver = new IntersectionObserver (entries => {
-          // refresh log when becomes visible
-          entries.forEach(entry => { if (entry.isIntersecting === true) getLog(); });
-        });
-        logObserver.observe($('#appLog'));
+        function initObservers() {
+          if (!rangeObserver && window.IntersectionObserver) {
+            rangeObserver = new IntersectionObserver(function(entries) {
+              entries.forEach(el => { if (el.isIntersecting === true) rangeSlider(el['target']); });
+            }, { threshold: [0] });
+            $$('input[type=range]').forEach(el => { rangeObserver.observe(el); });
+          }
+
+          if (!logObserver && window.IntersectionObserver) {
+            logObserver = new IntersectionObserver(entries => {
+              entries.forEach(entry => { if (entry.isIntersecting === true) getLog(); });
+            });
+            const appLogEl = $('#appLog');
+            if (appLogEl) logObserver.observe(appLogEl);
+          }
+        }
 
         function addButtons() {
           // add commmon buttons to relevant sections
@@ -310,19 +319,27 @@
 
         async function loadStatus(specifier) {
           // request and load current status from app
-          const response = await fetch(webServer+'/status'+specifier);
-          if (response.ok) {
-            updateData = await response.json();
-            updateStatus();
-            await sleep(1000);
-          } else alert("loadStatus - " + response.status + ": " + response.statusText);
+          try {
+            const response = await fetch(webServer + '/status' + specifier);
+            if (response.ok) {
+              updateData = await response.json();
+              updateStatus();
+            } else {
+              console.warn("loadStatus HTTP status:", response.status);
+            }
+          } catch (err) {
+            console.warn("loadStatus network error:", err);
+          }
         }
 
         function refreshStatus() {
-          // refresh status at required interval
+          if (refreshTimer) clearInterval(refreshTimer);
+          const interval = (typeof refreshInterval === 'number' && refreshInterval >= 1000) ? refreshInterval : 5000;
           refreshTimer = setInterval(function() {
-            doLoadStatus ? loadStatus("?q") : configStatus(true);
-          }, refreshInterval);
+            if (pageVisible) {
+              doLoadStatus ? loadStatus("?q") : configStatus(true);
+            }
+          }, interval);
         }
 
         function updateStatus() {
@@ -332,7 +349,7 @@
             if (el) {
               const nodeName = el.nodeName.toLowerCase();
               if (nodeName === 'text') el.textContent = value;
-              else if (nodeName === 'div' && el.classList.contains('displayonly')) el.innerHTML = value;
+              else if (el.classList.contains('displayonly')) el.innerHTML = value;
               else if (nodeName === 'td') el.innerHTML = value;
               else if (!el.classList.contains('nochange')) {
                 if (el.type === 'checkbox') el.checked = !!Number(value);
@@ -425,16 +442,13 @@
           }
         }
 
-        function debounce(func, timeout = 500){
-          // debounce rapid clicks to prevent unnecessary fetches
-          let timer;
-          return (...args) => {
-            clearTimeout(timer);
-            timer = setTimeout(() => { func.apply(this, args); }, timeout);
-          };
+        const debounceTimers = {};
+        function debounceSendControl(key, value, delay = 200) {
+          clearTimeout(debounceTimers[key]);
+          debounceTimers[key] = setTimeout(() => {
+            sendControl(key, value);
+          }, delay);
         }
-
-        const debounceSendControl = debounce((key, value) => sendControl(key, value));
 
         function sleep(ms) {
           return new Promise(resolve => setTimeout(resolve, ms));
@@ -510,7 +524,6 @@
           return (typeof variable === 'undefined' || variable === null ) ? false : true;
         }
 
-        let alertTimer = null;
         async function showAlert(value) {
           $('#alertText').innerHTML = value;
           if (alertTimer) clearTimeout(alertTimer);
@@ -786,9 +799,13 @@
         async function sendControl(key, value) {
           // send only
           if (value != null) {
-            const encodedValue = encodeURIComponent(value).replace(/#/g, '%23');
-            const response = await fetch(encodeURI("/control?" + key + "=") + encodedValue);
-            if (!response.ok) alert("sendControl - " + response.status + ": " + response.statusText);
+            try {
+              const encodedValue = encodeURIComponent(value).replace(/#/g, '%23');
+              const response = await fetch(encodeURI("/control?" + key + "=") + encodedValue);
+              if (!response.ok) console.warn("sendControl - " + response.status + ": " + response.statusText);
+            } catch (err) {
+              console.warn("sendControl error:", err);
+            }
           }
         }
 
@@ -800,28 +817,40 @@
 
         async function sendControlResp(key, value) {
           // send and apply response
-          const encodedValue = encodeURIComponent(value).replace(/#/g, '%23');
-          const response = await fetch(encodeURI("/control?" + key + "=") + encodedValue);
-          if (response.ok) {
-            updateData = await response.json();
-            updateStatus();
-          } else alert("sendControlResp - " + response.status + ": " + response.statusText);
+          try {
+            const encodedValue = encodeURIComponent(value).replace(/#/g, '%23');
+            const response = await fetch(encodeURI("/control?" + key + "=") + encodedValue);
+            if (response.ok) {
+              updateData = await response.json();
+              updateStatus();
+            } else {
+              console.warn("sendControlResp - " + response.status + ": " + response.statusText);
+            }
+          } catch (err) {
+            console.warn("sendControlResp error:", err);
+          }
         }
 
         /*********** config functions ***********/
 
         async function getConfig(cfgGroup) {
           // request config json for selected group
-          const response = await fetch('/status?123456789' + cfgGroup);
-          if (response.ok) {
-            const configData = await response.json();
-            if (isDefined($('.config-group#Main'+cfgGroup)) && isBuilt) {
-              // apply to existing Main tab table
-              updateData = configData;
-              updateStatus();
+          try {
+            const response = await fetch('/status?123456789' + cfgGroup);
+            if (response.ok) {
+              const configData = await response.json();
+              if (isDefined($('.config-group#Main'+cfgGroup)) && isBuilt) {
+                // apply to existing Main tab table
+                updateData = configData;
+                updateStatus();
+              }
+              else buildTable(configData, cfgGroup); // format received json into html table with data
+            } else {
+              console.warn("getConfig - " + response.status + ": " + response.statusText);
             }
-            else buildTable(configData, cfgGroup); // format received json into html table with data
-          } else alert("getConfig - " + response.status + ": " + response.statusText);
+          } catch (err) {
+            console.warn("getConfig error:", err);
+          }
         }
 
         function buildTable(configData, cfgGroup) {
@@ -892,10 +921,10 @@
                       inputHtml = '<input type="text" class="configItem" id="' + saveKey + '" value="'+ saveVal +'" readonly style="background-color: var(--menuBackground);">';
                     break;
                     case 'L': // binary string input
-                      inputHtml = `<input type="text" oninput="this.value = this.value.replace(/[^01]/g, \'\')" placeholder="0101..." class="configItem" id="` + saveKey + `" value="`+ saveVal +`" autocorrect="off" autocapitalize="none" spellcheck="false">`;
+                      inputHtml = '<input type="text" oninput="this.value = this.value.replace(/[^01]/g, \'\')" placeholder="0101..." class="configItem" id="' + saveKey + '" value="'+ saveVal +'" autocorrect="off" autocapitalize="none" spellcheck="false">';
                     break;
                     case 'N': // number input
-                      inputHtml = \'<input type="number" class="configItem" id="\' + saveKey + \'" value="\'+ saveVal +\'" autocorrect="off" autocapitalize="none" spellcheck="false">\';
+                      inputHtml = '<input type="number" class="configItem" id="' + saveKey + '" value="'+ saveVal +'" autocorrect="off" autocapitalize="none" spellcheck="false">';
                     break;
                     case 'R': // R:min:max:step
                       // format number as range slider

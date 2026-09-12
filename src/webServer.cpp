@@ -27,14 +27,15 @@ esp_err_t sendChunks(File df, httpd_req_t *req, bool endChunking) {
   // use chunked encoding to send large content to browser
   size_t chunksize = 0;
   esp_err_t res = ESP_OK;
-  while ((chunksize = df.read(chunk, CHUNKSIZE))) {
+  const size_t sendBlockSize = 1400; // fit cleanly within 1 TCP MSS for lwIP flow control
+  while ((chunksize = df.read(chunk, sendBlockSize))) {
     res = httpd_resp_send_chunk(req, (char*)chunk, chunksize);
     if (res != ESP_OK) break;
     // httpd_sess_update_lru_counter(req->handle, httpd_req_to_sockfd(req));
   }
   if (endChunking) {
     df.close();
-    httpd_resp_sendstr_chunk(req, NULL);
+    if (res == ESP_OK) httpd_resp_sendstr_chunk(req, NULL);
   }
   if (res != ESP_OK) LOG_WRN("Failed to send to browser: %s, err %s", inFileName, espErrMsg(res));
   return res;
@@ -133,7 +134,6 @@ static esp_err_t indexHandler(httpd_req_t* req) {
     httpd_resp_send_404(req);
     return ESP_FAIL;
   }
-  httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
   // first check if a startup failure needs to be reported
   if (startupFailure[0] != '\0') {
     httpd_resp_set_type(req, "text/html");
@@ -268,21 +268,25 @@ static esp_err_t controlHandler(httpd_req_t *req) {
   httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
   if (!checkAuth(req)) return ESP_OK;
   if (extractQueryKeyVal(req, variable, value, sizeof(value)) != ESP_OK) return ESP_FAIL;
-  if (!strcmp(variable, "displayLog")) displayLog(req);
-  else {
-    // extractQueryKeyVal already populated value
-    if (!strcmp(variable, "reset")) {
-      httpd_resp_sendstr(req, NULL); // stop browser resending reset
-      doRestart(value);
-      return ESP_OK;
-    }
-    if (!strcmp(variable, "startOTA")) snprintf(inFileName, IN_FILE_NAME_LEN - 1, "%s/%s", DATA_DIR, value);
-    else {
-      // if not handled by appSpecificWebHandler(), try updateStatus()
-      if (appSpecificWebHandler(req, variable, value) == ESP_FAIL) updateStatus(variable, value);
-    }
+  if (!strcmp(variable, "displayLog")) {
+    displayLog(req);
+    return ESP_OK;
   }
-  httpd_resp_sendstr(req, NULL);
+  if (!strcmp(variable, "reset")) {
+    httpd_resp_sendstr(req, NULL); // stop browser resending reset
+    doRestart(value);
+    return ESP_OK;
+  }
+  if (!strcmp(variable, "startOTA")) {
+    snprintf(inFileName, IN_FILE_NAME_LEN - 1, "%s/%s", DATA_DIR, value);
+    httpd_resp_sendstr(req, NULL);
+    return ESP_OK;
+  }
+  // if not handled by appSpecificWebHandler(), try updateStatus()
+  if (appSpecificWebHandler(req, variable, value) == ESP_FAIL) {
+    updateStatus(variable, value);
+    httpd_resp_sendstr(req, NULL);
+  }
   return ESP_OK;
 }
 
@@ -675,14 +679,14 @@ bool startWebServer() {
 #endif
     // HTTP server
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
-#if CONFIG_IDF_TARGET_ESP32S3
     config.stack_size = SERVER_STACK_SIZE;
-#endif
     config.server_port = HTTP_PORT;
     config.lru_purge_enable = true;
     config.max_uri_handlers = MAX_HANDLERS;
     config.max_open_sockets = HTTP_CLIENTS + MAX_STREAMS;
     config.task_priority = HTTP_PRI;
+    config.send_wait_timeout = 8;
+    config.recv_wait_timeout = 8;
     res = httpd_start(&httpServer, &config);
   }
   httpd_uri_t indexUri = {.uri = "/", .method = HTTP_GET, .handler = indexHandler, .user_ctx = NULL};

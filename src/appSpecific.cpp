@@ -334,19 +334,34 @@ esp_err_t appSpecificWebHandler(httpd_req_t *req, const char* variable, const ch
     if (keepFrameSemaphore) {
       xSemaphoreTake(keepFrameSemaphore, 0); // clear any existing
       doKeepFrame = true;
-      xSemaphoreTake(keepFrameSemaphore, pdMS_TO_TICKS(MAX_FRAME_WAIT));
+      if (xSemaphoreTake(keepFrameSemaphore, pdMS_TO_TICKS(3000)) != pdTRUE) {
+        LOG_WRN("keepFrameSemaphore timed out");
+      }
     } else {
       doKeepFrame = true;
-      while (doKeepFrame && millis() - startTime < MAX_FRAME_WAIT) delay(100);
+      while (doKeepFrame && millis() - startTime < 3000) delay(50);
     }
     if (!doKeepFrame && alertBufferSize) {
       httpd_resp_set_type(req, "image/jpeg");
       httpd_resp_set_hdr(req, "Content-Disposition", "inline; filename=capture.jpg");
-      httpd_resp_send(req, (const char*)alertBuffer, alertBufferSize);
+      size_t remaining = alertBufferSize;
+      const char* p = (const char*)alertBuffer;
+      esp_err_t sendRes = ESP_OK;
+      while (remaining > 0) {
+        size_t toSend = std::min(remaining, (size_t)1400);
+        sendRes = httpd_resp_send_chunk(req, p, toSend);
+        if (sendRes != ESP_OK) break;
+        p += toSend;
+        remaining -= toSend;
+      }
+      if (sendRes == ESP_OK) httpd_resp_sendstr_chunk(req, NULL);
       uint32_t jpegTime = millis() - startTime;
       LOG_INF("JPEG: %zuB in %ums", alertBufferSize, jpegTime);
       alertBufferSize = 0;
-    } else LOG_WRN("Failed to get still");
+    } else {
+      LOG_WRN("Failed to get still (doKeepFrame=%d, alertBufferSize=%u)", doKeepFrame, (unsigned)alertBufferSize);
+      httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to capture still");
+    }
   }
   else if (!strcmp(variable, "formatSD")) {
     if (formatSDcard()) doRestart("user requested format of SD card");
@@ -874,7 +889,7 @@ AP_sn~~0~T~AP subnet
 AP_gw~~0~T~AP gateway
 allowAP~1~0~C~Allow simultaneous AP
 doGetExtIP~1~0~C~Enable get external IP
-wifiTimeoutSecs~30~0~N~WiFi connect timeout (secs)
+wifiTimeoutSecs~60~0~N~WiFi connect timeout (secs)
 logType~0~99~N~Output log selection
 ntpServer~pool.ntp.org~0~T~NTP Server address
 alarmHour~1~2~N~Hour of day for daily actions
@@ -949,7 +964,7 @@ external_heartbeat_domain~~2~T~Heartbeat receiver domain or IP (eg. www.espsee.c
 external_heartbeat_uri~~2~T~Heartbeat receiver URI (eg. /heartbeat/)
 external_heartbeat_port~443~2~N~Heartbeat receiver port
 external_heartbeat_token~~2~T~Heartbeat receiver auth token
-usePing~1~0~C~Use ping
+usePing~0~0~C~Use ping
 teleUse~0~3~C~Use telemetry recording
 teleInterval~1~3~N~Telemetry collection interval (secs)
 RCactive~0~3~C~Enable remote control

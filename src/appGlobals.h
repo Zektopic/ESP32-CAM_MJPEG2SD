@@ -55,7 +55,7 @@
 #define MIN_PSRAM 2
 #endif
 
-#define HTTP_CLIENTS 2 // http(s), ws(s)
+#define HTTP_CLIENTS 4 // http(s), ws(s)
 #define MAX_STREAMS 4 // (web stream, playback, download), NVR, audio, subtitle
 #define FILE_NAME_LEN 64
 #define IN_FILE_NAME_LEN (FILE_NAME_LEN * 2)
@@ -100,7 +100,7 @@
 #define SERVER_STACK_SIZE (1024 * 8)
 #define DS18B20_STACK_SIZE (1024 * 2)
 #else
-#define SERVER_STACK_SIZE (1024 * 4)
+#define SERVER_STACK_SIZE (1024 * 8)
 #define DS18B20_STACK_SIZE (1024)
 #endif
 #define STICK_STACK_SIZE (1024 * 4)

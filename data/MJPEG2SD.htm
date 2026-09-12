@@ -612,21 +612,25 @@
       section#footer {
         position: fixed;
         bottom: 0;
-        width: 97%;
-        min-width: calc(var(--buttonSize) * 20);
-        background: var(--menuBackground);
-        margin-top: 0px;
-        padding: var(--buttonQuart) var(--buttonHalf);
+        left: 0;
+        right: 0;
+        width: 100%;
+        box-sizing: border-box;
+        background: rgba(15, 23, 42, 0.95);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        margin: 0;
+        padding: 6px 16px;
         display: flex;
         flex-wrap: wrap;
-        border-radius: var(--buttonQuart) var(--buttonQuart) 0 0;
-        justify-content: space-between;
+        border-radius: 8px 8px 0 0;
+        justify-content: space-around;
+        align-items: center;
+        gap: 6px;
         font-size: var(--footerSize);
-        z-index: -1;
-        border-top: 1px solid var(--itemBorder);
-        border-left: 1px solid var(--itemBorder);
-        border-right: 1px solid var(--itemBorder);
-        border-bottom: none;
+        z-index: 1000;
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
         text-align: center;
       }
 
@@ -637,18 +641,37 @@
       }
 
       #foot-spacer {
-        height: calc(var(--buttonSize) * 4);
+        height: calc(var(--buttonSize) * 4.5);
       }
 
       .info-group {
         position: relative;
-        margin: var(--buttonQuart) 0;
+        background: rgba(30, 41, 59, 0.75);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 6px;
+        padding: 4px 8px;
+        min-width: 70px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transition: transform 0.15s ease, background 0.15s ease;
       }
-      .info{
+      .info-group:hover {
+        background: rgba(51, 65, 85, 0.9);
+        transform: translateY(-1px);
+      }
+      .info {
         margin-top: 2px;
+        font-weight: 600;
+        color: #38bdf8;
+        letter-spacing: 0.3px;
       }
       .info-group label {
-        color: var(--itemInactive);
+        color: #94a3b8;
+        font-size: 0.68rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
       }
 
       .menu-action {
@@ -821,18 +844,32 @@
 
       #recording-indicator {
         display: inline-block;
-        width: calc(var(--buttonSize) * 3/4);
-        height: calc(var(--buttonSize) * 3/4);
-        padding: var(--buttonQuart);
-        margin: var(--buttonHalf);
-        background: var(--buttonReady);
-        border-radius: var(--buttonSize);
-        border: 2px solid var(--itemBorder);
+        width: 14px;
+        height: 14px;
+        margin: 6px;
+        background: #ef4444;
+        border-radius: 50%;
+        box-shadow: 0 0 10px #ef4444;
       }
 
       #stream-container {
-        margin: var(--buttonQuart) var(--buttonHalf);
-        border: 1px solid var(--itemBorder);
+        margin: 12px auto;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 12px;
+        overflow: hidden;
+        background: #090d16;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+        position: relative;
+        min-height: 240px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #stream-container img#stream {
+        display: block;
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
       }
 
       .iconSize{
@@ -1776,6 +1813,7 @@
       <span id="alertText"></span>
     </div>
 
+    <script src="/web?common.js"></script>
     <script>
       'use strict'
 
@@ -1835,20 +1873,36 @@
         recordingIndicator = $('#recording-indicator');
         streamButton = $('#forceStream');
         playbackButton = $('#forcePlayback');
-        $('#steerDirection').min = 0 - maxSteerAngle;
-        $('#steerDirection').max = maxSteerAngle;
-        $('#steerDirection').classList.add(steerOrientation);
-        $('#motorSpeed').max = maxDutyCycle;
-        $('#motorSpeed').min = allowReverse ? 0 - maxDutyCycle : 0;
-        $('#motorSpeed').classList.add(motorOrientation);
-        const RCcfgObserver = new IntersectionObserver((entries) => {
-          entries.forEach((entry) => {
-            if (!entry.isIntersecting && isHidden($('#RCdisplay'))) doLoadStatus = true;
+        const steer = $('#steerDirection');
+        if (steer) {
+          steer.min = 0 - maxSteerAngle;
+          steer.max = maxSteerAngle;
+          steer.classList.add(steerOrientation);
+        }
+        const motor = $('#motorSpeed');
+        if (motor) {
+          motor.max = maxDutyCycle;
+          motor.min = allowReverse ? 0 - maxDutyCycle : 0;
+          motor.classList.add(motorOrientation);
+        }
+        const rcBtn = $('#RCconfigBtn');
+        if (rcBtn && window.IntersectionObserver) {
+          const RCcfgObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting && isHidden($('#RCdisplay'))) doLoadStatus = true;
+            });
           });
-        });
-        RCcfgObserver.observe($('#RCconfigBtn'));
+          RCcfgObserver.observe(rcBtn);
+        }
         sustainId = +appClock + Math.ceil(refreshInterval / 1000);
         fetchTimeZones();
+        // Automatically make stream container visible and start live stream on page open
+        setTimeout(() => {
+          if (viewContainer && view) {
+            showView(false);
+            activateStreamButton();
+          }
+        }, 200);
       }
 
       async function processStatus(dest, key, value, fromUser = true) {
@@ -1871,7 +1925,7 @@
           else if (key == "motion") getConfig("01");
           else if (key == "other") getConfig("012");
           else if (key == "peripherals") getConfig("0123");
-          else if (key == "sustainId") { if (value >= sustainId) stopAll("sustainId", false); }
+          else if (key == "sustainId") { /* handled by server sustain task */ }
           else if (key == "RCconfig") { doLoadStatus = false; getConfig("01234"); }
           else if (key == "SVconfig") { doLoadStatus = false; getConfig("0123456"); }
           else if (key == "PGconfig") { doLoadStatus = false; getConfig("012345"); }
@@ -2174,10 +2228,9 @@
         streamButton.setAttribute("aria-label", "Stop Stream");
         streamButton.classList.add('blinking');
         showRC ? show($('#RCenable')) : hide($('#RCenable'));
-        if (await checkTask('/sustain?stream=0')) {
-          view.src = webServer + '/sustain?stream=0';
-          showView(false);
-        } else deactivateStreamButton();
+        showView(false);
+        view.src = webServer + '/sustain?stream=0';
+        checkTask('/sustain?stream=0');
       }
 
       function deactivateStreamButton(sendStop = true) {
@@ -2196,12 +2249,10 @@
         deactivateButton($('#spkrRem'));
         if (!isHidden(viewContainer)) {
           stopRC();
-          if (isSecure) await sleep(1000); // otherwise TLS crash
-          window.stop();
+          if (view) view.src = "";
         }
         if (isActive(playbackButton)) deactivatePlaybackButton(sendStop);
         if (isActive(streamButton)) deactivateStreamButton(sendStop);
-        hide(viewContainer);
       }
 
 
@@ -2261,10 +2312,13 @@
         }
         else {
           if (selectedSize == 'maxFit') {
+            const menuW = $('#menu-container') ? $('#menu-container').offsetWidth : 60;
+            const tabH = $('.tab') ? $('.tab').offsetHeight : 50;
+            const footH = $('#footer') ? $('#footer').offsetHeight : 40;
             fitSize = calculateAspectRatioFit(imgSize.width, imgSize.height,
-            window.screen.availWidth - $('#menu-container').offsetWidth - 25,
-            window.innerHeight - $('.tab').offsetHeight - $('#footer').offsetHeight - 25);
-            viewContainer.style.cssText = 'width:'+fitSize.width+'px; height:'+fitSize.height+'px';
+              Math.max(320, window.innerWidth - menuW - 30),
+              Math.max(240, window.innerHeight - tabH - footH - 30));
+            viewContainer.style.cssText = 'width:'+fitSize.width+'px; height:'+fitSize.height+'px; max-width: 100%;';
           }
           else if (selectedSize == 'actualSize') {
             viewContainer.style.cssText = 'width:'+imgSize.width+'px; height:'+imgSize.height+'px';
@@ -2598,12 +2652,14 @@
       const timezoneSelected = document.getElementById('timezone');
       const regionDropdown = document.getElementById('regionSel');
       const timezoneDropdown = document.getElementById('timezoneSel');
+      if (!regionDropdown || !timezoneDropdown) return;
 
       try {
-        const response = await fetch('https://raw.githubusercontent.com/nayarsystems/posix_tz_db/refs/heads/master/zones.json');
-        if (!response.ok) {
-          throw new Error('Network response was not ok to fetch Timezone data');
-        }
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2000);
+        const response = await fetch('https://raw.githubusercontent.com/nayarsystems/posix_tz_db/refs/heads/master/zones.json', { signal: controller.signal });
+        clearTimeout(timeoutId);
+        if (!response.ok) return;
         const data = await response.json();
 
         // List of "Etc" time zones to exclude
@@ -2678,14 +2734,7 @@
       const doHeartbeat = true;
       const doInitSSE = false;
 
-      const scriptFiles = ['/web?common.js', '../../CommonMaster/Latest/common.js'];
-      for (let i = 0; i < scriptFiles.length; i++) {
-        const scriptElement = document.createElement('script');
-        scriptElement.src = scriptFiles[i];
-        document.body.appendChild(scriptElement);
-      }
-
-      window.addEventListener('load', function() {
+      window.addEventListener('DOMContentLoaded', function() {
         initialise();
         appInit();
       });

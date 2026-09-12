@@ -1175,6 +1175,7 @@
       <span id="alertText"></span>
     </div>
 
+    <script src="/web?common.js"></script>
     <script>
       'use strict'
 
@@ -1339,14 +1340,7 @@
       const doHeartbeat = false;
       const doInitSSE = true;
 
-      const scriptFiles = ['/web?common.js', '../../CommonMaster/Latest/common.js'];
-      for (let i = 0; i < scriptFiles.length; i++) {
-        const scriptElement = document.createElement('script');
-        scriptElement.src = scriptFiles[i];
-        document.body.appendChild(scriptElement);
-      }
-
-      window.addEventListener('load', function() {
+      window.addEventListener('DOMContentLoaded', function() {
         initialise();
         appInit();
       });
