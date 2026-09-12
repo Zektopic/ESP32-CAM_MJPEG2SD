@@ -23,11 +23,8 @@
 #include "appGlobals.h"
 
 #if INCLUDE_RTSP
-#if __has_include("../libraries/ESP32-RTSPServer/src/ESP32-RTSPServer.h") 
+#if (__has_include("../libraries/ESP32-RTSPServer/src/ESP32-RTSPServer.h") || __has_include("../../ESP32-RTSPServer/src/ESP32-RTSPServer.h"))
 #include <ESP32-RTSPServer.h> 
-#else
-#error "Need to install ESP32-RTSPServer library"
-#endif
 RTSPServer rtspServer;
 
 //Comment out to enable multiple clients for all transports (TCP, UDP, Multicast)
@@ -124,7 +121,7 @@ static void startRTSPSubtitles(void* arg) {
   vTaskDelete(NULL); // not reached
 }
 
-#endif
+#endif // ISCAM
 
 static void sendRTSPAudio(void* p) {
 #if INCLUDE_AUDIO
@@ -192,4 +189,8 @@ void prepRTSP() {
   } else LOG_WRN("RTSP server not started, no transport selected");
 }
 
-#endif
+#else
+#error "Need to install ESP32-RTSPServer library"
+#endif // has_include
+
+#endif // INCLUDE_RTSP

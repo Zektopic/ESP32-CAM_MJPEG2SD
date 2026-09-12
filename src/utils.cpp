@@ -76,6 +76,7 @@ bool usePing = true;
 
 static void startPing();
 static bool getLocalNTP();
+static void checkScheduledRestart();
 
 int netMode = 0; // 0=WiFi only, 1=Ethernet only, 2=Ethernet+AP
 
@@ -431,6 +432,7 @@ void resetWatchDog(int wdIndex, uint32_t wdTimeout) {
 static void statusCheck() {
   // regular status checks
   if (!timeSynchronized) getLocalNTP();
+  checkScheduledRestart();
   doAppPing(timeSynchronized);
   if (!dataFilesChecked) dataFilesChecked = checkDataFiles();
 #if INCLUDE_MQTT
@@ -735,6 +737,66 @@ bool checkAlarm() {
     return notInit;
   }
   return false;
+}
+
+/****************** weekly scheduled restart ******************/
+// restart c. 02:00 every Tuesday (local time per 'timezone' setting), to clear any
+// long term memory fragmentation. If NTP time is never obtained, falls back to a
+// restart 7 days after boot, based on millis() uptime.
+
+#define RESTART_WDAY 2 // struct tm tm_wday: 0=Sun, 1=Mon, 2=Tue, ...
+#define RESTART_HOUR 2 // 02:00
+#define MIN_RESTART_GAP_SECS (24UL * 60 * 60) // ignore a scheduled restart if the last one was more recent than this
+#define FALLBACK_UPTIME_MS (7UL * 24 * 60 * 60 * 1000UL) // 7 days, compared against millis() (wraps safely after c. 49.7 days)
+
+RTC_NOINIT_ATTR time_t lastScheduledRestartEpoch;
+RTC_NOINIT_ATTR uint32_t lastScheduledRestartValid;
+
+static time_t nextWeeklyRestartEpoch(time_t fromEpoch) {
+  // next occurrence of RESTART_WDAY at RESTART_HOUR:00:00, strictly after fromEpoch
+  struct tm timeinfo = *localtime(&fromEpoch);
+  int daysAhead = (RESTART_WDAY - timeinfo.tm_wday + 7) % 7;
+  timeinfo.tm_mday += daysAhead;
+  timeinfo.tm_hour = RESTART_HOUR;
+  timeinfo.tm_min = 0;
+  timeinfo.tm_sec = 0;
+  timeinfo.tm_isdst = -1;
+  time_t nextEpoch = mktime(&timeinfo);
+  if (nextEpoch <= fromEpoch) nextEpoch += 7UL * 24 * 60 * 60; // today is restart day but time already passed
+  return nextEpoch;
+}
+
+static void checkScheduledRestart() {
+  // call regularly (from statusCheck()) to trigger the weekly restart, or the NTP-unavailable fallback
+  static time_t nextRestartEpoch = 0;
+  static bool fallbackArmed = true;
+
+  if (timeSynchronized) {
+    time_t nowEpoch = getEpoch();
+    if (!nextRestartEpoch) {
+      nextRestartEpoch = nextWeeklyRestartEpoch(nowEpoch);
+      char inBuff[30];
+      strftime(inBuff, sizeof(inBuff), "%d/%m/%Y %H:%M:%S", localtime(&nextRestartEpoch));
+      LOG_INF("Next scheduled weekly restart due: %s (tz %s)", inBuff, timezone);
+    }
+    if (nowEpoch >= nextRestartEpoch) {
+      bool noPriorRestart = (lastScheduledRestartValid != MAGIC_NUM);
+      if (noPriorRestart || (nowEpoch - lastScheduledRestartEpoch) >= (time_t)MIN_RESTART_GAP_SECS) {
+        lastScheduledRestartEpoch = nowEpoch;
+        lastScheduledRestartValid = MAGIC_NUM;
+        LOG_ALT("Weekly scheduled restart due (Tuesday %02u:00 %s)", RESTART_HOUR, timezone);
+        doRestart("weekly scheduled restart");
+      } else {
+        LOG_WRN("Weekly scheduled restart due, but skipped as last restart was under 24 hrs ago");
+        nextRestartEpoch = nextWeeklyRestartEpoch(nowEpoch); // reschedule so this isn't retried every cycle
+      }
+    }
+  } else if (fallbackArmed && millis() >= FALLBACK_UPTIME_MS) {
+    // NTP time never obtained - fallback to uptime based restart
+    fallbackArmed = false; // guard re-entry until actual reboot occurs
+    LOG_ALT("Weekly scheduled restart fallback: 7 days uptime reached without NTP sync");
+    doRestart("uptime fallback restart (no NTP sync)");
+  }
 }
 
 /********************** misc functions ************************/

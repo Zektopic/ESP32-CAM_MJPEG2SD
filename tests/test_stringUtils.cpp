@@ -2,7 +2,7 @@
 #include <cstring>
 #include <cassert>
 #include <cstdint>
-#include "../stringUtils.h"
+#include "../src/stringUtils.h"
 
 // Stub for removeChar since it's defined in utils.cpp which has ESP32 dependencies
 void removeChar(char* s, char c) {

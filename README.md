@@ -29,7 +29,7 @@ The ESP32 cannot support all of the features as it will run out of heap space. F
 ***This is a complex app and some users are raising issues when the app reports a warning, but this is the app notifying the user that there is an problem with their setup, which only the user can fix. Be aware that some clone boards have different specs to the original, eg PSRAM size. Please only raise issues for actual bugs (ERR messages, unhandled library error or crash). Thanks.  
 To suggest an improvement or enhancement use Discussions.*** 
 
-Changes for version up to 10.9.4:
+Changes for version up to 10.9.5:
 * Addition of [Ethernet](#configuration-web-page) network selection instead of Wifi
 * Pins added for [`CAMERA_MODEL_Waveshare_ESP32_S3_ETH`](https://www.waveshare.com/wiki/ESP32-S3-ETH)
 * Define pins for external W5500 Ethernet controller
@@ -78,11 +78,11 @@ The ESP32 time is set from an NTP server or connected browser client.
 
 Download github files into the Arduino IDE sketch folder, removing `-master` from the application folder name.
 Compile with at least arduino-esp32 core v3.1.1 which contains network fixes and frame selection changes.
-Select the required ESP-CAM board by uncommenting ONE only of the `#define CAMERA_MODEL_*` in `appGlobals.h` unless using the one of the defaults:
+Select the required ESP-CAM board by uncommenting ONE only of the `#define CAMERA_MODEL_*` in `ESP32-CAM_MJPEG2SD.h` unless using the one of the defaults:
 * ESP32 Cam board - `CAMERA_MODEL_AI_THINKER`
 * Freenove ESP32S3 Cam board - `CAMERA_MODEL_FREENOVE_ESP32S3_CAM`  
 
-Optional features are not included by default. To include a feature, in `appGlobals.h` set relevant `#define INCLUDE_*` to `true`. 
+Optional features are not included by default. To include a feature, in `ESP32-CAM_MJPEG2SD.h` set relevant `#define INCLUDE_*` to `true`. 
 
 Select the ESP32 or ESP32S3 Dev Module board and compile with PSRAM enabled and the following Partition scheme:
 * ESP32 - `Minimal SPIFFS (...)`
@@ -308,7 +308,7 @@ The auxiliary board can be used to drive the hardware for:
  * Enter IP address of the auxiliary board in field: `Send RC / Servo / PG commands to auxiliary IP` then save and reboot. Relevant commands from cam board web page will now be sent to the auxiliary board. 
  * Enter UART pin numbers and select `Use UART for Auxiliary connection`, then save and reboot. Relevant commands from cam board web page will be sent to the cam board then forwarded to the auxiliary board. 
  
- Instal app on auxiliary board after uncommenting ONLY `#define AUXILIARY` in camera selection block in `appGlobals.h`. The auxiliary board does not need camera, SD card or PSRAM, just wifi and enough pins to connect to the relevant hardware. Note that MCPWM for BDC motors is not supported by ESP32-C3.  
+ Instal app on auxiliary board after uncommenting ONLY `#define AUXILIARY` in camera selection block in `ESP32-CAM_MJPEG2SD.h`. The auxiliary board does not need camera, SD card or PSRAM, just wifi and enough pins to connect to the relevant hardware. Note that MCPWM for BDC motors is not supported by ESP32-C3.  
  
  The Auxil web page on the auxiliary board is a cut down version of the camera app web page. The configuration details under **RC Config**, **Servo Config** and **PG Config** tabs must be entered on the auxiliary board web page, not the cam web page. If using UART, enter relevant pin numbers on both web pages and wire RX to TX between boards plus a common ground.
  
@@ -408,7 +408,7 @@ The image shows how wires can be connected to the shared I2C port on the ESP32 A
 By default, the I2C port is shared with the camera, but a separate port can be used by defining alternative SDA and SCL pins under the **Peripherals** tab.
 
 To incorporate I2C support, set `#define INCLUDE_I2C` to `true`.
-To enable a particular I2C device, set corresponding `#define USE_*` to `true` in `appGlobals.h`.
+To enable a particular I2C device, set corresponding `#define USE_*` to `true` in `ESP32-CAM_MJPEG2SD.h`.
 
 ## Telemetry Recording
 
@@ -472,7 +472,7 @@ Only feasible on ESP32S3 due to memory use and built in AI Acceleration support.
 #### Only use this feature if you are familiar with Machine Learning
 
 The interface is designed to work with user models packaged as Arduino libraries by the [Edge Impulse](https://edgeimpulse.com/) AI platform.
-More details in `appGlobals.h`.   
+More details in `ESP32-CAM_MJPEG2SD.h`.   
 
 Use 96x96 grayscale or RGB images and train the model with for example the following Transfer learning Neural Network settings:  
 

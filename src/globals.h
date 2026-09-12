@@ -12,7 +12,7 @@
 
 #pragma once
 
-#if __has_include("./devUtilities.cpp")
+#if (__has_include("../devUtilities.cpp") || __has_include("./devUtilities.cpp"))
 #define DEV_ONLY
 #endif
 #ifdef DEV_ONLY
@@ -42,6 +42,7 @@
 #include <SD_MMC.h>
 #endif
 #include <LittleFS.h>
+#include <FFat.h>
 #include <sstream>
 #include <Update.h>
 #include <WiFi.h>
@@ -95,7 +96,7 @@
 #define BOUNDARY_VAL "123456789000000000000987654321"
 #define SF_LEN 128
 #define WAV_HDR_LEN 44
-#define RAM_LOG_LEN (1024 * 7) // size of system message log in bytes stored in slow RTC ram (max 8KB - vars)
+#define RAM_LOG_LEN ((1024 * 7) - 32) // size of system message log in bytes stored in slow RTC ram (max 8KB - vars)
 #define MIN_STACK_FREE 512
 #define STARTUP_FAIL "Startup Failure: "
 #define MAX_PAYLOAD_LEN 672 // set bigger than any incoming websocket payload (20ms audio)
@@ -213,6 +214,7 @@ bool updateConfigVect(const char* variable, const char* value);
 void updateStatus(const char* variable, const char* _value, bool fromUser = true);
 esp_err_t uploadHandler(httpd_req_t *req);
 void urlDecode(char* inVal);
+bool urlEncode(const char* inVal, char* encoded, size_t maxSize);
 uint32_t usePeripheral(const byte pinNum, const uint32_t receivedData);
 bool utilsStartup();
 esp_sleep_wakeup_cause_t wakeupResetReason();

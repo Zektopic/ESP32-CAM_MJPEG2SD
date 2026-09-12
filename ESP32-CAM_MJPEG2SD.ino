@@ -5,7 +5,7 @@
 * s60sc 2020 - 2026
 */
 
-#include "appGlobals.h"
+#include "ESP32-CAM_MJPEG2SD.h"
 
 void setup() {
   if (utilsStartup()) {

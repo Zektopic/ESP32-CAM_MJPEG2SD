@@ -1,3 +1,6 @@
+
+#pragma once
+
 // definition of camera pins for different boards
 
 #if defined(CAMERA_MODEL_WROVER_KIT)
