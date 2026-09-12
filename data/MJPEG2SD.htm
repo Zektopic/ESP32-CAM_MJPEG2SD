@@ -1086,31 +1086,31 @@
                   </div>
                   <div class="input-group" id="fps-group">
                       <label for="fps" aria-hidden="true">FPS</label>
-                      <input title="Set camera required frames per second" type="range" id="fps" min="1" max="30" value="10">
+                      <input title="Set camera required frames per second" type="range" id="fps" min="1" max="30" value="10" aria-label="FPS">
                   </div>
                   <div class="input-group" id="quality-group">
                       <label for="quality" aria-hidden="true">Quality</label>
-                      <input title="Set the recording quality" type="range" id="quality" min="4" max="63" value="10">
+                      <input title="Set the recording quality" type="range" id="quality" min="4" max="63" value="10" aria-label="Quality">
                   </div>
                   <div class="input-group" id="micGain-group">
                     <label for="micGain" aria-hidden="true">Microphone Gain</label>
-                    <input title="Set microphone gain" type="range" id="micGain" min="0" max="10" value="0">
+                    <input title="Set microphone gain" type="range" id="micGain" min="0" max="10" value="0" aria-label="Microphone Gain">
                   </div>
                   <div class="input-group" id="ampGain-group">
                     <label for="ampVol" aria-hidden="true">Amplifier Volume</label>
-                    <input title="Set amplifier volume" type="range" id="ampVol" min="0" max="10" value="0">
+                    <input title="Set amplifier volume" type="range" id="ampVol" min="0" max="10" value="0" aria-label="Amplifier Volume">
                   </div>
                   <div class="input-group" id="CamTilt-group">
                     <label for="camTilt" aria-hidden="true">Camera Tilt</label>
-                    <input class="local" title="Set camera tilt angle" type="range" id="camTilt" min="0" max="180" value="90">
+                    <input class="local" title="Set camera tilt angle" type="range" id="camTilt" min="0" max="180" value="90" aria-label="Camera Tilt">
                   </div>
                   <div class="input-group" id="CamPan-group">
                     <label for="camPan" aria-hidden="true">Camera Pan</label>
-                    <input class="local" title="Set camera pan angle" type="range" id="camPan" min="0" max="180" value="90">
+                    <input class="local" title="Set camera pan angle" type="range" id="camPan" min="0" max="180" value="90" aria-label="Camera Pan">
                   </div>
                   <div class="input-group" id="lamp-group">
                     <label for="lampLevel" aria-hidden="true">Lamp</label>
-                     <input title="Control onboard lamp led brightness" type="range" id="lampLevel" min="0" max="15" value="0">
+                     <input title="Control onboard lamp led brightness" type="range" id="lampLevel" min="0" max="15" value="0" aria-label="Lamp">
                   </div>
                 </div>
               </nav>
@@ -1128,25 +1128,25 @@
                   </div>
                   <div class="input-group" id="brightness-group">
                     <label for="brightness" aria-hidden="true">Brightness</label>
-                    <input title="Set image brightness" type="range" id="brightness" min="-2" max="2" value="0">
+                    <input title="Set image brightness" type="range" id="brightness" min="-2" max="2" value="0" aria-label="Brightness">
                   </div>
                   <div class="input-group" id="contrast-group">
                     <label for="contrast" aria-hidden="true">Contrast</label>
-                    <input title="Set image contrast" type="range" id="contrast" min="-2" max="2" value="0">
+                    <input title="Set image contrast" type="range" id="contrast" min="-2" max="2" value="0" aria-label="Contrast">
                   </div>
                   <div class="input-group" id="saturation-group">
                     <label for="saturation" aria-hidden="true">Saturation</label>
-                    <input title="Set image saturation" type="range" id="saturation" min="-2" max="2" value="0">
+                    <input title="Set image saturation" type="range" id="saturation" min="-2" max="2" value="0" aria-label="Saturation">
                   </div>
                   <div class="OV3660 OV5640 hidden">
                     <div class="input-group" id="sharpness-group">
                       <label for="sharpness" aria-hidden="true">Sharpness</label>
-                      <input title="Set image sharpness" type="range" id="sharpness" min="-3" max="3" value="0">
+                      <input title="Set image sharpness" type="range" id="sharpness" min="-3" max="3" value="0" aria-label="Sharpness">
                     </div>
                     <div class="input-group" id="denoise-group">
                       <label for="denoise" aria-hidden="true">De-Noise</label>
                       <div name="rangeMin" aria-hidden="true">Auto</div>
-                      <input title="Set image de-noise level" type="range" id="denoise" min="0" max="8" value="0">
+                      <input title="Set image de-noise level" type="range" id="denoise" min="0" max="8" value="0" aria-label="De-Noise">
                     </div>
                   </div>
                   <div class="input-group" id="special_effect-group">
@@ -1173,7 +1173,7 @@
                   </div>
                   <div class="input-group" id="aec_value-group">
                     <label for="aec_value"id="aec_value_lab" aria-hidden="true">Manual Exposure</label>
-                    <input title="Set manual exposure value" type="range" id="aec_value" min="0" max="1200" value="204">
+                    <input title="Set manual exposure value" type="range" id="aec_value" min="0" max="1200" value="204" aria-label="Manual Exposure">
                   </div>
                   <div class="input-group" id="aec2-group">
                     <label for="aec2" id="aec2_lab">AEC DSP</label>
@@ -1185,7 +1185,7 @@
                   <div class="input-group hidden" id="agc_gain-group">
                     <label for="agc_gain" id="agc_gain_lab" aria-hidden="true">Gain</label>
                     <div name="rangeMin" aria-hidden="true">1x</div>
-                    <input title="Set automatic gain control limit" type="range" id="agc_gain" min="0" max="30" value="5">
+                    <input title="Set automatic gain control limit" type="range" id="agc_gain" min="0" max="30" value="5" aria-label="Gain">
                     <div name="rangeMax" aria-hidden="true">31x</div>
                   </div>
                   <div class="input-group" id="hmirror-group">
@@ -1226,7 +1226,7 @@
                     </div>
                     <div class="input-group" id="ae_level-group">
                       <label for="ae_level" aria-hidden="true">Exposure Level</label>
-                      <input title="Set automatic exposure level" type="range" id="ae_level" min="-2" max="2" value="0">
+                      <input title="Set automatic exposure level" type="range" id="ae_level" min="-2" max="2" value="0" aria-label="Exposure Level">
                     </div>
                     <div class="input-group" id="dcw-group">
                       <label for="dcw" id="dcw_lab">DCW (Downsize)</label>
@@ -1245,7 +1245,7 @@
                     <div class="input-group" id="gainceiling-group">
                       <label for="gainceiling" aria-hidden="true">Gain Ceiling</label>
                       <div name="rangeMin" aria-hidden="true">2x</div>
-                      <input title="Set gain ceiling limit" type="range" id="gainceiling" min="0" max="6" value="2">
+                      <input title="Set gain ceiling limit" type="range" id="gainceiling" min="0" max="6" value="2" aria-label="Gain Ceiling">
                       <div name="rangeMax" aria-hidden="true">128x</div>
                     </div>
                     <div class="input-group" id="lenc-group">
@@ -1302,11 +1302,11 @@
                   </div>
                   <div class="input-group" id="motion-group">
                     <label for="motionVal" aria-hidden="true">Motion Sensitivity</label>
-                    <input title="Set motion detection sensitivity" type="range" id="motionVal" min="1" max="10" value="7">
+                    <input title="Set motion detection sensitivity" type="range" id="motionVal" min="1" max="10" value="7" aria-label="Motion Sensitivity">
                   </div>
                   <div class="input-group" id="minf-group">
                     <label for="minf" aria-hidden="true">Min Seconds</label>
-                    <input title="Minimum number of frames to be captured or the file is deleted" type="range" id="minf" min="0" max="20" value="5">
+                    <input title="Minimum number of frames to be captured or the file is deleted" type="range" id="minf" min="0" max="20" value="5" aria-label="Min Seconds">
                   </div>
                   <div class="input-group" id="record-group">
                       <label for="record">Save Capture</label>
@@ -1324,7 +1324,7 @@
                   </div>
                   <div class="input-group" id="lswitch-group">
                     <label for="lswitch" aria-hidden="true">Night Switch</label>
-                    <input title="Set night switch sensitivity" type="range" id="lswitch" min="0" max="100" value="10">
+                    <input title="Set night switch sensitivity" type="range" id="lswitch" min="0" max="100" value="10" aria-label="Night Switch">
                   </div>
                   <div class="vsep"></div>
                   <div class="input-group" id="tlapse-group">
@@ -1336,7 +1336,7 @@
                   </div>
                   <div class="input-group" id="dcam-group">
                     <label for="dashCamOn" aria-hidden="true">DashCam</label>
-                    <input title="Enable continuous recording with file duration in minutes" type="range" id="dashCamOn" min="0" max="5" value="0">
+                    <input title="Enable continuous recording with file duration in minutes" type="range" id="dashCamOn" min="0" max="5" value="0" aria-label="DashCam">
                   </div>
                 </div>
                 <br><br>

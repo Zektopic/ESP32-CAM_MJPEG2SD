@@ -31,3 +31,6 @@
 ## 2026-09-11 - Hide decorative icons in buttons from screen readers
 **Learning:** Raw Unicode symbols (like ➤ or ▢) used as decorative icons inside buttons can be read aloud verbatim or confusingly by screen readers unless explicitly hidden.
 **Action:** Wrap decorative glyphs or icons inside buttons with `<span aria-hidden="true">` to prevent screen reader noise.
+## 2025-09-12 - Aria-labels for range inputs with hidden labels
+**Learning:** Adding `aria-hidden="true"` to a `<label>` hides it from screen readers, which leaves the associated `<input>` without an accessible name, breaking form accessibility. Range inputs with hidden labels must have their own `aria-label` reflecting the intended name.
+**Action:** When improving form accessibility, do not blindly add `aria-label` attributes to all input elements. Only add `aria-label`s to inputs that lack a proper native association, such as inputs where the associated `<label>` uses `aria-hidden="true"`.
