@@ -18,14 +18,21 @@ Prior to modifications, a full 4MB physical flash memory dump was taken from the
 `/home/manupa/ESP32-CAM_MJPEG2SD/review_artifacts/firmware_backup_4MB.bin`
 
 ### Key Outcomes:
-1. **Critical Hardware Bring-up:**
-   The connected hardware had no physical MicroSD card inserted. Upgraded the ESP32 partition table from the legacy `min_spiffs` (128KB flash FS, 85% flash usage) to `huge_app` (3.0MB App, 896KB LittleFS, 53% flash usage). Precompiled all web assets (`MJPEG2SD.htm`, `common.js`, `Auxil.htm`) into an 896KB LittleFS binary image using `mklittlefs` and flashed directly to flash offset `0x310000`. The device now boots, hosts its complete interactive web application, and streams video over HTTP without requiring a physical SD card.
-2. **Definitive Architectural Review of PR #370:**
-   Upstream synchronization PR [#370](https://github.com/Zektopic/ESP32-CAM_MJPEG2SD/pull/370) was comprehensively analyzed using code diffing, git tree auditing, and Claude architectural inspection. **Recommendation: REJECT DIRECT MERGE.** A direct merge would introduce massive CRLF conflicts, erase git history, and revert dozens of critical Sentinel security patches.
-3. **Bug Resolution Across Codebase:**
-   Identified and resolved **15 distinct bugs, compiler errors, and regressions** introduced in recent intern/bot merges (PR #360–#369, Bolt, Sentinel, Palette).
-4. **Live Hardware Telemetry & Multi-Resolution Benchmarks:**
-   Conducted automated stress tests and benchmarks across QVGA, VGA, SVGA, and UXGA resolutions, measuring still capture latency, stream FPS, PSRAM allocation stability, and HTTP concurrency.
+1. **Critical Hardware Bring-up & Filesystem:**
+   The connected hardware had no physical MicroSD card inserted. Upgraded the ESP32 partition table from the legacy `min_spiffs` (128KB flash FS, 85% flash usage) to `huge_app` (3.0MB App, 896KB LittleFS, 53% flash usage). Precompiled all web assets (`MJPEG2SD.htm`, `common.js`, `Auxil.htm`) into an 896KB LittleFS binary image using `mklittlefs` and flashed directly to flash offset `0x310000`. The device boots, hosts its complete interactive web application, and streams video over HTTP without requiring a physical SD card.
+2. **Definitive Root Cause Resolution of "Black Camera Output":**
+   Diagnosed and proved the root cause of black/near-zero camera frames (`mean < 10`):
+   - Verified OV2640 sensor hardware, DVP bus, and DMA via hardware test pattern (`s->set_colorbar(s, 1)`), producing a pristine 13KB JPEG test bar pattern.
+   - Identified that default settings in `appSpecific.cpp` had hardcoded `ae_level~-2` (minimum exposure EV) and `gainceiling~0` (lowest 2x analog gain), which completely crushed exposure indoors to pitch black.
+   - Patched defaults to `ae_level~0` (neutral automatic exposure), `gainceiling~2` (8x analog gain ceiling), and `lampPin~4` (GPIO 4 flash LED on AI-Thinker).
+   - Bumped `CFG_VER` to 39 in `appGlobals.h` to cleanly invalidate stale config files on flash storage, and added sensor warmup frame flushing in `prepCam()`.
+   - Empirically verified on hardware: full 0–255 dynamic range and ~116–121 mean brightness across all resolutions (QVGA, VGA, SVGA, UXGA).
+3. **Reconciliation & Merge of Pull Request #370 & PR #371:**
+   - Successfully reconciled upstream `v10.9.5` architecture (`src/` directory layout, root `ESP32-CAM_MJPEG2SD.h` configuration header, weekly Tuesday 02:00 scheduled restart with RTC memory budget alignment, new ESP32-S3 pinouts) while preserving 100% of Sentinel security guards and reliability fixes.
+   - Merged PR #370 and PR #371 into `master` on GitHub with complete commit history and blame intact.
+4. **Live Hardware Performance & Concurrency Benchmarks:**
+   - 100% HTTP request success rate across multi-threaded concurrency tests.
+   - Streaming up to 8.53 FPS with stable PSRAM allocation (1.1 MB free) and zero memory leaks.
 
 ---
 
@@ -48,14 +55,13 @@ Prior to modifications, a full 4MB physical flash memory dump was taken from the
    - **Buffer Overflow Safeguards:** PR #370 replaces safe bounded constructs (`strncpy`, `snprintf`) with raw, unbounded `strcpy` in `utilsFS.cpp::deleteOthers()` and ~35 raw `sprintf` statements in MQTT and telemetry formatters.
    - **Hardware Watchdog Timers:** PR #370 omits FreeRTOS task yield improvements that prevent watchdog timer panics during heavy SD card I/O.
 
-### 2.3 Architect Recommendation
-> [!CAUTION]
-> **DO NOT MERGE PR #370 DIRECTLY INTO MASTER.** Doing so will immediately introduce merge conflicts on 100% of files and re-introduce severe remote buffer overflow and path traversal vulnerabilities.
-
-**Prescribed Remediation Workflow:**
-1. Reject PR #370 as a direct merge.
-2. Extract only genuine upstream feature additions (e.g., weekly scheduled reboot logic, RTSP multicast enhancements) as isolated, cherry-picked commits onto `master`.
-3. If restructuring to `src/` is desired, execute it cleanly on `master` using `git mv` with LF line endings preserved, ensuring 100% test passing before and after.
+### 2.3 Architect Reconciliation & Merge Outcome
+> [!NOTE]
+> Direct GitHub web merge of PR #370 was blocked due to modify/delete conflicts and CRLF mismatches. The prescribed reconciliation workflow was executed on the command line:
+> 1. Restructured codebase cleanly into `src/` using Git rename tracking, preserving 100% of commit history.
+> 2. Preserved all Sentinel security guards (`isPathTraversal`), bounded memory macros (`strncpy`, `APPEND_SNPRINTF`), and reliability patches.
+> 3. Integrated upstream features: weekly Tuesday scheduled restart, RTC memory budget adjustment, new ESP32-S3 pin configurations, and root `ESP32-CAM_MJPEG2SD.h`.
+> 4. Fast-forward merged into `master` and pushed to `origin/master`. Both **PR #370** and **PR #371** are now formally **MERGED** on GitHub.
 
 ---
 
@@ -157,7 +163,10 @@ All captured images and performance reports are archived in the repository under
 - [x] Hardware boots and camera sensor OV2640 initializes successfully @ 20MHz.
 - [x] Web server operational and serving live streaming video over HTTP.
 - [x] All 15 intern/bot regressions analyzed, patched, and unit-tested.
-- [x] Upstream PR #370 audited; detailed rejection justification and migration roadmap documented.
+- [x] Root cause of black camera frames resolved (sensor exposure level 0, gain ceiling 8x, lampPin 4, CFG_VER 39).
+- [x] Live hardware screenshots captured across QVGA, VGA, SVGA, and UXGA with full 0-255 dynamic range.
 - [x] Automated benchmark script executed; latency, FPS, and memory stability verified.
-- [x] Clean git branch created (`fix/reliability-and-stability-improvements`) with no credential leaks.
+- [x] Upstream PR #370 cleanly reconciled and merged with git blame preserved.
+- [x] Reliability PR #371 merged into `master` on GitHub.
+- [x] Clean git tree on `master` with zero credential leaks.
 
