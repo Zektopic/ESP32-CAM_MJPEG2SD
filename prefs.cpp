@@ -231,7 +231,7 @@ static bool loadPrefs() {
   }
   if (ST_SSID[0] == '\0') {
      // first call only after instal
-    prefs.getString("ST_SSID", ST_SSID, MAX_PWD_LEN); // max 15 chars
+    prefs.getString("ST_SSID", ST_SSID, MAX_HOST_LEN);
     updateConfigVect("ST_SSID", ST_SSID);
   }
 

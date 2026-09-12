@@ -824,7 +824,7 @@ extIP~~99~~na
 restart~~99~~na
 sdLog~0~99~~na
 xclkMhz~20~98~~na
-ae_level~-2~98~~na
+ae_level~0~98~~na
 aec~1~98~~na
 aec2~1~98~~na
 aec_value~204~98~~na
@@ -842,7 +842,7 @@ dcw~1~98~~na
 enableMotion~1~98~~na
 fps~20~98~~na
 framesize~10~98~~na
-gainceiling~0~98~~na
+gainceiling~2~98~~na
 hmirror~0~98~~na
 lampLevel~0~98~~na
 lenc~1~98~~na
@@ -913,7 +913,7 @@ accelDeg~5~3~N~Min accelerometer degrees movement
 lampType~0~3~S:Manual:Auto~How lamp activated
 SVactive~0~3~C~Enable servo use
 pirPin~~3~N~Pin used for PIR
-lampPin~~3~N~Pin used for Lamp
+lampPin~4~3~N~Pin used for Lamp
 servoPanPin~~6~N~Pin used for Pan Servo
 servoTiltPin~~6~N~Pin used for Tilt Servo
 ds18b20Pin~~3~N~Pin used for DS18B20 temperature sensor

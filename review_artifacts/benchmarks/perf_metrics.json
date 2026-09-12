@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-11T20:53:59Z",
+  "timestamp": "2026-09-12T03:20:47Z",
   "device": {
     "ip": "http://192.168.1.78",
     "firmware_version": "10.9.4",
@@ -14,92 +14,92 @@
     "QVGA_320x240": {
       "resolution_id": "5",
       "still_capture": {
-        "avg_latency_s": 0.424,
-        "min_latency_s": 0.33,
-        "max_latency_s": 0.547,
-        "avg_size_bytes": 2891
+        "avg_latency_s": 1.029,
+        "min_latency_s": 0.366,
+        "max_latency_s": 2.297,
+        "avg_size_bytes": 3897
       },
       "mjpeg_stream": {
-        "duration_s": 7.14,
-        "frames_received": 14,
-        "fps": 1.96,
-        "throughput_kb_s": 1.6,
-        "avg_frame_kb": 0.83
+        "duration_s": 6.22,
+        "frames_received": 53,
+        "fps": 8.53,
+        "throughput_kb_s": 9.1,
+        "avg_frame_kb": 1.07
       },
-      "heap_free": "56KB",
+      "heap_free": "58KB",
       "psram_free": "1.1MB",
-      "rssi": "-90 dBm"
+      "rssi": "-88 dBm"
     },
     "VGA_640x480": {
       "resolution_id": "8",
       "still_capture": {
-        "avg_latency_s": 1.475,
-        "min_latency_s": 0.473,
-        "max_latency_s": 2.161,
-        "avg_size_bytes": 5612
+        "avg_latency_s": 1.334,
+        "min_latency_s": 0.487,
+        "max_latency_s": 2.464,
+        "avg_size_bytes": 6781
       },
       "mjpeg_stream": {
-        "duration_s": 9.85,
-        "frames_received": 11,
-        "fps": 1.12,
-        "throughput_kb_s": 3.2,
-        "avg_frame_kb": 2.85
+        "duration_s": 0.56,
+        "frames_received": 0,
+        "fps": 0.0,
+        "throughput_kb_s": 0.0,
+        "avg_frame_kb": 0.0
       },
-      "heap_free": "50420 bytes",
+      "heap_free": "61KB",
       "psram_free": "1.1MB",
-      "rssi": "-91 dBm"
+      "rssi": "-90 dBm"
     },
     "SVGA_800x600": {
       "resolution_id": "9",
       "still_capture": {
-        "avg_latency_s": 2.877,
-        "min_latency_s": 0.401,
-        "max_latency_s": 5.997,
-        "avg_size_bytes": 4262
+        "avg_latency_s": 0.685,
+        "min_latency_s": 0.603,
+        "max_latency_s": 0.799,
+        "avg_size_bytes": 6774
       },
       "mjpeg_stream": {
-        "duration_s": 7.75,
-        "frames_received": 14,
-        "fps": 1.81,
-        "throughput_kb_s": 1.9,
-        "avg_frame_kb": 1.05
+        "duration_s": 6.24,
+        "frames_received": 46,
+        "fps": 7.37,
+        "throughput_kb_s": 10.1,
+        "avg_frame_kb": 1.38
       },
-      "heap_free": "50200 bytes",
+      "heap_free": "52KB",
       "psram_free": "1.1MB",
-      "rssi": "-91 dBm"
+      "rssi": "-88 dBm"
     },
     "UXGA_1600x1200": {
       "resolution_id": "13",
       "still_capture": {
-        "avg_latency_s": 4.645,
-        "min_latency_s": 3.839,
-        "max_latency_s": 6.03,
-        "avg_size_bytes": 23228
+        "avg_latency_s": 4.355,
+        "min_latency_s": 3.077,
+        "max_latency_s": 5.778,
+        "avg_size_bytes": 30817
       },
       "mjpeg_stream": {
-        "duration_s": 7.9,
+        "duration_s": 6.09,
         "frames_received": 1,
-        "fps": 0.13,
-        "throughput_kb_s": 2.9,
-        "avg_frame_kb": 23.29
+        "fps": 0.16,
+        "throughput_kb_s": 5.1,
+        "avg_frame_kb": 31.26
       },
-      "heap_free": "50200 bytes",
+      "heap_free": "46644 bytes",
       "psram_free": "1.1MB",
       "rssi": "-90 dBm"
     }
   },
   "concurrency_stress_test": {
     "total_requests": 10,
-    "success_rate_pct": 90.0,
-    "total_duration_s": 8.854,
-    "avg_req_latency_s": 2.97
+    "success_rate_pct": 100.0,
+    "total_duration_s": 4.378,
+    "avg_req_latency_s": 1.774
   },
   "stability_metrics": {
-    "initial_heap": "64KB",
-    "final_heap": "50KB",
+    "initial_heap": "66KB",
+    "final_heap": "53KB",
     "initial_psram": "1.1MB",
     "final_psram": "1.1MB",
-    "wifi_rssi": "-91 dBm",
-    "uptime": "0-00:06:22"
+    "wifi_rssi": "-90 dBm",
+    "uptime": "0-00:03:17"
   }
 }

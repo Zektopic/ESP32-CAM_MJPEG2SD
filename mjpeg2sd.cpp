@@ -1048,16 +1048,24 @@ bool prepCam() {
       res = true;
     }
   }
-  // check that camera data is accessible
+  // check that camera data is accessible and flush initial warmup frames for AEC/AGC
   if (res) {
-    camera_fb_t* fb = esp_camera_fb_get();
-    if (fb == NULL) {
-      // usually a camera hardware / ribbon cable fault
-      snprintf(startupFailure, SF_LEN, STARTUP_FAIL "Failed to get camera frame - check camera hardware");
-    } else {
-      esp_camera_fb_return(fb);
-      fb = NULL;
-      res = true;
+    for (int i = 0; i < 3; i++) {
+      camera_fb_t* fb = esp_camera_fb_get();
+      if (fb == NULL) {
+        if (i == 0) {
+          // usually a camera hardware / ribbon cable fault
+          snprintf(startupFailure, SF_LEN, STARTUP_FAIL "Failed to get camera frame - check camera hardware");
+          res = false;
+        }
+        break;
+      } else {
+        esp_camera_fb_return(fb);
+        fb = NULL;
+        res = true;
+      }
+      delay(40);
+    }
       LOG_INF("Camera model %s ready @ %uMHz", camModel, xclkMhz);
       if (timeLapseOn) dashCamOn = 0;
       if (dashCamOn) {
@@ -1069,7 +1077,6 @@ bool prepCam() {
         } else LOG_INF("Do continuous recording at %d min intervals", dashCamOn);
         forceRecord = true;
       } else frameLimit = maxFrames;
-    }
   }
   debugMemory("prepCam");
   return res;

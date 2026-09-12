@@ -129,7 +129,7 @@
  
 #define APP_VER "10.9.4"
 // to determine if newer data files need to be loaded
-#define CFG_VER 38
+#define CFG_VER 39
 
 #if defined(AUXILIARY)
 #define APP_NAME "ESP-CAM_AUX" // max 15 chars

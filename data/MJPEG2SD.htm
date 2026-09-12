@@ -1208,7 +1208,7 @@
                     <div class="input-group" id="gainceiling-group">
                       <label for="gainceiling" aria-hidden="true">Gain Ceiling</label>
                       <div name="rangeMin" aria-hidden="true">2x</div>
-                      <input title="Set gain ceiling limit" type="range" id="gainceiling" min="0" max="6" value="0">
+                      <input title="Set gain ceiling limit" type="range" id="gainceiling" min="0" max="6" value="2">
                       <div name="rangeMax" aria-hidden="true">128x</div>
                     </div>
                     <div class="input-group" id="lenc-group">
@@ -1955,7 +1955,7 @@
             changeRange('contrast', "-2", "2", "0");
             changeRange('saturation', "-2", "2", "0");
             changeRange('ae_level', "-2", "2", "0");
-            changeRange('gainceiling', "0", "6", "0");
+            changeRange('gainceiling', "0", "6", "2");
             changeRange('aec_value', "0", "1200", "204");
             changeRange('agc_gain', "0", "30", "5", true);
             $('#gainceiling').parentElement.children.rangeMin.innerHTML = '2x';
