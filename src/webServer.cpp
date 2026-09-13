@@ -68,7 +68,9 @@ esp_err_t fileHandler(httpd_req_t* req, bool download) {
     }
   }
   // this version not cached, so send it
-  httpd_resp_set_hdr(req, "Cache-Control", "no-cache");
+  httpd_resp_set_hdr(req, "Cache-Control", "no-cache, no-store, must-revalidate");
+  httpd_resp_set_hdr(req, "Pragma", "no-cache");
+  httpd_resp_set_hdr(req, "Expires", "0");
   itoa(CFG_VER, inVer, 10);
   httpd_resp_set_hdr(req, "ETag", inVer);
   return (download) ? downloadFile(df, req) : sendChunks(df, req);
