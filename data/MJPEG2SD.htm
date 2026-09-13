@@ -864,12 +864,17 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        contain: layout paint;
       }
       #stream-container img#stream {
         display: block;
         max-width: 100%;
         height: auto;
         border-radius: 8px;
+        image-rendering: auto;
+        transform: translateZ(0);
+        will-change: transform;
+        backface-visibility: hidden;
       }
 
       .iconSize{
@@ -1895,7 +1900,7 @@
           RCcfgObserver.observe(rcBtn);
         }
         sustainId = +appClock + Math.ceil(refreshInterval / 1000);
-        fetchTimeZones();
+        setTimeout(fetchTimeZones, 1500);
         // Automatically make stream container visible and start live stream on page open
         setTimeout(() => {
           if (viewContainer && view) {
@@ -2012,8 +2017,8 @@
             changeRange('gainceiling', "0", "6", "2");
             changeRange('aec_value', "0", "1200", "204");
             changeRange('agc_gain', "0", "30", "5", true);
-            $('#gainceiling').parentElement.children.rangeMin.innerHTML = '2x';
-            $('#gainceiling').parentElement.children.rangeMax.innerHTML = '128x';
+            const gcMin = getRangeMin($('#gainceiling')); if (gcMin) gcMin.innerHTML = '2x';
+            const gcMax = getRangeMax($('#gainceiling')); if (gcMax) gcMax.innerHTML = '128x';
             // show additional options
             $$('div.ALLOV').forEach(el => {show(el)});
             $$('#framesize option').forEach(el => {
@@ -2069,11 +2074,12 @@
       function changeRange(id, min, max, val, isX = false) {
         // set parameters for range slider
         const range = $('#'+id);
+        if (!range) return;
         range.min = min;
         range.max = max;
         range.value = val;
-        range.parentElement.children.rangeMin.innerHTML = isX ? (parseInt(min)+1)+'x' : min;
-        range.parentElement.children.rangeMax.innerHTML = isX ? (parseInt(max)+1)+'x' : max;
+        const rMin = getRangeMin(range); if (rMin) rMin.innerHTML = isX ? (parseInt(min)+1)+'x' : min;
+        const rMax = getRangeMax(range); if (rMax) rMax.innerHTML = isX ? (parseInt(max)+1)+'x' : max;
       }
 
       function navigation(key) {
@@ -2282,12 +2288,15 @@
           $$('#framesize option').forEach(el => {
             if (el.innerHTML.substr(0, sizeStr.length) == sizeStr) sizeStr = el.innerHTML; // now contains eg SVGA(800x600)
           });
-        } else sizeStr = $('#framesize option:checked').innerHTML; // get framesize from selected framesize
+        } else {
+          const opt = $('#framesize option:checked') || $('#framesize option[selected]') || $('#framesize option');
+          sizeStr = opt ? opt.innerHTML : 'VGA(640x480)';
+        }
 
         // determine actual image size using framesize pixels
         const sizeData = sizeStr.match(/(\d+)x(\d+)/);
-        const fwidth = sizeData[1];
-        const fheight = sizeData[2];
+        const fwidth = sizeData ? parseInt(sizeData[1]) : 640;
+        const fheight = sizeData ? parseInt(sizeData[2]) : 480;
         imgSize = {width: fwidth, height: fheight};
         sizeView('maxFit'); // initial view size
       }
@@ -2548,7 +2557,8 @@
             // auto centre steering or stop motor if focus lost
             val = 0;
             const e = $('#'+key);
-            e.parentElement.children.rangeVal.innerHTML = '0';
+            const rv = getRangeVal(e);
+            if (rv) rv.innerHTML = '0';
             rangeSlider(e, false);
             doSend = true;
           }
@@ -2719,7 +2729,13 @@
         // Log the timeZonesByRegion for debugging
         //console.log('Time Zones by Region:', timeZonesByRegion);
       } catch (error) {
-        console.error('Failed to fetch time zones:', error);
+        console.warn('Online time zones unavailable (offline mode):', error.message);
+        if (regionDropdown && regionDropdown.innerHTML.includes('Loading...')) {
+          regionDropdown.innerHTML = '<option value="" selected>Manual / Custom</option>';
+        }
+        if (timezoneDropdown && timezoneDropdown.innerHTML.includes('Loading...')) {
+          timezoneDropdown.innerHTML = '<option value="" selected>Manual / Custom</option>';
+        }
       }
     }
 

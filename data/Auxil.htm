@@ -1258,11 +1258,12 @@
       function changeRange(id, min, max, val, isX = false) {
         // set parameters for range slider
         const range = $('#'+id);
+        if (!range) return;
         range.min = min;
         range.max = max;
         range.value = val;
-        range.parentElement.children.rangeMin.innerHTML = isX ? (parseInt(min)+1)+'x' : min;
-        range.parentElement.children.rangeMax.innerHTML = isX ? (parseInt(max)+1)+'x' : max;
+        const rMin = getRangeMin(range); if (rMin) rMin.innerHTML = isX ? (parseInt(min)+1)+'x' : min;
+        const rMax = getRangeMax(range); if (rMax) rMax.innerHTML = isX ? (parseInt(max)+1)+'x' : max;
       }
 
       function navigation(key) {

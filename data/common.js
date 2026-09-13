@@ -32,9 +32,23 @@
         const smallThumbSize = parseFloat(root.getPropertyValue('--smallThumbSize')) * baseFontSize;
         let isImmed = false;
         let pageVisible = true;
-        let logType = 0;
-        let isBuilt = false; // for one off build of Main tab
         let alertTimer = null;
+
+        function getRangeVal(el) {
+          if (!el || !el.parentElement) return null;
+          return el.parentElement.querySelector('[name="rangeVal"], .rangeVal');
+        }
+        function getRangeMin(el) {
+          if (!el || !el.parentElement) return null;
+          return el.parentElement.querySelector('[name="rangeMin"], .rangeMin');
+        }
+        function getRangeMax(el) {
+          if (!el || !el.parentElement) return null;
+          return el.parentElement.querySelector('[name="rangeMax"], .rangeMax');
+        }
+        window.getRangeVal = getRangeVal;
+        window.getRangeMin = getRangeMin;
+        window.getRangeMax = getRangeMax;
 
         async function initialise() {
           try {
@@ -236,16 +250,18 @@
 
         function rangeSlider(el, isPos = true, statusVal = null) {
           // update range slider marker position and value
-          const rangeVal = el.parentElement.children.rangeVal;
+          if (!el || !el.parentElement) return;
+          const rangeVal = getRangeVal(el);
+          if (!rangeVal) return;
           if (statusVal != null) rangeVal.innerHTML = statusVal;
-          const currVal = isPos ? parseFloat(el.value) : parseFloat(rangeVal.innerHTML);
-          const minval = parseFloat(el.min);
-          const maxval = parseFloat(el.max);
+          const currVal = isPos ? parseFloat(el.value) : parseFloat(rangeVal.innerHTML || el.value || 0);
+          const minval = parseFloat(el.min || 0);
+          const maxval = parseFloat(el.max || 100);
           const decPlaces = (el.step > 0 && el.step < 1) || el.step == 'any' ? 1 : 0;
           if (el.classList.contains('logslider')) {
             // range value is logarithmic
-            const minlog = Math.log(minval);
-            const maxlog = Math.log(maxval) ;
+            const minlog = Math.log(minval || 1);
+            const maxlog = Math.log(maxval || 100);
             const scale = (maxlog - minlog) / (maxval - minval);
             // if isPos then get value from slider positional change by user, else set slider position from initial value.
             if (isPos) rangeVal.innerHTML = Math.exp((currVal - minval) * scale + minlog).toFixed(decPlaces);
@@ -259,12 +275,12 @@
           // position of range marker relative to slider thumb
           const rangeThumbSize = el.classList.contains('bigThumb') ? bigThumbSize : smallThumbSize;
           let markerRange = el.offsetWidth - rangeThumbSize;
-          let position = markerRange * (el.value - minval) / (maxval - minval);
+          let position = (maxval !== minval) ? markerRange * (el.value - minval) / (maxval - minval) : 0;
 
           // calculate absolute marker position for orientation of slider
           if (el.classList.contains('vertical')) {
             rangeVal.style.top = el.offsetTop + markerRange/2 - position + 'px';
-            rangeVal.style.left = el.offsetLeft + markerRange/2 - (rangeVal.offsetWidth - rangeThumbSize)/2 + 'px'; //
+            rangeVal.style.left = el.offsetLeft + markerRange/2 - (rangeVal.offsetWidth - rangeThumbSize)/2 + 'px';
           } else if (el.classList.contains('vertInv')) {
             rangeVal.style.top = el.offsetTop + position - markerRange/2 + 'px';
             rangeVal.style.left = el.offsetLeft + markerRange/2 - (rangeVal.offsetWidth - rangeThumbSize)/2 + 'px';
@@ -302,14 +318,14 @@
         }
 
         function addRangeData() {
-          // add labelling for rangle sliders
+          // add labelling for range sliders
           $$('input[type="range"]').forEach(el => {
             if (el.classList.contains('vertical')) el.style.transform = 'rotate(270deg)';
             else if (el.classList.contains('vertInv')) el.style.transform = 'rotate(90deg)';
             if (!el.classList.contains('ignore')) {
-              if (!isDefined(el.parentElement.children.rangeMin)) el.insertAdjacentHTML("beforebegin", '<div name="rangeMin" aria-hidden="true">'+el.min+'</div>');
-              el.insertAdjacentHTML("afterend", '<div name="rangeVal" aria-hidden="true">'+el.value+'</div>');
-              if (!isDefined(el.parentElement.children.rangeMax)) el.insertAdjacentHTML("afterend", '<div name="rangeMax" aria-hidden="true">'+el.max+'</div>');
+              if (!getRangeMin(el)) el.insertAdjacentHTML("beforebegin", '<div name="rangeMin" class="rangeMin" aria-hidden="true">'+el.min+'</div>');
+              if (!getRangeVal(el)) el.insertAdjacentHTML("afterend", '<div name="rangeVal" class="rangeVal" aria-hidden="true">'+el.value+'</div>');
+              if (!getRangeMax(el)) el.insertAdjacentHTML("afterend", '<div name="rangeMax" class="rangeMax" aria-hidden="true">'+el.max+'</div>');
             }
             rangeSlider(el, false);
           });
@@ -481,6 +497,7 @@
         }
 
         function disable(el, title) {
+          if (!el) return;
           el.classList.add('disabled');
           el.disabled = true;
           el.setAttribute('aria-disabled', 'true');
@@ -488,6 +505,7 @@
         }
 
         function enable(el, title) {
+          if (!el) return;
           el.classList.remove('disabled');
           el.disabled = false;
           el.removeAttribute('aria-disabled');
@@ -495,18 +513,24 @@
         }
 
         function disableRangeSlider(el) {
-          const rangeVal = el.parentElement.children.rangeVal;
-          const itemInactiveColor =  getComputedStyle(rangeVal).getPropertyValue('--itemInactive');
-          rangeVal.style.background = itemInactiveColor;
+          if (!el || !el.parentElement) return;
+          const rangeVal = getRangeVal(el);
+          if (rangeVal) {
+            const itemInactiveColor = getComputedStyle(rangeVal).getPropertyValue('--itemInactive') || '#888';
+            rangeVal.style.background = itemInactiveColor;
+          }
           el.classList.add('disabled');
           el.disabled = true;
           el.setAttribute('aria-disabled', 'true');
         }
 
         function enableRangeSlider(el) {
-          const rangeVal = el.parentElement.children.rangeVal;
-          const itemInactiveColor =  getComputedStyle(rangeVal).getPropertyValue('--buttonReady');
-          rangeVal.style.background = itemInactiveColor;
+          if (!el || !el.parentElement) return;
+          const rangeVal = getRangeVal(el);
+          if (rangeVal) {
+            const itemInactiveColor = getComputedStyle(rangeVal).getPropertyValue('--buttonReady') || '#4CAF50';
+            rangeVal.style.background = itemInactiveColor;
+          }
           el.classList.remove('disabled');
           el.disabled = false;
           el.removeAttribute('aria-disabled');
@@ -665,7 +689,7 @@
               else if (e.type === 'checkbox') processStatus(ID, e.id, e.checked ? 1 : 0);
               else if (et === 'button' || et === 'file') processStatus(ID, e.id, 1);
               else if (et === 'radio') { if (e.checked) processStatus(ID, e.name, value); }
-              else if (et === 'range') processStatus(ID, e.id, e.parentElement.children.rangeVal.innerHTML);
+              else if (et === 'range') processStatus(ID, e.id, (getRangeVal(e) ? getRangeVal(e).innerHTML : e.value));
               else if (e.hasAttribute('id')) processStatus(ID, e.id, value);
             }
             else if (e.tagName == 'SELECT') processStatus(ID, e.id, value);
@@ -679,7 +703,7 @@
               // for element with class='immed' send data for processing immediately
               if (e.classList.contains('immed')) {
                 isImmed = true;
-                processStatus(ID, e.id, e.parentElement.children.rangeVal.innerHTML);
+                processStatus(ID, e.id, (getRangeVal(e) ? getRangeVal(e).innerHTML : e.value));
               }
             }
           });
