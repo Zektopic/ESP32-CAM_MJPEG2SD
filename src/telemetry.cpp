@@ -90,7 +90,7 @@ static void getSensorData() {
     }
   #if INCLUDE_MQTT
     if (mqtt_active) {
-      sprintf(jsonBuff, "{\"Temp\":\"%0.1f\", \"TIME\":\"%s\"}", bmxData[0], esp_log_system_timestamp());
+      snprintf(jsonBuff, JSON_BUFF_LEN, "{\"Temp\":\"%0.1f\", \"TIME\":\"%s\"}", bmxData[0], esp_log_system_timestamp());
       mqttPublish(jsonBuff);
     }
   #endif

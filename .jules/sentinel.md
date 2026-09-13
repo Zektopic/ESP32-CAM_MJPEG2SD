@@ -224,3 +224,8 @@
 **Vulnerability:** Unbounded `sprintf` was used in `mjpeg2sd.cpp` to construct MQTT JSON payloads dynamically (`sprintf(jsonBuff, "{\"RECORD\":\"ON\", \"TIME\":\"%s\"}", esp_log_system_timestamp());`). The dynamic timestamp component could hypothetically exceed the allocated bounds, leading to memory corruption.
 **Learning:** `sprintf` should never be used to format dynamic runtime values directly into bounded buffers, even if the buffer is large (`JSON_BUFF_LEN`). It provides no inherent bounds checking.
 **Prevention:** In C/C++, always deprecate `sprintf` in favor of `snprintf` combined with the maximum buffer size (e.g., `JSON_BUFF_LEN`), ensuring strict bounds enforcement and null-termination.
+
+## 2026-09-11 - [CRITICAL] Buffer Overflow in telemetry JSON payload construction
+**Vulnerability:** Unbounded `sprintf` was used in `telemetry.cpp` to construct MQTT JSON payloads dynamically (`sprintf(jsonBuff, "{\"Temp\":\"%0.1f\", \"TIME\":\"%s\"}", bmxData[0], esp_log_system_timestamp());`). The dynamic timestamp string component could potentially exceed allocated bounds if malformed, leading to a stack buffer overflow.
+**Learning:** `sprintf` should never be used to format dynamic runtime values directly into bounded buffers, even if the buffer is globally defined as large. It provides no inherent bounds checking.
+**Prevention:** In C/C++, always deprecate `sprintf` in favor of `snprintf` combined with the maximum buffer size (e.g., `JSON_BUFF_LEN`), ensuring strict bounds enforcement and preventing buffer overflow exploits.
