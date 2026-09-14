@@ -1590,7 +1590,7 @@
           </section>
         </div>
         <figure>
-          <div id="stream-container" class="image-container hidden">
+          <div id="stream-container" class="image-container">
             <button type="button" class="iconSize btn-reset" id="closeStream" title="Close screen" aria-label="Close screen">×</button>
             <button type="button" class="iconSize btn-reset" id="rotate" title="Rotate screen" aria-label="Rotate screen">↻</button>
             <button type="button" class="iconSize btn-reset" id="actualSize" title="Actual size" aria-label="Actual size">1x</button>
@@ -1818,7 +1818,7 @@
       <span id="alertText"></span>
     </div>
 
-    <script src="/web?common.js"></script>
+    <script src="/web?common.js?v=41"></script>
     <script>
       'use strict'
 
@@ -1926,10 +1926,10 @@
           else if (key == "refreshVal") refreshInterval = value * 1000;
           else if (key == "heartbeatRC") heartbeatInterval = value * 1000;
           else if (key == "clockUTC") { appClock = value; checkTime(value); }
-          else if (key == "streaming") getConfig("012345678");
-          else if (key == "motion") getConfig("01");
-          else if (key == "other") getConfig("012");
-          else if (key == "peripherals") getConfig("0123");
+          else if (key == "streaming") { if (fromUser) getConfig("012345678"); }
+          else if (key == "motion") { if (fromUser) getConfig("01"); }
+          else if (key == "other") { if (fromUser) getConfig("012"); }
+          else if (key == "peripherals") { if (fromUser) getConfig("0123"); }
           else if (key == "sustainId") { /* handled by server sustain task */ }
           else if (key == "RCconfig") { doLoadStatus = false; getConfig("01234"); }
           else if (key == "SVconfig") { doLoadStatus = false; getConfig("0123456"); }
@@ -2228,15 +2228,16 @@
       }
 
       async function activateStreamButton() {
-        stopAll("activateStreamButton");
-        streamButton.classList.add("active");
-        streamButton.innerHTML = '<span aria-hidden="true">▢</span>&nbsp;Stop Stream';
-        streamButton.setAttribute("aria-label", "Stop Stream");
-        streamButton.classList.add('blinking');
-        showRC ? show($('#RCenable')) : hide($('#RCenable'));
-        showView(false);
-        view.src = webServer + '/sustain?stream=0';
-        checkTask('/sustain?stream=0');
+        if (await checkTask('/sustain?stream=0')) {
+          stopAll("activateStreamButton");
+          streamButton.classList.add("active");
+          streamButton.innerHTML = '<span aria-hidden="true">▢</span>&nbsp;Stop Stream';
+          streamButton.setAttribute("aria-label", "Stop Stream");
+          streamButton.classList.add('blinking');
+          showRC ? show($('#RCenable')) : hide($('#RCenable'));
+          showView(false);
+          view.src = webServer + '/sustain?stream=0';
+        }
       }
 
       function deactivateStreamButton(sendStop = true) {
@@ -2253,12 +2254,14 @@
         deactivateButton($('#micRem'));
         closeSpkr(wsInd);
         deactivateButton($('#spkrRem'));
-        if (!isHidden(viewContainer)) {
-          stopRC();
-          if (view) view.src = "";
+        if (caller !== "activateStreamButton") {
+          if (!isHidden(viewContainer)) {
+            stopRC();
+            if (view) view.src = "";
+          }
         }
         if (isActive(playbackButton)) deactivatePlaybackButton(sendStop);
-        if (isActive(streamButton)) deactivateStreamButton(sendStop);
+        if (isActive(streamButton) && caller !== "activateStreamButton") deactivateStreamButton(sendStop);
       }
 
 
@@ -2750,10 +2753,16 @@
       const doHeartbeat = true;
       const doInitSSE = false;
 
-      window.addEventListener('DOMContentLoaded', function() {
-        initialise();
-        appInit();
-      });
+      async function startApp() {
+        if (typeof initialise === 'function') await initialise();
+        if (typeof appInit === 'function') appInit();
+      }
+
+      if (document.readyState === 'loading') {
+        window.addEventListener('DOMContentLoaded', startApp);
+      } else {
+        startApp();
+      }
 
     </script>
   </body>

@@ -1175,7 +1175,7 @@
       <span id="alertText"></span>
     </div>
 
-    <script src="/web?common.js"></script>
+    <script src="/web?common.js?v=41"></script>
     <script>
       'use strict'
 
@@ -1341,10 +1341,16 @@
       const doHeartbeat = false;
       const doInitSSE = true;
 
-      window.addEventListener('DOMContentLoaded', function() {
-        initialise();
-        appInit();
-      });
+      async function startApp() {
+        if (typeof initialise === 'function') await initialise();
+        if (typeof appInit === 'function') appInit();
+      }
+
+      if (document.readyState === 'loading') {
+        window.addEventListener('DOMContentLoaded', startApp);
+      } else {
+        startApp();
+      }
 
     </script>
   </body>

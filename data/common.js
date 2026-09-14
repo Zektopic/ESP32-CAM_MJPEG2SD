@@ -58,7 +58,7 @@
             addRangeData();
             if (doCustomInit) customInit();
             setListeners();
-            doLoadStatus ? loadStatus("") : configStatus(false);
+            if (doLoadStatus) await loadStatus(""); else configStatus(false);
             startEventSource();
             initWebSocket(0);
             if (doRefreshTimer && refreshTimer == null) refreshStatus();
@@ -1353,3 +1353,19 @@
           audioContextSpkr.close().then(() => {});
         }
       }
+
+      // Explicitly expose functions to window scope
+      window.initialise = initialise;
+      window.loadStatus = loadStatus;
+      window.updateStatus = updateStatus;
+      window.refreshStatus = refreshStatus;
+      window.show = show;
+      window.hide = hide;
+      window.enable = enable;
+      window.disable = disable;
+      window.rangeSlider = rangeSlider;
+      window.enableRangeSlider = enableRangeSlider;
+      window.disableRangeSlider = disableRangeSlider;
+      window.isActive = isActive;
+      window.activateButton = activateButton;
+      window.deactivateButton = deactivateButton;

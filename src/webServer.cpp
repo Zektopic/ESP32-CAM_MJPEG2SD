@@ -60,7 +60,8 @@ esp_err_t fileHandler(httpd_req_t* req, bool download) {
 
   // Check if browser already has this version of the file
   char inVer[10];
-  if (httpd_req_get_hdr_value_str(req, "If-None-Match", inVer, sizeof(inVer)) == ESP_OK) {
+  bool isWebAsset = strstr(inFileName, ".htm") || strstr(inFileName, ".js") || strstr(inFileName, ".css");
+  if (!isWebAsset && httpd_req_get_hdr_value_str(req, "If-None-Match", inVer, sizeof(inVer)) == ESP_OK) {
     if (atoi(inVer) == CFG_VER) {
       // already has version cached, no need to resend
       httpd_resp_set_status(req, "304 Not Modified");
@@ -68,7 +69,7 @@ esp_err_t fileHandler(httpd_req_t* req, bool download) {
     }
   }
   // this version not cached, so send it
-  httpd_resp_set_hdr(req, "Cache-Control", "no-cache, no-store, must-revalidate");
+  httpd_resp_set_hdr(req, "Cache-Control", "no-cache, no-store, must-revalidate, max-age=0");
   httpd_resp_set_hdr(req, "Pragma", "no-cache");
   httpd_resp_set_hdr(req, "Expires", "0");
   itoa(CFG_VER, inVer, 10);
@@ -214,6 +215,12 @@ static esp_err_t webHandler(httpd_req_t* req) {
   }
   httpd_req_get_url_query_str(req, variable, queryLen);
   urlDecode(variable);
+
+  // Strip query parameters for cache busting (e.g. common.js?v=41)
+  char* qmark = strchr(variable, '?');
+  if (qmark != NULL) *qmark = '\0';
+  char* ampersand = strchr(variable, '&');
+  if (ampersand != NULL) *ampersand = '\0';
 
   if (isPathTraversal(variable)) {
     LOG_WRN("Path traversal attempt detected in URL query: %s", variable);
