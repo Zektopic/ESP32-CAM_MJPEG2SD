@@ -556,7 +556,7 @@
       .quick-nav {
         width: var(--buttonDbl);
         height: var(--buttonDbl);
-        margin: var(--buttonHalf) var(--buttonHalf); var(--buttonHalf) var(--buttonHalf);
+        margin: var(--buttonHalf);
         border: 1px solid var(--itemBorder);
         border-radius: var(--buttonQuart);
         cursor: pointer;
@@ -1835,7 +1835,7 @@
         }
       }
 
-      let refreshInterval = 5000;
+      refreshInterval = 5000;
       let heartbeatInterval = 5000;
       let imgSize = { width: 0, height: 0 };
       let fitSize = { width: 0, height: 0 };
@@ -2334,14 +2334,14 @@
           }
           else if (selectedSize == 'fullAspect') {
             if (viewContainer.requestFullscreen) viewContainer.requestFullscreen();
-            else viewContainer.webkitRequestFullscreen();
+            else if (viewContainer.webkitRequestFullscreen) viewContainer.webkitRequestFullscreen();
             const r = calculateAspectRatioFit(imgSize.width, imgSize.height, window.screen.availWidth, window.screen.availHeight)
             viewContainer.style.cssText = 'width:'+r.width+'px; height:'+r.height+'px';
             view.style.cssText = "width: 100%; height:auto";
           }
           else if (selectedSize == 'fullSize') {
             if (viewContainer.requestFullscreen) viewContainer.requestFullscreen();
-            else viewContainer.webkitRequestFullscreen();
+            else if (viewContainer.webkitRequestFullscreen) viewContainer.webkitRequestFullscreen();
             viewContainer.style.cssText = 'width:'+window.screen.availWidth+'px; height:'+window.screen.availHeight+'px';
             view.style.cssText = "width: 100%; height: 100%";
           }
@@ -2350,9 +2350,9 @@
             const scale = (rotateAngle == 90 || rotateAngle == 270) ? imgSize.height / imgSize.width : 1.0;
             view.style.transform = 'rotate('+rotateAngle+'deg) scale(' + scale + ')';
           }
-          if ((selectedSize == 'actualSize' || selectedSize == 'maxFit') && document.fullscreenElement !== null) {
+          if ((selectedSize == 'actualSize' || selectedSize == 'maxFit') && Boolean(document.fullscreenElement)) {
             if (document.exitFullscreen) document.exitFullscreen();
-            else document.webkitExitFullscreen(); /* Safari */
+            else if (document.webkitExitFullscreen) document.webkitExitFullscreen(); /* Safari */
           }
 
           // locate size buttons on screen

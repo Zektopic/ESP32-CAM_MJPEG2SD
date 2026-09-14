@@ -1136,16 +1136,18 @@
       }
 
       // Retrieve and populate the input field with the saved IPs on page load
-      const hubObserver = new IntersectionObserver (entries => {
-        // refresh hub when becomes visible
-        entries.forEach(entry => { if (entry.isIntersecting) {
-          const savedIPs = localStorage.getItem('enteredIPs');
-          const ipAddresses = savedIPs ? JSON.parse(savedIPs) : [];
-          createImageElements(ipAddresses);
-        }});
-      });
-      const deviceHubEl = document.getElementById('DeviceHub');
-      if (deviceHubEl) hubObserver.observe(deviceHubEl);
+      if (typeof IntersectionObserver !== 'undefined') {
+        const hubObserver = new IntersectionObserver (entries => {
+          // refresh hub when becomes visible
+          entries.forEach(entry => { if (entry.isIntersecting) {
+            const savedIPs = localStorage.getItem('enteredIPs');
+            const ipAddresses = savedIPs ? JSON.parse(savedIPs) : [];
+            createImageElements(ipAddresses);
+          }});
+        });
+        const deviceHubEl = document.getElementById('DeviceHub');
+        if (deviceHubEl) hubObserver.observe(deviceHubEl);
+      }
 
 
       /*********************** Browser Mic & Speaker *********************/
@@ -1259,15 +1261,13 @@
 
       function showMicLevel(fraction) {
         const canvas = $('#micLevel');
+        if (!canvas || !canvas.getContext) return;
         const ctx = canvas.getContext('2d');
-        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--chkColor').trim();
-        function draw() {
-          const fillWidth = fraction * canvas.width;
-          ctx.clearRect(0, 0, canvas.width, canvas.height);  // Clear
-          ctx.fillRect(0, 0, fillWidth, canvas.height);
-          requestAnimationFrame(draw);
-        }
-        draw();
+        if (!ctx) return;
+        ctx.fillStyle = (getComputedStyle(document.documentElement).getPropertyValue('--chkColor') || '#4CAF50').trim();
+        const fillWidth = Math.max(0, Math.min(1, fraction)) * canvas.width;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillRect(0, 0, fillWidth, canvas.height);
       }
 
       async function closeMic(index) {
