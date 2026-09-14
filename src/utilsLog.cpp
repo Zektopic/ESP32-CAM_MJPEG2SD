@@ -403,7 +403,7 @@ void logSetup() {
       }
       xTaskCreateWithCaps(logTask, "logTask", LOG_STACK_SIZE, NULL, LOG_PRI, &logHandle, STACK_MEM);
       
-      if (mlogEnd >= RAM_LOG_LEN) ramLogClear(); // init
+      if (esp_reset_reason() == ESP_RST_POWERON || mlogEnd >= RAM_LOG_LEN) ramLogClear(); // init
       LOG_SEND("\n\n=============== %s %s ===============\n", APP_NAME, APP_VER);
       LOG_INF("Setup RAM based log, size %u, starting from %u", RAM_LOG_LEN, mlogEnd);
       if (!DBG_ON) esp_log_level_set("*", ESP_LOG_ERROR); // show ESP_LOG_ERROR messages during init

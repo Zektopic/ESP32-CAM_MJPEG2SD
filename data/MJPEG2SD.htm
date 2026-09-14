@@ -1818,7 +1818,7 @@
       <span id="alertText"></span>
     </div>
 
-    <script src="/web?common.js?v=41"></script>
+    <script src="/web?common.js?v=42"></script>
     <script>
       'use strict'
 
@@ -2123,11 +2123,13 @@
 
       async function checkTask(viewURL) {
         // required to get response code as not available from <img> tag
-        const response = await fetchRetry(webServer + viewURL, {method: 'HEAD', mode: 'cors'}, 100, 500);
-        if (response.ok) {
+        const response = await fetchRetry(webServer + viewURL, {method: 'HEAD', mode: 'cors'}, 100, 1500);
+        if (response && response.ok) {
           sustainId = +appClock + Math.ceil(refreshInterval / 1000);
           return true;
-        } else alert("checkTask - " + response.status + ": " + response.statusText);
+        } else {
+          console.warn("checkTask - " + (response ? response.status + ": " + response.statusText : "device busy or network error"));
+        }
         return false;
       }
 

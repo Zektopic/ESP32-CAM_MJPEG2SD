@@ -694,8 +694,8 @@ bool startWebServer() {
     config.max_uri_handlers = MAX_HANDLERS;
     config.max_open_sockets = HTTP_CLIENTS + MAX_STREAMS;
     config.task_priority = HTTP_PRI;
-    config.send_wait_timeout = 8;
-    config.recv_wait_timeout = 8;
+    config.send_wait_timeout = 3;
+    config.recv_wait_timeout = 5;
     res = httpd_start(&httpServer, &config);
   }
   httpd_uri_t indexUri = {.uri = "/", .method = HTTP_GET, .handler = indexHandler, .user_ctx = NULL};

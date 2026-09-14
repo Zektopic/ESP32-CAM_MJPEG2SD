@@ -413,8 +413,29 @@ static boolean processFrame() {
   bool res = true;
   uint32_t dTime = millis();
 
+  static uint32_t nullFbCount = 0;
   camera_fb_t* fb = esp_camera_fb_get();
-  if (fb == NULL || !fb->len || fb->len > maxFrameBuffSize) return false;
+  if (fb == NULL) {
+    nullFbCount++;
+    if (nullFbCount >= 50 && (nullFbCount % 50 == 0)) {
+      LOG_WRN("Camera fb_get returned NULL (%u consecutive frames) - attempting sensor recovery", (unsigned int)nullFbCount);
+      sensor_t* s = esp_camera_sensor_get();
+      if (s != NULL && s->reset != NULL) {
+        s->reset(s);
+        char fsizePtrStr[4];
+        if (retrieveConfigVal("framesize", fsizePtrStr, sizeof(fsizePtrStr))) s->set_framesize(s, (framesize_t)(atoi(fsizePtrStr)));
+        else s->set_framesize(s, FRAMESIZE_VGA);
+      }
+    }
+    return false;
+  }
+  nullFbCount = 0;
+
+  if (!fb->len || fb->len > maxFrameBuffSize) {
+    LOG_WRN("Invalid camera frame length: %u (max: %u)", (unsigned int)fb->len, (unsigned int)maxFrameBuffSize);
+    esp_camera_fb_return(fb);
+    return false;
+  }
   timeLapse(fb);
 
   for (int i = 0; i < vidStreams; i++) {

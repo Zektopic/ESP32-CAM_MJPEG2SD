@@ -336,7 +336,10 @@
         async function loadStatus(specifier) {
           // request and load current status from app
           try {
-            const response = await fetch(webServer + '/status' + specifier);
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 6000);
+            const response = await fetch(webServer + '/status' + specifier, { signal: controller.signal });
+            clearTimeout(timeoutId);
             if (response.ok) {
               updateData = await response.json();
               updateStatus();
@@ -470,14 +473,13 @@
           return new Promise(resolve => setTimeout(resolve, ms));
         }
 
-        async function fetchRetry(url, options, interval, timeout) {
+        async function fetchRetry(url, options = {}, interval = 100, timeout = 1500) {
           let response;
           let retries = Math.ceil(timeout / interval);
-          while (retries--) {
+          while (retries-- > 0) {
             try {
               response = await fetch(url, options);
               if (response.ok) {
-                sleep(interval);
                 return response;
               }
             } catch {}

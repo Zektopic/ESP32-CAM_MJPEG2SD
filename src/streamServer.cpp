@@ -8,6 +8,8 @@
 // s60sc 2022 - 2025
 
 #include "appGlobals.h"
+#include <lwip/sockets.h>
+#include <errno.h>
 
 // stream separator
 #define STREAM_CONTENT_TYPE "multipart/x-mixed-replace;boundary=" BOUNDARY_VAL
@@ -120,13 +122,35 @@ static void showStream(httpd_req_t* req, uint8_t taskNum) {
   httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
   httpd_resp_set_type(req, STREAM_CONTENT_TYPE);
   char hdrBuf[HDR_BUF_LEN];
+  int sockfd = httpd_req_to_sockfd(req);
+  uint32_t consecutiveTimeouts = 0;
   while (isStreaming[taskNum]) {
     // stream from camera at current frame rate
     if (xSemaphoreTake(frameSemaphore[taskNum], pdMS_TO_TICKS(MAX_FRAME_WAIT)) == pdFAIL) {
       // failed to take semaphore, allow retry
       streamBufferSize[taskNum] = 0;
+      consecutiveTimeouts++;
+
+      // Check if client socket is still connected
+      if (sockfd >= 0) {
+        char probe;
+        int r = recv(sockfd, &probe, 1, MSG_PEEK | MSG_DONTWAIT);
+        if (r == 0 || (r < 0 && errno != EAGAIN && errno != EWOULDBLOCK)) {
+          LOG_VRB("Stream client disconnected (sockfd %d, r=%d, errno=%d)", sockfd, r, errno);
+          isStreaming[taskNum] = false;
+          break;
+        }
+      }
+
+      // If we haven't received a frame for 10 consecutive timeouts (~12s)
+      if (consecutiveTimeouts >= 10) {
+        LOG_WRN("Stream task %u stalled: 10 consecutive frame timeouts, aborting stream", taskNum);
+        isStreaming[taskNum] = false;
+        break;
+      }
       continue;
     }
+    consecutiveTimeouts = 0;
     if (dbgMotion && !taskNum) {
       // motion tracking stream on task 0 only, wait for new move mapping image
       if (xSemaphoreTake(motionSemaphore, pdMS_TO_TICKS(MAX_FRAME_WAIT)) == pdFAIL) continue;
@@ -316,7 +340,7 @@ esp_err_t appSpecificSustainHandler(httpd_req_t* req) {
                 isStreaming[taskNum] = false;
                 if (!taskNum) doPlayback = false; // only for task 0
                 if (taskNum < vidStreams && frameSemaphore[taskNum] != NULL) xSemaphoreGive(frameSemaphore[taskNum]);
-                for (int w = 0; w < 10 && sustainReq[taskNum].inUse; w++) delay(50);
+                for (int w = 0; w < 40 && sustainReq[taskNum].inUse; w++) delay(50);
               }
             } 
             if (sustainReq[taskNum].inUse) {
@@ -336,12 +360,16 @@ esp_err_t appSpecificSustainHandler(httpd_req_t* req) {
             if (sustainReq[taskNum].inUse) {
               isStreaming[taskNum] = false;
               if (taskNum < vidStreams && frameSemaphore[taskNum] != NULL) xSemaphoreGive(frameSemaphore[taskNum]);
-              for (int w = 0; w < 10 && sustainReq[taskNum].inUse; w++) delay(50);
+              for (int w = 0; w < 40 && sustainReq[taskNum].inUse; w++) delay(50);
             }
           }
         }
             
         // action request if task available
+        if (sustainReq[taskNum].inUse && taskNum == 0 && !strcmp(variable, "stream")) {
+          // If task 0 is in use when starting new stream, allow up to 2 seconds for previous stream to release
+          for (int w = 0; w < 40 && sustainReq[taskNum].inUse; w++) delay(50);
+        }
         if (!sustainReq[taskNum].inUse) {
           // make copy of request data and pass request to task indexed by request
           uint8_t i = taskNum;
