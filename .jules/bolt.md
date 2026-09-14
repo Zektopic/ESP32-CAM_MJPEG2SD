@@ -156,3 +156,6 @@
 ## 2024-05-18 - LUT optimization in urlDecode
 **Learning:** Found that `urlDecode` in `utils.cpp` was using arithmetic branching `(h1 <= '9') ? (h1 - '0') : ((h1 & 0xDF) - 'A' + 10)` which incurs overhead on every iteration inside a tight network parsing loop.
 **Action:** Replaced the generic bitwise and arithmetic calculations with a static lookup table (LUT) to decode hex sequences in constant O(1) time. Ensure comments are added to explain micro-optimizations as required by the instruction prompt.
+## 2024-11-26 - O(N) strlen overhead after snprintf
+**Learning:** Found multiple redundant `strlen` calls in `src/telegram.cpp` calculating the length of `tgramBuff` immediately after `snprintf` was used to append data to it. Because `snprintf` builds the string linearly, traversing the buffer again with `strlen(tgramBuff + FORM_OFFSET)` forces an unnecessary O(N) string traversal for lengths that could be calculated in O(1) time.
+**Action:** To eliminate redundant O(N) string traversals in C/C++, never call `strlen()` on a buffer immediately after formatting data into it with `snprintf`. Instead, calculate the length in O(1) time using pointer arithmetic (e.g., `p - (tgramBuff + FORM_OFFSET)`) or by validating and accumulating the return value of `snprintf`.
