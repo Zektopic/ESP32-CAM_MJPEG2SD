@@ -226,7 +226,20 @@
         outline: 2px solid var(--buttonActive);
         outline-offset: 2px;
       }
+      .password-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        width: 100%;
+      }
+
       .password-toggle {
+        position: absolute;
+        right: 4px;
+        background: transparent !important;
+        padding: 0;
+        margin: 0;
+        border: none;
         cursor: pointer;
         transition: 0.3s;
       }
@@ -262,8 +275,12 @@
         width: 100%;
       }
 
-      .input-group input,.input-group select {
+      .input-group input,.input-group select, .password-wrapper {
         flex-grow: 1
+      }
+
+      .password-wrapper input {
+        padding-right: 30px !important;
       }
 
       input {
