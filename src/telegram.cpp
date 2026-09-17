@@ -170,7 +170,7 @@ static bool sendTgramHeader(const char* tmethod, const char* contentType, const 
       written = snprintf(p, rem, CONTENT_TYPE, fileName, contentType);
       if (written > 0 && written < (int)rem) { p += written; rem -= written; }
     } // else JSON data already loaded by sendTgramMessage
-    size_t formLen = strlen(tgramBuff + FORM_OFFSET);
+    size_t formLen = isFile ? (p - (tgramBuff + FORM_OFFSET)) : fileSize;
     // create http request header
     p = tgramBuff;
     size_t rem = FORM_OFFSET;
@@ -260,7 +260,7 @@ bool getTgramUpdate(char* responseText) {
     size_t rem = MAX_HTTP_MSG - FORM_OFFSET;
     int written = snprintf(t, rem, GETUP_JSON, LONG_POLL, lastUpdate + 1);
     if (written > 0 && written < (int)rem) { t += written; rem -= written; }
-    sendTgramHeader("getUpdates", NULL, NULL, strlen(tgramBuff + FORM_OFFSET), NULL, NULL);
+    sendTgramHeader("getUpdates", NULL, NULL, t - (tgramBuff + FORM_OFFSET), NULL, NULL);
   }
   return false; // no response for app to process
 }
@@ -275,7 +275,7 @@ bool sendTgramMessage(const char* info, const char* item, const char* parseMode)
     written = snprintf(t - 1, rem + 1, PARSE_MODE, parseMode); // overwrite previous '}'
     if (written > 0 && written < (int)(rem + 1)) { t += written - 1; rem -= written - 1; }
   }
-  return sendTgramHeader("sendMessage", NULL, NULL, strlen(tgramBuff + FORM_OFFSET), NULL, NULL);
+  return sendTgramHeader("sendMessage", NULL, NULL, t - (tgramBuff + FORM_OFFSET), NULL, NULL);
 }
 
 bool sendTgramPhoto(uint8_t* photoData, size_t photoSize, const char* caption) {
