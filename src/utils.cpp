@@ -242,17 +242,17 @@ static void predefEthPins() {
   // set board specific pins if defined
 #if defined(ETH_CS)
   char ethPin[3];
-  sprintf(ethPin, "%d", ETH_CS);
+  snprintf(ethPin, sizeof(ethPin), "%d", ETH_CS);
   updateStatus("ethCS", ethPin);
-  sprintf(ethPin, "%d", ETH_INT);
+  snprintf(ethPin, sizeof(ethPin), "%d", ETH_INT);
   updateStatus("ethInt", ethPin);
-  sprintf(ethPin, "%d", ETH_RST);
+  snprintf(ethPin, sizeof(ethPin), "%d", ETH_RST);
   updateStatus("ethRst", ethPin);
-  sprintf(ethPin, "%d", ETH_SCLK);
+  snprintf(ethPin, sizeof(ethPin), "%d", ETH_SCLK);
   updateStatus("ethSclk", ethPin);
-  sprintf(ethPin, "%d", ETH_MISO);
+  snprintf(ethPin, sizeof(ethPin), "%d", ETH_MISO);
   updateStatus("ethMiso", ethPin);
-  sprintf(ethPin, "%d", ETH_MOSI);
+  snprintf(ethPin, sizeof(ethPin), "%d", ETH_MOSI);
   updateStatus("ethMosi", ethPin);
 #endif
 }
