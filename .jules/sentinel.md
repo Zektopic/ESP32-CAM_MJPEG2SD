@@ -229,3 +229,7 @@
 **Vulnerability:** Unbounded `sprintf` was used in `telemetry.cpp` to construct MQTT JSON payloads dynamically (`sprintf(jsonBuff, "{\"Temp\":\"%0.1f\", \"TIME\":\"%s\"}", bmxData[0], esp_log_system_timestamp());`). The dynamic timestamp string component could potentially exceed allocated bounds if malformed, leading to a stack buffer overflow.
 **Learning:** `sprintf` should never be used to format dynamic runtime values directly into bounded buffers, even if the buffer is globally defined as large. It provides no inherent bounds checking.
 **Prevention:** In C/C++, always deprecate `sprintf` in favor of `snprintf` combined with the maximum buffer size (e.g., `JSON_BUFF_LEN`), ensuring strict bounds enforcement and preventing buffer overflow exploits.
+## 2024-09-19 - [CRITICAL] Buffer Overflow in predefEthPins
+**Vulnerability:** In `utils.cpp`, unbounded `sprintf` was used multiple times to format Ethernet pin numbers (`ETH_CS`, etc.) into a 3-byte `ethPin` array (`sprintf(ethPin, "%d", ETH_CS)`).
+**Learning:** Even when dealing with macro constants like pin numbers that are generally expected to be small (e.g. < 99), using unbounded `sprintf` into a very small static array is an inherent buffer overflow risk if a negative or larger value is unexpectedly passed.
+**Prevention:** In C/C++, `sprintf` should always be replaced by bounds-checked `snprintf` with `sizeof()` limits, especially when targeting tiny character arrays, to prevent accidental stack memory corruption.
