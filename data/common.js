@@ -792,7 +792,7 @@
           logText += reqStr;
           // append to log display
           const log = $('#appLog');
-          log.innerHTML += colorise(logText) + '<br>';
+          log.insertAdjacentHTML('beforeend', colorise(logText) + '<br>');
           // auto scroll new entry unless scroll bar is not at bottom
           const bottom = 2 * baseFontSize;// 2 lines
           const pos = Math.abs(log.scrollHeight - log.clientHeight - log.scrollTop);
