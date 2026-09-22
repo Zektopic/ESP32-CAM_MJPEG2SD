@@ -233,3 +233,7 @@
 **Vulnerability:** In `utils.cpp`, unbounded `sprintf` was used multiple times to format Ethernet pin numbers (`ETH_CS`, etc.) into a 3-byte `ethPin` array (`sprintf(ethPin, "%d", ETH_CS)`).
 **Learning:** Even when dealing with macro constants like pin numbers that are generally expected to be small (e.g. < 99), using unbounded `sprintf` into a very small static array is an inherent buffer overflow risk if a negative or larger value is unexpectedly passed.
 **Prevention:** In C/C++, `sprintf` should always be replaced by bounds-checked `snprintf` with `sizeof()` limits, especially when targeting tiny character arrays, to prevent accidental stack memory corruption.
+## 2024-05-24 - CRITICAL: Path Traversal in OTA Update Handler
+**Vulnerability:** A path traversal vulnerability existed in `src/webServer.cpp`'s `startOTA` query parameter handler. The code directly passed the user-controlled `value` parameter to `snprintf(inFileName, ..., "%s/%s", DATA_DIR, value)` without any sanitization or validation.
+**Learning:** This vulnerability existed because the developer trusted the input for the OTA filename and assumed it would only ever be a benign file name originating from the frontend form.
+**Prevention:** Always validate and sanitize user input before using it in file paths, especially when concatenating strings for file system access. Check for traversal strings (like `..`, `/`, `\`) or use a secure path normalization function before using the path.
