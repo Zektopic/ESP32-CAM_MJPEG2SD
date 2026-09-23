@@ -287,6 +287,11 @@ static esp_err_t controlHandler(httpd_req_t *req) {
     return ESP_OK;
   }
   if (!strcmp(variable, "startOTA")) {
+    if (strstr(value, "..") != NULL || strchr(value, '/') != NULL || strchr(value, '\\') != NULL) {
+      LOG_WRN("Path traversal attempt in startOTA: %s", value);
+      httpd_resp_send_404(req);
+      return ESP_FAIL;
+    }
     snprintf(inFileName, IN_FILE_NAME_LEN - 1, "%s/%s", DATA_DIR, value);
     httpd_resp_sendstr(req, NULL);
     return ESP_OK;
