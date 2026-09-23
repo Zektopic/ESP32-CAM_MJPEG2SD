@@ -299,9 +299,10 @@ static bool handleMove() {
       httpd_resp_send_404(req);
       return false;
     }
-    memmove(dest, pos + (sizeof(WEBDAV) - 1), strlen(pos + (sizeof(WEBDAV) - 1)) + 1);
-    size_t destLen = strlen(dest);
-    if (destLen > 0 && dest[destLen - 1] == '/') dest[destLen - 1] = '\0';
+    // ⚡ Bolt optimization: Cache strlen to avoid redundant O(N) string traversal after memmove.
+    size_t destLen = strlen(pos + (sizeof(WEBDAV) - 1));
+    memmove(dest, pos + (sizeof(WEBDAV) - 1), destLen + 1);
+    if (destLen > 0 && dest[destLen - 1] == '/') { dest[destLen - 1] = '\0'; destLen--; }
 
     // only allow renaming if a folder
     if (isFolder()) res = checkSamePath(pathName, dest);
