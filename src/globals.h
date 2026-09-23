@@ -148,7 +148,7 @@ esp_err_t extractQueryKeyVal(httpd_req_t *req, char* variable, char* value, size
 esp_err_t fileHandler(httpd_req_t* req, bool download = false);
 void flush_log(bool andClose = false);
 char* fmtSize (uint64_t sizeVal);
-void formatElapsedTime(char* timeStr, uint32_t timeVal, bool noDays = false);
+void formatElapsedTime(char* timeStr, size_t maxLen, uint32_t timeVal, bool noDays = false);
 const char* formatIPstr(bool getAP = false);
 bool formatSDcard();
 bool fsStartTransfer(const char* fileFolder);

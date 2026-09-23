@@ -231,12 +231,12 @@ static void srtStream(httpd_req_t* req, uint8_t taskNum) {
   while (isStreaming[taskNum]) {
     srtSeqNo++;
     uint32_t startTime = millis();
-    formatElapsedTime(timeStr, srtTime, true);
+    formatElapsedTime(timeStr, sizeof(timeStr), srtTime, true);
     size_t srtPtr = 0;
     int written = snprintf(srtHdr, sizeof(srtHdr), "%d\n%s --> ", srtSeqNo, timeStr);
     if (written > 0 && written < sizeof(srtHdr)) srtPtr += written;
     srtTime += sampleInterval;
-    formatElapsedTime(timeStr, srtTime, true);
+    formatElapsedTime(timeStr, sizeof(timeStr), srtTime, true);
     written = snprintf(srtHdr + srtPtr, sizeof(srtHdr) - srtPtr, "%s\n", timeStr);
     if (written > 0 && written < sizeof(srtHdr) - srtPtr) srtPtr += written;
     time_t currEpoch = getEpoch();
