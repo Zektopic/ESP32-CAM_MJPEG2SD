@@ -483,7 +483,7 @@ void buildJsonString(uint8_t filter) {
     char timeBuff[20];
     strftime(timeBuff, 20, "%Y-%m-%d %H:%M:%S", localtime(&currEpoch));
     JSON_APPEND("\"clock\":\"%s\",", timeBuff);
-    formatElapsedTime(timeBuff, millis()); // rolls over after 49.7 days due to max uint32
+    formatElapsedTime(timeBuff, sizeof(timeBuff), millis()); // rolls over after 49.7 days due to max uint32
     JSON_APPEND("\"up_time\":\"%s\",", timeBuff);
     JSON_APPEND("\"free_heap\":\"%s\",", fmtSize(ESP.getFreeHeap()));
     JSON_APPEND("\"wifi_rssi\":\"%i dBm\",", netRSSI() );

@@ -418,7 +418,7 @@ void sendMqttHasState(){
   time_t currEpoch = getEpoch();
   strftime(timeBuff, 20, "%Y-%m-%d %H:%M:%S", localtime(&currEpoch));
   mqttPublishPath("clock", timeBuff);
-  formatElapsedTime(timeBuff, millis());
+  formatElapsedTime(timeBuff, sizeof(timeBuff), millis());
   mqttPublishPath("up_time", timeBuff);
   float aTemp = readTemperature(true);
   if (aTemp > -127.0){    

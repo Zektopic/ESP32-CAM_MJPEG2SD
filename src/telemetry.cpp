@@ -145,10 +145,10 @@ static void telemetryTask(void* pvParameters) {
     while (capturing) {
       uint32_t startTime = millis();
       // write header for this subtitle
-      formatElapsedTime(timeStr, srtTime, true);
+      formatElapsedTime(timeStr, sizeof(timeStr), srtTime, true);
       highPoint[1] += snprintf(teleBuf[1] + highPoint[1], MAX_LINE_LEN, "%d\n%s,000 --> ", srtSeqNo++, timeStr);
       srtTime += sampleInterval;
-      formatElapsedTime(timeStr, srtTime, true);
+      formatElapsedTime(timeStr, sizeof(timeStr), srtTime, true);
       highPoint[1] += snprintf(teleBuf[1] + highPoint[1], MAX_LINE_LEN,"%s,000\n", timeStr);
       // write current time for csv row and srt entry
       time_t currEpoch = getEpoch();
