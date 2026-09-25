@@ -352,7 +352,7 @@ static void battTask(void* parameter) {
     if (currentVoltage < voltLow && !sentExtAlert) {
       sentExtAlert = true; // only sent once per esp32 session
       char battMsg[20];
-      sprintf(battMsg, "Voltage is %0.2fV", currentVoltage);
+      snprintf(battMsg, sizeof(battMsg), "Voltage is %0.2fV", currentVoltage);
       externalAlert("Low battery", battMsg);
     }
     delay(voltInterval * 60 * 1000); // mins
@@ -386,7 +386,7 @@ static void setupLamp() {
   if (lampPin <= 0) {
     lampPin = LED_GPIO_NUM;
     char lampPinStr[3];
-    sprintf(lampPinStr, "%d", lampPin);
+    snprintf(lampPinStr, sizeof(lampPinStr), "%d", lampPin);
     updateStatus("lampPin", lampPinStr);
   }
 #endif

@@ -419,19 +419,19 @@ void setI2Schan(int whichChan) {
 static void predefPins() {
 char audPin[3];
 #if defined(I2S_SD)
-  sprintf(audPin, "%d", I2S_SD);
+  snprintf(audPin, sizeof(audPin), "%d", I2S_SD);
   updateStatus("micSdPin", audPin);
-  sprintf(audPin, "%d", I2S_WS);
+  snprintf(audPin, sizeof(audPin), "%d", I2S_WS);
   updateStatus("micSWsPin", audPin);
-  sprintf(audPin, "%d", I2S_SCK);
+  snprintf(audPin, sizeof(audPin), "%d", I2S_SCK);
   updateStatus("micSckPin", audPin);
 #endif
 #if defined(I2S_BCLK)
-  sprintf(audPin, "%d", I2S_BCLK);
+  snprintf(audPin, sizeof(audPin), "%d", I2S_BCLK);
   updateStatus("mampBckIo", audPin);
-  sprintf(audPin, "%d", I2S_LRCLK);
+  snprintf(audPin, sizeof(audPin), "%d", I2S_LRCLK);
   updateStatus("mampSwsIo", audPin);
-  sprintf(audPin, "%d", I2S_DIN);
+  snprintf(audPin, sizeof(audPin), "%d", I2S_DIN);
   updateStatus("mampSdIo", audPin);
 #endif
 

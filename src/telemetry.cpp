@@ -138,7 +138,8 @@ static void telemetryTask(void* pvParameters) {
     File teleFile = STORAGE.open(TELETEMP, FILE_WRITE);
     File srtFile = STORAGE.open(SRTTEMP, FILE_WRITE);
     // write CSV header row to buffer
-    highPoint[0] = sprintf(teleBuf[0], "Time%s\n", csvHeader); 
+    int w = snprintf(teleBuf[0], RAMSIZE + MAX_LINE_LEN, "Time%s\n", csvHeader);
+    highPoint[0] = (w > 0 && w < RAMSIZE + MAX_LINE_LEN) ? w : RAMSIZE + MAX_LINE_LEN - 1;
     highPoint[1] = 0;
     
     // loop while camera recording
@@ -156,8 +157,10 @@ static void telemetryTask(void* pvParameters) {
       // get and store data from sensors 
       storeSensorData(false);
       // add newline to finish row
-      highPoint[0] += sprintf(teleBuf[0] + highPoint[0], "\n"); 
-      highPoint[1] += sprintf(teleBuf[1] + highPoint[1], "\n\n");
+      int w0 = snprintf(teleBuf[0] + highPoint[0], RAMSIZE + MAX_LINE_LEN - highPoint[0], "\n");
+      if (w0 > 0) highPoint[0] += (w0 < RAMSIZE + MAX_LINE_LEN - highPoint[0]) ? w0 : RAMSIZE + MAX_LINE_LEN - highPoint[0] - 1;
+      int w1 = snprintf(teleBuf[1] + highPoint[1], RAMSIZE + MAX_LINE_LEN - highPoint[1], "\n\n");
+      if (w1 > 0) highPoint[1] += (w1 < RAMSIZE + MAX_LINE_LEN - highPoint[1]) ? w1 : RAMSIZE + MAX_LINE_LEN - highPoint[1] - 1;
       
       // if marker overflows buffer, write to storage
       for (int i = 0; i < NUM_BUFF; i++) {

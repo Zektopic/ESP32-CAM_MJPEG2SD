@@ -427,7 +427,7 @@ bool netIsConnected() { return (netMode > 0) ? (ETH.linkUp() && ETH.localIP()) :
 const char* formatIPstr(bool getAP) {
   static char localIP[16] = "";
   IPAddress ipLocal = getAP ? WiFi.AP.localIP() : netLocalIP();
-  sprintf(localIP, "%u.%u.%u.%u", ipLocal[0], ipLocal[1], ipLocal[2], ipLocal[3]); 
+  snprintf(localIP, sizeof(localIP), "%u.%u.%u.%u", ipLocal[0], ipLocal[1], ipLocal[2], ipLocal[3]);
   return localIP;
 }
 
