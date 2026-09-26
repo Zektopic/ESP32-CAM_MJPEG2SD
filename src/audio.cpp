@@ -417,7 +417,7 @@ void setI2Schan(int whichChan) {
 }
 
 static void predefPins() {
-char audPin[3];
+char audPin[5];
 #if defined(I2S_SD)
   snprintf(audPin, sizeof(audPin), "%d", I2S_SD);
   updateStatus("micSdPin", audPin);
