@@ -318,7 +318,7 @@ esp_err_t appSpecificWebHandler(httpd_req_t *req, const char* variable, const ch
     strncpy(inFileName, value, IN_FILE_NAME_LEN - 1);
     inFileName[IN_FILE_NAME_LEN - 1] = 0;
     if (!forceRecord) doPlayback = listDir(inFileName, jsonBuff, JSON_BUFF_LEN, AVI_EXT); // browser control
-    else strcpy(jsonBuff, "{}");
+    else snprintf(jsonBuff, JSON_BUFF_LEN, "{}");
     httpd_resp_set_type(req, "application/json");
     httpd_resp_sendstr(req, jsonBuff);
   }

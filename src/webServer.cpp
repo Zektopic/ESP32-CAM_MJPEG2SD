@@ -131,7 +131,7 @@ bool checkAuth(httpd_req_t* req) {
 }
 
 static esp_err_t indexHandler(httpd_req_t* req) {
-  strcpy(inFileName, INDEX_PAGE_PATH);
+  snprintf(inFileName, IN_FILE_NAME_LEN, "%s", INDEX_PAGE_PATH);
   if (isPathTraversal(inFileName)) {
     LOG_WRN("Path traversal attempt detected in index: %s", inFileName);
     httpd_resp_send_404(req);

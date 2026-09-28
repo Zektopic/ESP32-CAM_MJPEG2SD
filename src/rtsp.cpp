@@ -49,28 +49,36 @@ char transportStr[30];  // Adjust the size as needed
 
 RTSPServer::TransportType determineTransportType() { 
   if (rtspVideo && rtspAudio && rtspSubtitles) { 
-    strcpy(transportStr, "s: Video, Audio & Subtitles");
+    strncpy(transportStr, "s: Video, Audio & Subtitles", sizeof(transportStr) - 1);
+    transportStr[sizeof(transportStr) - 1] = 0;
     return RTSPServer::VIDEO_AUDIO_SUBTITLES; 
   } else if (rtspVideo && rtspAudio) { 
-    strcpy(transportStr, "s: Video & Audio");
+    strncpy(transportStr, "s: Video & Audio", sizeof(transportStr) - 1);
+    transportStr[sizeof(transportStr) - 1] = 0;
     return RTSPServer::VIDEO_AND_AUDIO; 
   } else if (rtspVideo && rtspSubtitles) { 
-    strcpy(transportStr, "s: Video & Subtitles");
+    strncpy(transportStr, "s: Video & Subtitles", sizeof(transportStr) - 1);
+    transportStr[sizeof(transportStr) - 1] = 0;
     return RTSPServer::VIDEO_AND_SUBTITLES; 
   } else if (rtspAudio && rtspSubtitles) { 
-    strcpy(transportStr, "s: Audio & Subtitles");
+    strncpy(transportStr, "s: Audio & Subtitles", sizeof(transportStr) - 1);
+    transportStr[sizeof(transportStr) - 1] = 0;
     return RTSPServer::AUDIO_AND_SUBTITLES; 
   } else if (rtspVideo) { 
-    strcpy(transportStr, ": Video");
+    strncpy(transportStr, ": Video", sizeof(transportStr) - 1);
+    transportStr[sizeof(transportStr) - 1] = 0;
     return RTSPServer::VIDEO_ONLY; 
   } else if (rtspAudio) { 
-    strcpy(transportStr, ": Audio");
+    strncpy(transportStr, ": Audio", sizeof(transportStr) - 1);
+    transportStr[sizeof(transportStr) - 1] = 0;
     return RTSPServer::AUDIO_ONLY; 
   } else if (rtspSubtitles) { 
-    strcpy(transportStr, ": Subtitles");
+    strncpy(transportStr, ": Subtitles", sizeof(transportStr) - 1);
+    transportStr[sizeof(transportStr) - 1] = 0;
     return RTSPServer::SUBTITLES_ONLY; 
   } else { 
-    strcpy(transportStr, ": None!");
+    strncpy(transportStr, ": None!", sizeof(transportStr) - 1);
+    transportStr[sizeof(transportStr) - 1] = 0;
     return RTSPServer::NONE; 
   }
 }
@@ -143,7 +151,7 @@ static void initRTSP() {
   // Initialize the RTSP server for VC using constants
   rtspVideo = rtspSubtitles = false;
   rtspAudio = true;
-  strcpy(RTP_ip, "239.255.0.1");
+  snprintf(RTP_ip, sizeof(RTP_ip), "239.255.0.1");
   rtspPort = 554;
   rtpAudioPort = 5432; 
   rtpVideoPort = 0; 
