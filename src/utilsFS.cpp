@@ -44,9 +44,9 @@ static void infoSD() {
   if (cardType == CARD_NONE) LOG_WRN("No SD card attached");
   else {
     char typeStr[8] = "UNKNOWN";
-    if (cardType == CARD_MMC) strcpy(typeStr, "MMC");
-    else if (cardType == CARD_SD) strcpy(typeStr, "SDSC");
-    else if (cardType == CARD_SDHC) strcpy(typeStr, "SDHC");
+    if (cardType == CARD_MMC) snprintf(typeStr, sizeof(typeStr), "MMC");
+    else if (cardType == CARD_SD) snprintf(typeStr, sizeof(typeStr), "SDSC");
+    else if (cardType == CARD_SDHC) snprintf(typeStr, sizeof(typeStr), "SDHC");
     LOG_INF("SD card type %s, Size: %s, using %d bit mode @ %uMHz", typeStr, fmtSize(SD_MMC.cardSize()), use1bitMode ? 1 : 4, sdmmcFreq / 1000);
   }
 #endif
@@ -112,7 +112,7 @@ static void listFolder(const char* rootDir) {
     file = root.openNextFile();
   }
   char totalBytes[20];
-  strcpy(totalBytes, fmtSize(STORAGE.totalBytes()));
+  snprintf(totalBytes, sizeof(totalBytes), "%s", fmtSize(STORAGE.totalBytes()));
   LOG_INF("%s: %s used of %s", fsTypes[thisFS], fmtSize(STORAGE.usedBytes()), totalBytes);
 }
 
@@ -237,7 +237,7 @@ bool listDir(const char* fname, char* jsonBuff, size_t jsonBuffLen, const char* 
     // required file type selected
     hasExtension = true;
     noEntries = true; 
-    strcpy(jsonBuff, "{}");     
+    snprintf(jsonBuff, jsonBuffLen, "{}");
   } else {
     // ignore leading '/' if not the only character
     bool returnDirs = fileName[0] != '\0' && fileName[1] != '\0' ? (strchr(fileName+1, '/') == NULL ? false : true) : true;
@@ -250,7 +250,7 @@ bool listDir(const char* fname, char* jsonBuff, size_t jsonBuffLen, const char* 
     }
     
     // build relevant option list
-    strcpy(jsonBuff, returnDirs ? "{" : "{\"/\":\".. [ Up ]\",");            
+    snprintf(jsonBuff, jsonBuffLen, "%s", returnDirs ? "{" : "{\"/\":\".. [ Up ]\",");
     File file = root.openNextFile();
     if (psramFound()) heap_caps_malloc_extmem_enable(MIN_RAM); // small number to force vector into psram
     while (file) {
@@ -361,7 +361,7 @@ static esp_err_t writeHeader(File& inFile, httpd_req_t* req) {
   snprintf(tarHeader + 124, 12, "%011o", inFile.size()); // length of file in bytes as 6 digit ascii octal number
   memcpy(tarHeader + 148, "        ", 8); // init as 8 spaces to calc checksum
   tarHeader[156] = '0'; // type of entry - 0 for ordinary file
-  strcpy(tarHeader + 257, "ustar"); // magic
+  snprintf(tarHeader + 257, 6, "ustar"); // magic
   memcpy(tarHeader + 263, "00", 2); // version as two 0 digits
 
   // Calculate and set the checksum
