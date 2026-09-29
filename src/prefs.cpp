@@ -425,10 +425,14 @@ void updateStatus(const char* variable, const char* _value, bool fromUser) {
     if (intVal) deleteFolderOrFile(DATA_DIR); // entire folder
     else {
       // manually specified file, eg control?deldata=favicon.ico
-      char delFile[FILE_NAME_LEN];
-      int dlen = snprintf(delFile, FILE_NAME_LEN, "%s/%s", DATA_DIR, value);
-      if (dlen > FILE_NAME_LEN) LOG_WRN("File name %s too long", value);
-      else deleteFolderOrFile(delFile);
+      if (strstr(value, "..") != NULL || strchr(value, '/') != NULL || strchr(value, '\\') != NULL) {
+        LOG_WRN("Path traversal attempt in deldata: %s", value);
+      } else {
+        char delFile[FILE_NAME_LEN];
+        int dlen = snprintf(delFile, FILE_NAME_LEN, "%s/%s", DATA_DIR, value);
+        if (dlen > FILE_NAME_LEN) LOG_WRN("File name %s too long", value);
+        else deleteFolderOrFile(delFile);
+      }
     }
     doRestart("user requested restart after data deletion");
   }
