@@ -157,7 +157,16 @@ static bool handleProp() {
   if (extractHeaderVal(req, "Depth", value, sizeof(value)) == ESP_OK) depth = (!strcmp(value, "0")) ? false : true;
 
   // get request payload content if present
-  char payload[req->content_len + 1] = {0};
+  if (req->content_len > 4096) {
+    httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Payload too large");
+    return false;
+  }
+  char* payload = (char*)malloc(req->content_len + 1);
+  if (!payload) {
+    httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Memory allocation failed");
+    return false;
+  }
+  memset(payload, 0, req->content_len + 1);
   if (req->content_len) getPayload(payload);
 
   // common header
@@ -180,6 +189,7 @@ static bool handleProp() {
   root.close();
   httpd_resp_sendstr_chunk(req, "</D:multistatus>");
   httpd_resp_sendstr_chunk(req, NULL);
+  free(payload);
   return true;
 }
 
