@@ -34,3 +34,6 @@
 ## 2025-09-12 - Aria-labels for range inputs with hidden labels
 **Learning:** Adding `aria-hidden="true"` to a `<label>` hides it from screen readers, which leaves the associated `<input>` without an accessible name, breaking form accessibility. Range inputs with hidden labels must have their own `aria-label` reflecting the intended name.
 **Action:** When improving form accessibility, do not blindly add `aria-label` attributes to all input elements. Only add `aria-label`s to inputs that lack a proper native association, such as inputs where the associated `<label>` uses `aria-hidden="true"`.
+## 2026-10-03 - Exclude SVGs when applying aria-hidden to decorative icons
+**Learning:** When using `<span aria-hidden="true">` to hide decorative Unicode emojis or symbols from screen readers in HTML files, applying this pattern blindly across all matches will break SVG elements (like `<text>`). `<span>` is not a valid tag inside an SVG context (the correct element is `<tspan>`), and wrapping text nodes in SVGs with `<span>` causes rendering failures and invalid markup.
+**Action:** When writing scripts or regex to wrap decorative icons, always explicitly exclude matches that occur inside `<svg>` blocks, or use SVG-specific tags (`<tspan aria-hidden="true">`) and ensure the parent `<svg>` isn't already handling the accessibility state.
