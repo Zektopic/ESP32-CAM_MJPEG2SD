@@ -59,14 +59,9 @@ static bool searchJsonResponse(const char* keyName) {
   // search json to extract value for given key, must end with a colon
   char* keyPtr = strstr(tgramBuff, keyName);
   if (keyPtr == NULL) return false;
+  // ⚡ Bolt optimization: find end using strcspn instead of multiple strchr/strlen checks
   char* startItem = keyPtr + strlen(keyName);
-  char* endItem = strchr(startItem, ',');
-  if (endItem == NULL) {
-    endItem = strchr(startItem, '}');
-    if (endItem == NULL) {
-      endItem = startItem + strlen(startItem);
-    }
-  }
+  char* endItem = startItem + strcspn(startItem, ",}");
   int valSize = endItem - startItem;
   if (valSize > sizeof(keyValue) - 1) {
     LOG_WRN("Telegram JSON value too long %d", valSize); 
