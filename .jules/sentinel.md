@@ -254,3 +254,7 @@
 **Vulnerability:** A path traversal vulnerability existed in `src/prefs.cpp`'s `deldata` endpoint where the user-supplied `value` parameter was passed directly to `snprintf(delFile, FILE_NAME_LEN, "%s/%s", DATA_DIR, value)` without validation.
 **Learning:** This vulnerability existed because the developer trusted the input for the file deletion path, assuming it would only be benign filenames like `favicon.ico` passed from the frontend form.
 **Prevention:** Always validate and sanitize user input before using it in file paths, especially when concatenating strings for file system access or deletion. Implement standard path traversal checks like `strstr(value, "..")` and `strchr(value, '/')`.
+## 2024-10-05 - [CRITICAL] Path Traversal in sfile endpoint
+**Vulnerability:** A path traversal vulnerability existed in `src/appSpecific.cpp` within the `appSpecificWebHandler` function. When handling the `sfile` request, the user-supplied `value` parameter was passed directly to the `listDir` function without validation, allowing directory escape via `..` or `\`.
+**Learning:** Even parameters intended to identify a specific directory to list (like `sfile`) must be treated as untrusted input. Trusting the client to send a well-formed directory name without checking for traversal sequences allows unauthorized filesystem access.
+**Prevention:** Always validate and sanitize user input before passing it to filesystem functions. Implement checks like `strstr(value, "..")` and `strchr(value, '\\')` to reject inputs containing directory traversal characters.
