@@ -159,3 +159,6 @@
 ## 2024-11-26 - O(N) strlen overhead after snprintf
 **Learning:** Found multiple redundant `strlen` calls in `src/telegram.cpp` calculating the length of `tgramBuff` immediately after `snprintf` was used to append data to it. Because `snprintf` builds the string linearly, traversing the buffer again with `strlen(tgramBuff + FORM_OFFSET)` forces an unnecessary O(N) string traversal for lengths that could be calculated in O(1) time.
 **Action:** To eliminate redundant O(N) string traversals in C/C++, never call `strlen()` on a buffer immediately after formatting data into it with `snprintf`. Instead, calculate the length in O(1) time using pointer arithmetic (e.g., `p - (tgramBuff + FORM_OFFSET)`) or by validating and accumulating the return value of `snprintf`.
+## 2024-11-26 - Optimize JSON value parsing with strcspn
+**Learning:** Chaining multiple sequential `strchr` and `strlen` calls to search for the end of a token (e.g., searching for either `,` or `}` to find the end of a JSON value string) introduces redundant O(N) string traversals, and may incorrectly parse substrings if a fallback character occurs before the primary search character.
+**Action:** Use `strcspn` to search for the first occurrence of multiple delimiter characters simultaneously. This reduces time complexity to a single O(N) pass and handles multiple terminators natively.
