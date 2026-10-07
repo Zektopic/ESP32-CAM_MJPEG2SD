@@ -165,3 +165,6 @@
 ## 2024-11-26 - Fixed-point integer overflow in bilinear interpolation
 **Learning:** When using fixed-point integer math to replace floating-point operations (e.g., using a 16-bit fractional part shifted by 16), intermediate calculations for interpolation weights can easily overflow 32-bit integers. Specifically, if a pixel weight perfectly aligns (e.g., `one_minus_xWeight = 65536`), multiplying two such weights (`65536 * 65536 = 4,294,967,296`) overflows a `uint32_t` causing the weight to wrap to 0, resulting in black pixels.
 **Action:** Always cast integer operands to `uint64_t` before performing fixed-point multiplication to prevent overflow, e.g., `((uint64_t)w1 * w2) >> 16`.
+## 2024-05-24 - O(1) String token boundary detection
+**Learning:** To improve C/C++ string parsing performance when searching for the first occurrence of multiple possible delimiter characters (e.g., finding the end of a JSON value string by looking for either a comma or a closing brace), avoid chaining multiple sequential `strchr` combined with `strlen` checks. Instead, use a single `strcspn(str, ",}")` call to perform the search in one optimized O(N) pass, eliminating redundant string traversals.
+**Action:** When searching a string for the first match from a set of characters, use `strcspn` instead of multiple `strchr` calls.
