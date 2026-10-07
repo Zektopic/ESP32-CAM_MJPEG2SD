@@ -119,28 +119,32 @@ static void rescaleImage(const uint8_t* input, int inputWidth, int inputHeight, 
   int inW_cD = inputWidth * colorDepth;
   int outW_cD = outputWidth * colorDepth;
 
+  // ⚡ Bolt optimization: Use fixed-point integer math and unroll loop to replace slow floating-point interpolation
+  uint32_t xRatioFixed = (uint32_t)((inputWidth << 16) / outputWidth);
+  uint32_t yRatioFixed = (uint32_t)((inputHeight << 16) / outputHeight);
+
   for (int i = 0; i < outputHeight; ++i) {
-    float yf = yRatio * i;
-    int yL = (int)floor(yf);
-    int yH = (int)ceil(yf);
-    float yWeight = yf - yL;
-    float one_minus_yWeight = 1.0f - yWeight;
+    uint32_t yf = (i * yRatioFixed);
+    int yL = yf >> 16;
+    int yH = yL + 1 < inputHeight ? yL + 1 : inputHeight - 1;
+    uint32_t yWeight = yf & 0xFFFF;
+    uint32_t one_minus_yWeight = 65536 - yWeight;
 
     int yL_idx = yL * inW_cD;
     int yH_idx = yH * inW_cD;
     int out_y_idx = i * outW_cD;
 
     for (int j = 0; j < outputWidth; ++j) {
-      float xf = xRatio * j;
-      int xL = (int)floor(xf);
-      int xH = (int)ceil(xf);
-      float xWeight = xf - xL;
-      float one_minus_xWeight = 1.0f - xWeight;
+      uint32_t xf = (j * xRatioFixed);
+      int xL = xf >> 16;
+      int xH = xL + 1 < inputWidth ? xL + 1 : inputWidth - 1;
+      uint32_t xWeight = xf & 0xFFFF;
+      uint32_t one_minus_xWeight = 65536 - xWeight;
 
-      float w1 = one_minus_xWeight * one_minus_yWeight;
-      float w2 = xWeight * one_minus_yWeight;
-      float w3 = one_minus_xWeight * yWeight;
-      float w4 = xWeight * yWeight;
+      uint32_t w1 = ((uint64_t)one_minus_xWeight * one_minus_yWeight) >> 16;
+      uint32_t w2 = ((uint64_t)xWeight * one_minus_yWeight) >> 16;
+      uint32_t w3 = ((uint64_t)one_minus_xWeight * yWeight) >> 16;
+      uint32_t w4 = ((uint64_t)xWeight * yWeight) >> 16;
 
       int xL_cD = xL * colorDepth;
       int xH_cD = xH * colorDepth;
@@ -151,12 +155,27 @@ static void rescaleImage(const uint8_t* input, int inputWidth, int inputHeight, 
       int d_idx = yH_idx + xH_cD;
       int out_idx = out_y_idx + j * colorDepth;
 
-      for (int channel = 0; channel < colorDepth; ++channel) {
-        float pixel = input[a_idx + channel] * w1 +
-                      input[b_idx + channel] * w2 +
-                      input[c_idx + channel] * w3 +
-                      input[d_idx + channel] * w4;
-        output[out_idx + channel] = (uint8_t)pixel;
+      if (colorDepth == 1) {
+        uint32_t pixel = input[a_idx] * w1 +
+                      input[b_idx] * w2 +
+                      input[c_idx] * w3 +
+                      input[d_idx] * w4;
+        output[out_idx] = (uint8_t)(pixel >> 16);
+      } else if (colorDepth == 3) {
+        uint32_t pixel0 = input[a_idx] * w1 + input[b_idx] * w2 + input[c_idx] * w3 + input[d_idx] * w4;
+        uint32_t pixel1 = input[a_idx + 1] * w1 + input[b_idx + 1] * w2 + input[c_idx + 1] * w3 + input[d_idx + 1] * w4;
+        uint32_t pixel2 = input[a_idx + 2] * w1 + input[b_idx + 2] * w2 + input[c_idx + 2] * w3 + input[d_idx + 2] * w4;
+        output[out_idx] = (uint8_t)(pixel0 >> 16);
+        output[out_idx + 1] = (uint8_t)(pixel1 >> 16);
+        output[out_idx + 2] = (uint8_t)(pixel2 >> 16);
+      } else {
+        for (int channel = 0; channel < colorDepth; ++channel) {
+          uint32_t pixel = input[a_idx + channel] * w1 +
+                        input[b_idx + channel] * w2 +
+                        input[c_idx + channel] * w3 +
+                        input[d_idx + channel] * w4;
+          output[out_idx + channel] = (uint8_t)(pixel >> 16);
+        }
       }
     }
   }
