@@ -315,6 +315,11 @@ esp_err_t appSpecificWebHandler(httpd_req_t *req, const char* variable, const ch
   // update handling requiring response specific to mjpeg2sd
   if (!strcmp(variable, "sfile")) {
     // get folders / files on SD, save received filename if has required extension
+    if (strstr(value, "..") != NULL || strchr(value, '\\') != NULL) {
+      LOG_WRN("Path traversal attempt in sfile: %s", value);
+      httpd_resp_send_404(req);
+      return ESP_FAIL;
+    }
     strncpy(inFileName, value, IN_FILE_NAME_LEN - 1);
     inFileName[IN_FILE_NAME_LEN - 1] = 0;
     if (!forceRecord) doPlayback = listDir(inFileName, jsonBuff, JSON_BUFF_LEN, AVI_EXT); // browser control
