@@ -947,10 +947,10 @@
                       inputHtml = '<input type="text" class="configItem" id="' + saveKey + '" value="'+ saveVal +'" readonly style="background-color: var(--menuBackground);">';
                     break;
                     case 'L': // binary string input
-                      inputHtml = '<input type="text" oninput="this.value = this.value.replace(/[^01]/g, \'\')" placeholder="0101..." class="configItem" id="' + saveKey + '" value="'+ saveVal +'" autocorrect="off" autocapitalize="none" spellcheck="false">';
+                      inputHtml = '<input type="text" oninput="this.value = this.value.replace(/[^01]/g, \'\')" placeholder="0101..." class="configItem" id="' + saveKey + '" value="'+ saveVal +'" autocorrect="off" autocapitalize="none" spellcheck="false" onkeydown="if(event.key === \'Enter\') this.blur();">';
                     break;
                     case 'N': // number input
-                      inputHtml = '<input type="number" class="configItem" id="' + saveKey + '" value="'+ saveVal +'" autocorrect="off" autocapitalize="none" spellcheck="false">';
+                      inputHtml = '<input type="number" class="configItem" id="' + saveKey + '" value="'+ saveVal +'" autocorrect="off" autocapitalize="none" spellcheck="false" onkeydown="if(event.key === \'Enter\') this.blur();">';
                     break;
                     case 'R': // R:min:max:step
                       // format number as range slider
@@ -970,10 +970,10 @@
                       inputHtml += '</select>';
                     break;
                     case 'T': // text input
-                      inputHtml = '<input type="text" class="configItem" id="' + saveKey + '" value="'+ saveVal +'" autocorrect="off" autocapitalize="none" spellcheck="false" >';
+                      inputHtml = '<input type="text" class="configItem" id="' + saveKey + '" value="'+ saveVal +'" autocorrect="off" autocapitalize="none" spellcheck="false" onkeydown="if(event.key === \'Enter\') this.blur();">';
                     break;
                     case 'X': // text input field not updated by app
-                      inputHtml = '<input type="text" class="configItem nochange" id="' + saveKey + '" value="'+ saveVal +'" autocorrect="off" autocapitalize="none" spellcheck="false" >';
+                      inputHtml = '<input type="text" class="configItem nochange" id="' + saveKey + '" value="'+ saveVal +'" autocorrect="off" autocapitalize="none" spellcheck="false" onkeydown="if(event.key === \'Enter\') this.blur();">';
                     break;
                     default:
                       alert("Unhandled config input type " + value);
