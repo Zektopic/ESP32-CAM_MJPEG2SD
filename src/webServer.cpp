@@ -131,6 +131,7 @@ bool checkAuth(httpd_req_t* req) {
 }
 
 static esp_err_t indexHandler(httpd_req_t* req) {
+  if (!checkAuth(req)) return ESP_OK;
   snprintf(inFileName, IN_FILE_NAME_LEN, "%s", INDEX_PAGE_PATH);
   if (isPathTraversal(inFileName)) {
     LOG_WRN("Path traversal attempt detected in index: %s", inFileName);
@@ -151,7 +152,7 @@ static esp_err_t indexHandler(httpd_req_t* req) {
     // Open a basic wifi setup page
     httpd_resp_set_type(req, "text/html");
     return httpd_resp_sendstr(req, setupPage_html);
-  } else if (!checkAuth(req)) return ESP_OK; // check if authentication required & passed
+  }
 
   return fileHandler(req);
 }

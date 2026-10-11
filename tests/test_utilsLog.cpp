@@ -36,7 +36,7 @@ void mock_log(const char* fmt, ...) {
 }
 #define LOG_INF(...) mock_log(__VA_ARGS__)
 
-#include "../utilsLog.cpp"
+#include "../src/utilsLog.cpp"
 
 void test_partitionTypeToStr() {
     assert(strcmp(partitionTypeToStr(ESP_PARTITION_TYPE_APP), "APP") == 0);
