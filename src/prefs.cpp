@@ -291,7 +291,8 @@ void updateStatus(const char* variable, const char* _value, bool fromUser) {
   // or from loadConfig() to update app status from stored preferences
   bool res = true;
   char value[IN_FILE_NAME_LEN];
-  strncpy(value, _value, sizeof(value));
+  strncpy(value, _value, sizeof(value) - 1);
+  value[sizeof(value) - 1] = '\0';
 #if INCLUDE_MQTT
   if (mqtt_active) {
     char buff[(IN_FILE_NAME_LEN * 2)];
