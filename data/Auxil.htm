@@ -879,7 +879,7 @@
                     <label for="ST_Pass">Password</label>
                     <div class="password-wrapper">
                       <input type="password" autocorrect="off" autocapitalize="none" spellcheck="false" id="ST_Pass" onkeydown="if(event.key === 'Enter') this.blur();" name="ST_Pass" maxlength=64 placeholder="Router password" style="padding-right:30px; width:100%">
-                      <button type="button" class="password-toggle local" onclick="const p=document.getElementById('ST_Pass'); if(p.type==='password'){p.type='text';this.innerText='🙈';this.title='Hide password';}else{p.type='password';this.innerText='👁️';this.title='Show password';}" aria-label="Toggle password visibility for ST_Pass" title="Show password">👁️</button>
+                      <button type="button" class="password-toggle local" onclick="const p=document.getElementById('ST_Pass'); if(p.type==='password'){p.type='text';this.innerHTML='<span aria-hidden=\'true\'>🙈</span>';this.setAttribute('aria-pressed', 'true');this.title='Hide password';}else{p.type='password';this.innerHTML='<span aria-hidden=\'true\'>👁️</span>';this.setAttribute('aria-pressed', 'false');this.title='Show password';}" aria-label="Toggle password visibility for ST_Pass" title="Show password" aria-pressed="false"><span aria-hidden="true">👁️</span></button>
                     </div>
                   </div>
                   <div class="input-group">
@@ -922,7 +922,7 @@
                     <label for="FS_Pass">FS password</label>
                     <div class="password-wrapper">
                       <input type="password" autocorrect="off" autocapitalize="none" spellcheck="false" id="FS_Pass" onkeydown="if(event.key === 'Enter') this.blur();" name="FS_Pass" maxlength=32 placeholder="File server password" style="padding-right:30px; width:100%">
-                      <button type="button" class="password-toggle local" onclick="const p=document.getElementById('FS_Pass'); if(p.type==='password'){p.type='text';this.innerText='🙈';this.title='Hide password';}else{p.type='password';this.innerText='👁️';this.title='Show password';}" aria-label="Toggle password visibility for FS_Pass" title="Show password">👁️</button>
+                      <button type="button" class="password-toggle local" onclick="const p=document.getElementById('FS_Pass'); if(p.type==='password'){p.type='text';this.innerHTML='<span aria-hidden=\'true\'>🙈</span>';this.setAttribute('aria-pressed', 'true');this.title='Hide password';}else{p.type='password';this.innerHTML='<span aria-hidden=\'true\'>👁️</span>';this.setAttribute('aria-pressed', 'false');this.title='Show password';}" aria-label="Toggle password visibility for FS_Pass" title="Show password" aria-pressed="false"><span aria-hidden="true">👁️</span></button>
                     </div>
                   </div>
                   <div class="input-group" id="ftp-group">
@@ -954,7 +954,7 @@
                     <label for="SMTP_Pass">SMTP password</label>
                     <div class="password-wrapper">
                       <input type="password" autocorrect="off" autocapitalize="none" spellcheck="false" id="SMTP_Pass" onkeydown="if(event.key === 'Enter') this.blur();" name="SMTP_Pass" maxlength=32 placeholder="smtp password" style="padding-right:30px; width:100%">
-                      <button type="button" class="password-toggle local" onclick="const p=document.getElementById('SMTP_Pass'); if(p.type==='password'){p.type='text';this.innerText='🙈';this.title='Hide password';}else{p.type='password';this.innerText='👁️';this.title='Show password';}" aria-label="Toggle password visibility for SMTP_Pass" title="Show password">👁️</button>
+                      <button type="button" class="password-toggle local" onclick="const p=document.getElementById('SMTP_Pass'); if(p.type==='password'){p.type='text';this.innerHTML='<span aria-hidden=\'true\'>🙈</span>';this.setAttribute('aria-pressed', 'true');this.title='Hide password';}else{p.type='password';this.innerHTML='<span aria-hidden=\'true\'>👁️</span>';this.setAttribute('aria-pressed', 'false');this.title='Show password';}" aria-label="Toggle password visibility for SMTP_Pass" title="Show password" aria-pressed="false"><span aria-hidden="true">👁️</span></button>
                     </div>
                   </div>
                   <div class="input-group" id="ftp-group">
@@ -971,7 +971,7 @@
                       <label for="Auth_Pass">Web password</label>
                       <div class="password-wrapper">
                       <input type="password" autocorrect="off" autocapitalize="none" spellcheck="false" id="Auth_Pass" onkeydown="if(event.key === 'Enter') this.blur();" name="Auth_Pass" maxlength=32 placeholder="Authentication password" style="padding-right:30px; width:100%">
-                      <button type="button" class="password-toggle local" onclick="const p=document.getElementById('Auth_Pass'); if(p.type==='password'){p.type='text';this.innerText='🙈';this.title='Hide password';}else{p.type='password';this.innerText='👁️';this.title='Show password';}" aria-label="Toggle password visibility for Auth_Pass" title="Show password">👁️</button>
+                      <button type="button" class="password-toggle local" onclick="const p=document.getElementById('Auth_Pass'); if(p.type==='password'){p.type='text';this.innerHTML='<span aria-hidden=\'true\'>🙈</span>';this.setAttribute('aria-pressed', 'true');this.title='Hide password';}else{p.type='password';this.innerHTML='<span aria-hidden=\'true\'>👁️</span>';this.setAttribute('aria-pressed', 'false');this.title='Show password';}" aria-label="Toggle password visibility for Auth_Pass" title="Show password" aria-pressed="false"><span aria-hidden="true">👁️</span></button>
                     </div>
                   </div>
                   <div class="input-group" id="auth-group">
