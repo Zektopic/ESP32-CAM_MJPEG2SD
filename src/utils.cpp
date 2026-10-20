@@ -844,6 +844,29 @@ bool calcProgress(int progressVal, int totalVal, int percentReport, uint8_t &pcP
 
 
 void urlDecode(char* inVal) {
+
+  // ⚡ Bolt optimization: Use a precomputed static boolean lookup table (LUT) for hex digit
+  // validation (isxdigit) to avoid generic standard library locale-checking and function
+  // call overhead inside the tight URL decoding loop.
+  static const bool isXDigitLUT[256] = {
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
+      0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+  };
+
   // Optimized: Precomputed constant-time lookup table (LUT) to eliminate generic bitwise
   // and arithmetic operations in the hot loop, reducing CPU overhead during hex decoding.
   static const uint8_t hexDecodeLUT[256] = {
@@ -869,7 +892,7 @@ void urlDecode(char* inVal) {
   char* readPtr = inVal;
   char* writePtr = inVal;
   while (*readPtr) {
-    if (*readPtr == '%' && isxdigit((unsigned char)readPtr[1]) && isxdigit((unsigned char)readPtr[2])) {
+    if (*readPtr == '%' && isXDigitLUT[(unsigned char)readPtr[1]] && isXDigitLUT[(unsigned char)readPtr[2]]) {
       char h1 = readPtr[1];
       char h2 = readPtr[2];
       int v1 = hexDecodeLUT[(unsigned char)h1];
