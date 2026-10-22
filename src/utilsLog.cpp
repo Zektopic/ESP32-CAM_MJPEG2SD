@@ -6,6 +6,8 @@
  * true  : also saves log on SD card. To download the log generated, either:
  *  - To view the log, press Show Log button on the browser
  * - To clear the log file contents, on log web page press Clear Log link
+ *
+ * s60sc 2026
  */
  
 #ifndef TEST_ENV
@@ -62,11 +64,23 @@ void logIncrementDropCount(void) {
   Atomic_Increment_u32(&dropCount);
 }
 
+int getLogStartPtr(int mlogEnd) {
+  // skip over nulls
+  int startPtr = mlogEnd;
+  while (messageLog[startPtr] == 0) {
+    startPtr++;
+    if (startPtr >= RAM_LOG_LEN) startPtr = 0;
+    if (startPtr == mlogEnd) break;
+  }
+  return startPtr;
+}
+
 void saveRamLog(const char* ramLogName) {
   // save ramlog to storage 
   File ramFile = STORAGE.open(ramLogName, FILE_WRITE);
-  int startPtr, endPtr;
-  startPtr = endPtr = mlogEnd;  
+  int startPtr = getLogStartPtr(mlogEnd);
+  int endPtr = mlogEnd;  
+
   // write log in chunks
   do {
     int maxChunk = startPtr < endPtr ? endPtr - startPtr : RAM_LOG_LEN - startPtr;
@@ -74,7 +88,7 @@ void saveRamLog(const char* ramLogName) {
     if (chunkSize > 0) ramFile.write((uint8_t*)messageLog + startPtr, chunkSize);
     startPtr += chunkSize;
     if (startPtr >= RAM_LOG_LEN) startPtr = 0;
-    vTaskDelay(1);
+    delay(1);
   } while (startPtr != endPtr);
   ramFile.close();
 }
@@ -110,7 +124,7 @@ void flush_log(bool andClose) {
 }
 
 static void remote_log_init_SD() {
-#if !CONFIG_IDF_TARGET_ESP32C3
+#if (!CONFIG_IDF_TARGET_ESP32C3 && !CONFIG_IDF_TARGET_ESP32S2)
   STORAGE.mkdir(DATA_DIR);
   // Open remote file
   log_remote_fp = NULL;
@@ -205,15 +219,16 @@ const char* espErrMsg(esp_err_t errCode) {
 static void appPanicHandler(arduino_panic_info_t *info, void *arg) {
   // store crash backtrace and delay reboot to avoid thrashing
   // https://github.com/espressif/arduino-esp32/blob/master/cores/esp32/esp32-hal-misc.c
-    TaskHandle_t task =  xTaskGetCurrentTaskHandleForCore(info->core);
-    btHWM = uxTaskGetStackHighWaterMark(task);
-    const char* taskName = task ? pcTaskGetName(task) : "idle";
-    strncpy(btTask, taskName, sizeof(btTask) - 1);
-    strncpy(btReason, info->reason, sizeof(btReason) - 1);
-    btReason[sizeof(btReason) - 1] = '\0';
-    btCore = info->core;
+  TaskHandle_t task = xTaskGetCurrentTaskHandleForCore(info->core);
+  btHWM = uxTaskGetStackHighWaterMark(task);
+  const char* taskName = task ? pcTaskGetName(task) : "idle";
+  strncpy(btTask, taskName, sizeof(btTask) - 1);
+  strncpy(btReason, info->reason, sizeof(btReason) - 1);
+  btReason[sizeof(btReason) - 1] = '\0';
+  btCore = info->core;
   btLen = info->backtrace_len;
-  for (int i = 0; i < info->backtrace_len; i++) backtrace[i] = info->backtrace[i];
+  int start = (btLen > 60) ? btLen - 60 : 0; // later entries more important
+  for (int i = start; i < info->backtrace_len; i++) backtrace[i - start] = info->backtrace[i];
   haveTrace = MAGIC_NUM; // flag that backtrace available
   esp_rom_delay_us(PANIC_DELAY * 1000 * 1000);
 }
@@ -250,11 +265,8 @@ static void showBacktrace() {
       int remaining = sizeof(bt) - offset;
       if (remaining < 12) break; // Need space for 11 chars + null terminator
       int written = snprintf(bt + offset, remaining, "0x%08x ", (unsigned int)backtrace[i]);
-      if (written > 0 && written < remaining) {
-        offset += written;
-      } else {
-        break;
-      }
+      if (written > 0 && written < remaining) offset += written;
+      else break;
     }
     LOG_WRN("Paste backtrace below into Arduino Exception Decoder:\n");
     LOG_SEND("Backtrace: %s\n\n", bt);
@@ -679,5 +691,10 @@ void showSys() {
   runTaskStats(true);
   logLine();
   //gpio_dump_io_configuration(stdout, SOC_GPIO_VALID_GPIO_MASK);
+}
+void showHWM(const char* msg) {
+  uint32_t freeStack = (uint32_t)uxTaskGetStackHighWaterMark(NULL);
+  LOG_DBG("%s: stack for task %s has min %lu bytes",  msg, pcTaskGetName(NULL), freeStack);
+  delay(250);
 }
 #endif // TEST_ENV
