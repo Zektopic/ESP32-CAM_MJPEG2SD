@@ -168,3 +168,7 @@
 ## 2024-05-24 - O(1) String token boundary detection
 **Learning:** To improve C/C++ string parsing performance when searching for the first occurrence of multiple possible delimiter characters (e.g., finding the end of a JSON value string by looking for either a comma or a closing brace), avoid chaining multiple sequential `strchr` combined with `strlen` checks. Instead, use a single `strcspn(str, ",}")` call to perform the search in one optimized O(N) pass, eliminating redundant string traversals.
 **Action:** When searching a string for the first match from a set of characters, use `strcspn` instead of multiple `strchr` calls.
+
+## 2024-11-26 - Optimize static array string length checks in loops
+**Learning:** Using `strlen()` inside a parsing loop (e.g., `getMimeType`) against a static array of constant string literals (like file extensions) causes redundant O(N) traversals on every iteration for lengths that are known at compile time.
+**Action:** Replace runtime `strlen(ext)` calls inside loops iterating over static string arrays with a parallel array of precomputed `size_t` lengths (e.g., `static const size_t extensions_len[] = {...}`) to enable O(1) length lookups.
