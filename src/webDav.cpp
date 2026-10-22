@@ -44,6 +44,7 @@ static char pathName[IN_FILE_NAME_LEN];
 static httpd_req_t* req;
 static char formattedTime[80];
 static const char* extensions[] = {"dummy", ".htm", ".css", ".txt", ".js", ".json", ".png", ".gif", ".jpg", ".ico", ".svg", ".xml", ".pdf", ".zip", ".gz"};
+static const size_t extensions_len[] = {5, 4, 4, 4, 3, 5, 4, 4, 4, 4, 4, 4, 4, 4, 3};
 static const char* mimeTypes[] = {"application/octet-stream", "text/html", "text/html", "text/css", "text/plain", "application/javascript", "application/json", "image/png", "image/gif", "image/jpeg", "image/x-icon", "image/svg+xml", "text/xml", "application/pdf", "application/zip", "application/x-gzip"};
 
 static int getMimeType(const char* path) {
@@ -51,7 +52,7 @@ static int getMimeType(const char* path) {
   int mimePtr = 1;
   size_t len = strlen(path);
   for (const char* ext : extensions) {
-    size_t slen = strlen(ext);
+    size_t slen = extensions_len[mimePtr - 1]; // ⚡ Bolt optimization: Use precomputed extension lengths to avoid O(N) strlen overhead in tight loop
     if (!strncmp(path + len - slen, ext, slen)) return mimePtr;
     mimePtr++;
   }
