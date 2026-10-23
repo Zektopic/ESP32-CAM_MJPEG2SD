@@ -649,13 +649,10 @@ static void pingTimeout(esp_ping_handle_t hdl, void *args) {
       wl_status_t wStat = WiFi.STA.status();
       if (wStat != WL_NO_SSID_AVAIL && wStat != WL_NO_SHIELD) {
         if (wStat == WL_CONNECTED) {
-          statusCheck();
+          runStatusCheck();
         } else {
-          if (wStat == WL_CONNECTED) runStatusCheck();
-          else {
-            LOG_WRN("Disconnected, restart wifi ...");
-            startWifi(false);
-          }
+          LOG_WRN("Disconnected, restart wifi ...");
+          startWifi(false);
         }
       }
     }
