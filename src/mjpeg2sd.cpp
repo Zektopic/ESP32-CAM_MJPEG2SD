@@ -444,7 +444,7 @@ static bool processFrame() { // Changed legacy 'boolean' to standard C++ 'bool' 
           s->reset(s);
           
           char fsizePtrStr[8] = {0}; // Increased buffer size and zero-initialized to prevent overflow.
-          if (retrieveConfigVal("framesize", fsizePtrStr)) {
+          if (retrieveConfigVal("framesize", fsizePtrStr, sizeof(fsizePtrStr))) {
             int parsed_framesize = 0;
             // Replaced unsafe old 'atoi' with bounded and faster 'std::from_chars' to prevent undefined behavior.
             const auto result = std::from_chars(fsizePtrStr, fsizePtrStr + sizeof(fsizePtrStr), parsed_framesize);
@@ -1176,8 +1176,8 @@ bool prepCam() {
       }
       
       // set frame size to configured value
-      char fsizePtrStr[4];
-      if (retrieveConfigVal("framesize", fsizePtrStr)) {
+      char fsizePtrStr[8] = {0};
+      if (retrieveConfigVal("framesize", fsizePtrStr, sizeof(fsizePtrStr))) {
         int parsed_size = 0;
         auto res = std::from_chars(fsizePtrStr, fsizePtrStr + sizeof(fsizePtrStr), parsed_size);
         if (res.ec == std::errc{} && res.ptr > fsizePtrStr) {
