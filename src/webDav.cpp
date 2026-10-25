@@ -85,20 +85,27 @@ static bool isFolder() {
 
 static void sendContentProp(const char* prop, const char* value) {
   // set individual XML properties in response
-  char propStr[strlen(prop) * 2 + strlen(value) + 15];
-  snprintf(propStr, sizeof(propStr), "<D:%s>%s</D:%s>", prop, value, prop);
-  httpd_resp_sendstr_chunk(req, propStr);
-  LOG_VRB("propStr %s", propStr);
+  size_t propLen = strlen(prop) * 2 + strlen(value) + 15;
+  char* propStr = (char*)malloc(propLen);
+  if (propStr) {
+    snprintf(propStr, propLen, "<D:%s>%s</D:%s>", prop, value, prop);
+    httpd_resp_sendstr_chunk(req, propStr);
+    LOG_VRB("propStr %s", propStr);
+    free(propStr);
+  }
 }
 
 static void sendPropResponse(File& file, const char* payload) {
   // send SD properties details to PC
   size_t encodeLen = 3 + strlen(file.path()) * 2;
   size_t maxLen = (sizeof(XML2) - 1) + encodeLen + (sizeof(XML3) - 1);
-  char resp[maxLen + 1];
-  snprintf(resp, maxLen, "%s%s%s", XML2, file.path(), XML3);
-  httpd_resp_sendstr_chunk(req, resp);
-  LOG_VRB("resp xml: %s", resp);
+  char* resp = (char*)malloc(maxLen + 1);
+  if (resp) {
+    snprintf(resp, maxLen + 1, "%s%s%s", XML2, file.path(), XML3);
+    httpd_resp_sendstr_chunk(req, resp);
+    LOG_VRB("resp xml: %s", resp);
+    free(resp);
+  }
 
   formatTime(file.getLastWrite());
   sendContentProp("getlastmodified", formattedTime);
@@ -242,10 +249,14 @@ static bool handleLock() {
   // provide (dummy) lock while file open
   const char* lockToken = "0123456789012345";
   httpd_resp_set_hdr(req, "Lock-Token", lockToken);
-  char resp[(sizeof(XML5) - 1) + strlen(lockToken) + (sizeof(XML6) - 1) + 1];
-  snprintf(resp, sizeof(resp), "%s%s%s", XML5, lockToken, XML6);
-  httpd_resp_set_type(req, "application/xml;charset=utf-8");
-  httpd_resp_sendstr(req, resp);
+  size_t maxLen = (sizeof(XML5) - 1) + strlen(lockToken) + (sizeof(XML6) - 1) + 1;
+  char* resp = (char*)malloc(maxLen);
+  if (resp) {
+    snprintf(resp, maxLen, "%s%s%s", XML5, lockToken, XML6);
+    httpd_resp_set_type(req, "application/xml;charset=utf-8");
+    httpd_resp_sendstr(req, resp);
+    free(resp);
+  }
   return true;
 }
 
