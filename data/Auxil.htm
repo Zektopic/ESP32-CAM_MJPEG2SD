@@ -850,12 +850,12 @@
           <div id="sidebar">
             <div id="menu-container" class="menu-pinned">
               <nav id="menu-selector" class="menu-pinned menu-closed">
-                <button type="button" class="quick-nav btn-reset" id="accSettings" name="access-settings" title="Access Settings" aria-label="Access Settings">🔧</button>
+                <button type="button" class="quick-nav btn-reset" id="accSettings" name="access-settings" title="Access Settings" aria-label="Access Settings"><span aria-hidden="true">🔧</span></button>
               </nav>
               <nav class="menu panel" id="access-settings">
                 <input type="checkbox" id="other-cb" class="menu-action">
-                <button type="button" class="pin-menu btn-reset" title="Pin / unpin menu" aria-label="Pin / unpin menu">📌</button>
-                <label for="other-cb" class="nav-toggle">🔧&nbsp;&nbsp;Access Settings&nbsp;&nbsp;</label>
+                <button type="button" class="pin-menu btn-reset" title="Pin / unpin menu" aria-label="Pin / unpin menu"><span aria-hidden="true">📌</span></button>
+                <label for="other-cb" class="nav-toggle"><span aria-hidden="true">🔧</span>&nbsp;&nbsp;Access Settings&nbsp;&nbsp;</label>
                 <div class='addButtons'></div>
                 <div>
                   <div class="subheader">Network settings</div>
@@ -1062,32 +1062,32 @@
           </div>
         </div>
         <br>
-        <button type="button" aria-labelledby="showsys" class="btn-reset">
+        <button type="button" aria-label="System" class="btn-reset">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text id="showsys" class="midText">System</text>
           </svg>
         </button>
         <div style="grid-column: span 4"><br></div>
-        <button type="button" aria-labelledby="refreshLog" class="btn-reset">
+        <button type="button" aria-label="Refresh Log" class="btn-reset">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local" id="refreshLog">Refresh Log</text>
           </svg>
         </button>
-        <button type="button" aria-labelledby="clearLog" class="btn-reset">
+        <button type="button" aria-label="Clear Log" class="btn-reset">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local" id="clearLog">Clear Log</text>
           </svg>
         </button>
-        <button type="button" aria-labelledby="save" class="btn-reset">
+        <button type="button" aria-label="Save" class="btn-reset">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text id="save" class="midText">Save</text>
           </svg>
         </button>
-        <button type="button" aria-labelledby="reset" class="btn-reset">
+        <button type="button" aria-label="Reboot ESP" class="btn-reset">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text id="reset" class="midText">Reboot ESP</text>
@@ -1104,25 +1104,25 @@
       <div class="header">Control</div>
       <br>
       <div class="grid-cols4">
-        <button type="button" aria-labelledby="save" class="btn-reset">
+        <button type="button" aria-label="Save" class="btn-reset">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text id="save" class="midText">Save</text>
           </svg>
         </button>
-        <button type="button" aria-labelledby="reset" class="btn-reset">
+        <button type="button" aria-label="Reboot ESP" class="btn-reset">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text id="reset" class="midText">Reboot ESP</text>
           </svg>
         </button>
-        <button type="button" aria-labelledby="deldata" class="btn-reset">
+        <button type="button" aria-label="Reload /data" class="btn-reset">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text id="deldata" class="midText">Reload /data</text>
           </svg>
         </button>
-        <button type="button" aria-labelledby="clear" class="btn-reset">
+        <button type="button" aria-label="Clear NVS" class="btn-reset">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text id="clear" class="midText">Clear NVS</text>
@@ -1135,31 +1135,31 @@
           <div class="subheader">Press Save button to make changes permanent</div>
           <br>
         </div>
-        <button type="button" aria-labelledby="wifi" class="btn-reset">
+        <button type="button" aria-label="Network" class="btn-reset">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local midText" id="wifi">Network</text>
           </svg>
         </button>
-        <button type="button" aria-labelledby="peripherals" class="btn-reset">
+        <button type="button" aria-label="Peripherals" class="btn-reset">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local midText" id="peripherals">Peripherals</text>
           </svg>
         </button>
-        <button type="button" id="RCconfigBtn" class="hidden btn-reset" aria-labelledby="RCconfig">
+        <button type="button" id="RCconfigBtn" class="hidden btn-reset" aria-label="RC Config">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local midText" id="RCconfig">RC Config</text>
           </svg>
         </button>
-        <button type="button" id="SVconfigBtn" class="hidden btn-reset" aria-labelledby="SVconfig">
+        <button type="button" id="SVconfigBtn" class="hidden btn-reset" aria-label="Servos">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local midText" id="SVconfig">Servos</text>
           </svg>
         </button>
-        <button type="button" id="PGconfigBtn" class="hidden btn-reset" aria-labelledby="PGconfig">
+        <button type="button" id="PGconfigBtn" class="hidden btn-reset" aria-label="PG Control">
           <svg aria-hidden="true">
             <rect class="buttonRect"/>
             <text class="local midText" id="PGconfig">PG Control</text>

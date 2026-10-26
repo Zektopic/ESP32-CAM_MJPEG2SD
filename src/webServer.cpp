@@ -130,12 +130,7 @@ bool checkAuth(httpd_req_t* req) {
   return true; // authentication ok or not required
 }
 
-bool isPathTraversal(const char* path) {
-  if (!path) return false;
-  return strstr(path, "../") || strstr(path, "..\\") ||
-         strstr(path, "/..") || strstr(path, "\\..") ||
-         !strcmp(path, "..");
-}
+
 
 static esp_err_t indexHandler(httpd_req_t* req) {
   if (!checkAuth(req)) return ESP_OK;
