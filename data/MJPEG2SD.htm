@@ -226,7 +226,24 @@
         outline: 2px solid var(--buttonActive);
         outline-offset: 2px;
       }
+      .password-wrapper {
+        position: relative;
+        display: flex;
+        width: 100%;
+        align-items: center;
+      }
+
       .password-toggle {
+        position: absolute;
+        right: var(--buttonHalf);
+        background: transparent;
+        border: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
         cursor: pointer;
         transition: 0.3s;
       }
@@ -1826,12 +1843,12 @@
         const p = document.getElementById(inputId);
         if (p.type === 'password') {
           p.type = 'text';
-          btn.innerHTML = '<span aria-hidden="true">🙈</span>';
+          btn.innerHTML = '<span aria-hidden=\'true\'>🙈</span>';
           btn.title = 'Hide password';
           btn.setAttribute('aria-pressed', 'true');
         } else {
           p.type = 'password';
-          btn.innerHTML = '<span aria-hidden="true">👁️</span>';
+          btn.innerHTML = '<span aria-hidden=\'true\'>👁️</span>';
           btn.title = 'Show password';
           btn.setAttribute('aria-pressed', 'false');
         }
@@ -2652,7 +2669,12 @@
         outputSpkr(bufferData); // ArrayBuffer containing PCM 16kHz audio data
       }
 
-      function customWsMsg(data) {}
+      function customSvrMsg(data) {
+        // notify end of playback
+        if (data == "#SP") deactivatePlaybackButton(false);
+        else if (data.slice(0, 2) === "#P") document.getElementById("progressBar").value = data.slice(2);
+      }
+
 
       function customInit() {
         disableRangeSlider($('#micGain'));
@@ -2755,7 +2777,7 @@
       const doRefreshTimer = true;
       const doCustomSync = false;
       const doHeartbeat = true;
-      const doInitSSE = false;
+      const doInitSSE = true;
 
       async function startApp() {
         if (typeof initialise === 'function') await initialise();

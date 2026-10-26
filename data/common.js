@@ -82,7 +82,7 @@
               } catch (err) {
                 console.error("Invalid WS JSON:", data, err);
               }
-            } else if (data.startsWith("#")) customWsMsg(data);
+            } else if (data.startsWith("#")) customSvrMsg(data);
             else {
               if (data.endsWith("\n")) data = data.slice(0, -1); // remove newline
               if (data.endsWith("~")) {
@@ -92,6 +92,10 @@
               showLog(data, false);
             }
           }
+        }
+
+        function applyMessageCmd(msgData) {
+          customSvrMsg(msgData);
         }
 
         // JSON handlers
@@ -208,6 +212,11 @@
               applyMessageData(event.data);
             });
 
+            eventSource.addEventListener('cmd', (event) => {
+              // server command
+              applyMessageCmd(event.data);
+            });
+            
             // unhandled events
             eventSource.onerror = (err) => {
               console.error("SSE error:", err);

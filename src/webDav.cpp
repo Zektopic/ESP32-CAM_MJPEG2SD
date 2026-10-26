@@ -1,10 +1,13 @@
 
 /*
   Using the WebDAV server:
-    Windows 10:
-    - Windows file explorer, in address bar enter: <ip_address>/webdav
-    - Map Network Drive, connect to: \\<ip_address>\webdav
-    Windows 11:
+    Windows 10 / 11:
+    - Ensure windows webdav service is running:
+        Open command window as administrator
+        Enter: sc query WebClient
+        If not running, enter: net start WebClient
+    - Windows file explorer - in address bar enter: \\<ip_address>\webdav
+    - Browser - in address bar enter: \\<ip_address>\webdav
     - Map Network Drive:
       - connect to: \\<ip_address>\webdav
       - Click on the link “Connect to a web site that you can use to store your documents and pictures.”
@@ -32,7 +35,7 @@
 #include "stringUtils.h"
 
 #if INCLUDE_WEBDAV
-#define ALLOW "PROPPATCH,PROPFIND,OPTIONS,DELETE,MOVE,COPY,HEAD,POST,PUT,GET"
+#define ALLOW "OPTIONS,PROPFIND,PROPPATCH,LOCK,UNLOCK,MKCOL,DELETE,MOVE,COPY,HEAD,PUT,GET"
 #define XML1 "<?xml version=\"1.0\" encoding=\"utf-8\"?><D:multistatus xmlns:D=\"DAV:\">"
 #define XML2 "<D:response xmlns:D=\"DAV:\"><D:href>"
 #define XML3 "</D:href><D:propstat><D:status>HTTP/1.1 200 OK</D:status><D:prop>"
@@ -44,6 +47,7 @@ static char pathName[IN_FILE_NAME_LEN];
 static httpd_req_t* req;
 static char formattedTime[80];
 static const char* extensions[] = {"dummy", ".htm", ".css", ".txt", ".js", ".json", ".png", ".gif", ".jpg", ".ico", ".svg", ".xml", ".pdf", ".zip", ".gz"};
+static const size_t extensions_len[] = {5, 4, 4, 4, 3, 5, 4, 4, 4, 4, 4, 4, 4, 4, 3};
 static const char* mimeTypes[] = {"application/octet-stream", "text/html", "text/html", "text/css", "text/plain", "application/javascript", "application/json", "image/png", "image/gif", "image/jpeg", "image/x-icon", "image/svg+xml", "text/xml", "application/pdf", "application/zip", "application/x-gzip"};
 
 static int getMimeType(const char* path) {
@@ -51,7 +55,7 @@ static int getMimeType(const char* path) {
   int mimePtr = 1;
   size_t len = strlen(path);
   for (const char* ext : extensions) {
-    size_t slen = strlen(ext);
+    size_t slen = extensions_len[mimePtr - 1]; // ⚡ Bolt optimization: Use precomputed extension lengths to avoid O(N) strlen overhead in tight loop
     if (!strncmp(path + len - slen, ext, slen)) return mimePtr;
     mimePtr++;
   }
@@ -110,7 +114,7 @@ static void sendPropResponse(File& file, const char* payload) {
   }
   sendContentProp("displayname", file.name());
 
-  if (payload[0] != '\0') {
+  if (payload[0]) {
     // return quota data if requested
     if (strstr(payload, "quota-available-bytes") != NULL || strstr(payload, "quota-used-bytes") != NULL) {
       char numberStr[24];
@@ -190,6 +194,20 @@ static bool handleProp() {
   httpd_resp_sendstr_chunk(req, "</D:multistatus>");
   httpd_resp_sendstr_chunk(req, NULL);
   free(payload);
+  return true;
+}
+
+static bool handlePropPatch() {
+  // ignore
+  httpd_resp_set_status(req, "207 Multi-Status");
+  httpd_resp_set_type(req, "application/xml; charset=utf-8");
+
+  const char* response =
+      "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+      "<D:multistatus xmlns:D=\"DAV:\">"
+      "</D:multistatus>";
+
+  httpd_resp_sendstr(req, response);
   return true;
 }
 
@@ -364,7 +382,7 @@ bool handleWebDav(httpd_req_t* rreq) {
   switch(req->method) {
     case HTTP_PUT: return handlePut(); // file create/uploads
     case HTTP_PROPFIND: return handleProp(); // get file or directory properties
-    case HTTP_PROPPATCH: return handleProp(); // set file or directory properties
+    case HTTP_PROPPATCH: return handlePropPatch(); // property mod request
     case HTTP_GET: return handleGet(); // file downloads
     case HTTP_HEAD: return handleHead(); // file properties
     case HTTP_LOCK: return handleLock(); // open file lock

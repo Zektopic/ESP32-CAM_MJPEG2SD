@@ -12,9 +12,6 @@
 #include "appGlobals.h"
 
 #if INCLUDE_SMTP
-#if (!INCLUDE_CERTS)
-const char* smtp_rootCACertificate = "";
-#endif
 
 // SMTP connection params, setup via web page
 char smtp_login[MAX_HOST_LEN]; // sender email account
@@ -23,7 +20,7 @@ char smtp_email[MAX_HOST_LEN]; // receiver, can be same as smtp_login, or be any
 char smtp_server[MAX_HOST_LEN]; // the email service provider, eg smtp.gmail.com"
 uint16_t smtp_port; // gmail SSL port 465;
 
-#define MIME_TYPE "image/jpg"
+#define MIME_TYPE "image/jpeg"
 #define ATTACH_NAME "frame.jpg"
 
 // SMTP control
@@ -41,7 +38,7 @@ int alertMax = 10; // only applied to emails
 static bool sendSmtpCommand(NetworkClientSecure& client, const char* cmd, const char* respCode) {
   // wait from smtp server response, check response code and extract response data
   LOG_VRB("Cmd: %s", cmd);
-  if (cmd[0] != '\0') client.println(cmd);
+  if (cmd[0]) client.println(cmd);
 
   uint32_t start = millis();
   while (!client.available() && millis() < start + (responseTimeoutSecs * 1000)) delay(1);
@@ -73,7 +70,7 @@ static bool emailSend(const char* mimeType = MIME_TYPE, const char* fileName = A
   char content[100];
   
   NetworkClientSecure client;
-  bool res = remoteServerConnect(client, smtp_server, smtp_port, smtp_rootCACertificate, EMAILCONN); 
+  bool res = remoteServerConnect(client, smtp_server, smtp_port, EMAILCONN); 
   if (!res) return false;
   
   while (true) { // fake non loop to enable breaks
@@ -115,35 +112,32 @@ static bool emailSend(const char* mimeType = MIME_TYPE, const char* fileName = A
     client.println(message);
     client.println();
     
-    if (alertBufferSize) {
+    if (appSpecificSMTP()) {
       // send attachment
       client.println(content); // boundary
       snprintf(content, sizeof(content), "Content-Type: %s", mimeType);
       client.println(content);
       client.println("Content-Transfer-Encoding: base64");
-      snprintf(content, sizeof(content), "Content-Disposition: attachment; filename="%s"; size=%zu;", fileName, alertBufferSize);
-      
+      snprintf(content, sizeof(content), "Content-Disposition: attachment; filename=\"%s\"; size=%u;", fileName, (unsigned int)alertBufferSize);
       client.println(content); 
+      client.println(); // End of MIME headers
       // base64 encode attachment and buffer for output
       size_t chunkSize = 3;
-      uint8_t* outBuf = (uint8_t*)ps_malloc(1024); // Buffer for batched output
-      if (outBuf) {
-        size_t outLen = 0;
-        for (size_t i = 0; i < alertBufferSize; i += chunkSize) {
-          memcpy(outBuf + outLen, encode64chunk(alertBuffer + i, min(alertBufferSize - i, chunkSize)), 4);
-          outLen += 4;
-          if (outLen >= 1024) {
-            client.write(outBuf, outLen);
-            outLen = 0;
-          }
+      uint8_t outBuf[76]; // Buffer for batched output
+      size_t outLen = 0;
+      for (size_t i = 0; i < alertBufferSize; i += chunkSize) {
+        memcpy(outBuf + outLen, encode64chunk(alertBuffer + i, min(alertBufferSize - i, chunkSize)), 4);
+        outLen += 4;
+        if (outLen >= 76) {
+          client.write(outBuf, outLen);
+          outLen = 0;
         }
-        if (outLen > 0) client.write(outBuf, outLen);
-        free(outBuf);
-      } else LOG_ERR("Unable to alloc outBuf");
+      }
+      if (outLen > 0) client.write(outBuf, outLen);
+      client.println(); // end of base64 body
+      sprintf(content, "--%s--", BOUNDARY_VAL);
+      client.println(content);
     }
-    client.println("
-"); // two lines to finish header
-        
     // close message data and quit
     if (!sendSmtpCommand(client, ".", "250")) break;
     if (!sendSmtpCommand(client, "QUIT", "221")) break;
@@ -173,7 +167,7 @@ void emailAlert(const char* _subject, const char* _message) {
   if (smtpUse) {
     if (alertBuffer != NULL) {
       if (emailHandle == NULL) {
-        // ⚡ Bolt optimization: Combine string building into a single snprintf to eliminate O(N) strlen overhead and zero-padding
+// ⚡ Bolt optimization: Combine string building into a single snprintf to eliminate O(N) strlen overhead and zero-padding
         snprintf(subject, sizeof(subject), "%s from %s", _subject, hostName);
         strncpy(message, _message, sizeof(message)-1);
         xTaskCreateWithCaps(&emailTask, "emailTask", EMAIL_STACK_SIZE, NULL, EMAIL_PRI, &emailHandle, STACK_MEM);
