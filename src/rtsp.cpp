@@ -22,17 +22,17 @@
 
 #include "appGlobals.h"
 
+bool rtspVideo = false;
+bool rtspAudio = false;
+bool rtspSubtitles = false;
+
 #if INCLUDE_RTSP
-#if (__has_include("../libraries/ESP32-RTSPServer/src/ESP32-RTSPServer.h") || __has_include("../../ESP32-RTSPServer/src/ESP32-RTSPServer.h"))
+#if __has_include("../libraries/ESP32-RTSPServer/src/ESP32-RTSPServer.h")
 #include <ESP32-RTSPServer.h> 
 RTSPServer rtspServer;
 
 //Comment out to enable multiple clients for all transports (TCP, UDP, Multicast)
 //#define OVERRIDE_RTSP_SINGLE_CLIENT_MODE
-
-bool rtspVideo;
-bool rtspAudio;
-bool rtspSubtitles;
 int rtspPort;
 uint16_t rtpVideoPort;
 uint16_t rtpAudioPort;

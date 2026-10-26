@@ -1,6 +1,6 @@
 // Provides web server for user control of app
 //
-// s60sc 2022 - 2023
+// s60sc 2022 - 2026      
 
 #include "appGlobals.h"
 #include "stringUtils.h"
@@ -80,8 +80,8 @@ esp_err_t fileHandler(httpd_req_t* req, bool download) {
 static void displayLog(httpd_req_t *req) {
   // output ram log to browser
   if (logType == 0) {
-    int startPtr, endPtr;
-    startPtr = endPtr = mlogEnd;
+    int startPtr = getLogStartPtr(mlogEnd);
+    int endPtr = mlogEnd;   
     httpd_resp_set_type(req, "text/plain");
 
     // output log in chunks
@@ -98,7 +98,7 @@ static void displayLog(httpd_req_t *req) {
 
 bool checkAuth(httpd_req_t* req) {
   // check if authentication is required
-  if (Auth_Name[0] != '\0') {
+  if (Auth_Name[0] && Auth_Pass[0]) {
     // authentication required
     size_t credLen = strlen(Auth_Name) + strlen(Auth_Pass) + 2; // +2 for colon & terminator
     char credentials[credLen];
@@ -130,6 +130,13 @@ bool checkAuth(httpd_req_t* req) {
   return true; // authentication ok or not required
 }
 
+bool isPathTraversal(const char* path) {
+  if (!path) return false;
+  return strstr(path, "../") || strstr(path, "..\\") ||
+         strstr(path, "/..") || strstr(path, "\\..") ||
+         !strcmp(path, "..");
+}
+
 static esp_err_t indexHandler(httpd_req_t* req) {
   if (!checkAuth(req)) return ESP_OK;
   snprintf(inFileName, IN_FILE_NAME_LEN, "%s", INDEX_PAGE_PATH);
@@ -137,9 +144,8 @@ static esp_err_t indexHandler(httpd_req_t* req) {
     LOG_WRN("Path traversal attempt detected in index: %s", inFileName);
     httpd_resp_send_404(req);
     return ESP_FAIL;
-  }
-  // first check if a startup failure needs to be reported
-  if (startupFailure[0] != '\0') {
+  }  // first check if a startup failure needs to be reported
+  if (startupFailure[0]) {
     httpd_resp_set_type(req, "text/html");
     httpd_resp_sendstr_chunk(req, failPageS_html);
     httpd_resp_sendstr_chunk(req, startupFailure);
@@ -228,7 +234,6 @@ static esp_err_t webHandler(httpd_req_t* req) {
     httpd_resp_send_404(req);
     return ESP_FAIL;
   }
-
   // check file extension to determine required processing before response sent to browser
   size_t varLen = strlen(variable); // Bolt: Cache length to prevent O(N^2) behavior in if/else chain
   if (!strcmp(variable, "OTA.htm")) {
@@ -512,23 +517,6 @@ static esp_err_t setupHandler(httpd_req_t *req) {
   return ESP_OK;
 }
 
-void showHttpHeaders(httpd_req_t *req) {
-  // httpd_req_aux struct members hidden so need to access them via offsets
-  // to calculate offset any element not on 4 byte boundary has to be packed
-  LOG_DBG("HTTP: %s %s", HTTP_METHOD_STRING(req->method), req->uri);
-#if ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 3, 0)
-  size_t maxHdrLen = max(CONFIG_HTTPD_MAX_REQ_HDR_LEN, CONFIG_HTTPD_MAX_URI_LEN);
-#else
-  size_t maxHdrLen = max(HTTPD_MAX_REQ_HDR_LEN, HTTPD_MAX_URI_LEN);
-#endif
-  uint32_t req_hdrs_count = *((uint8_t*)req->aux + 4 + maxHdrLen + 1 + 3 + 4 + 4 + 4 + 1 + 3);
-  char* header = (char*)req->aux + 4; // start of scratch buffer containing headers
-  // get each header string in turn
-  while (req_hdrs_count--) {
-    LOG_DBG("  %s", header);
-    header += strlen(header) + 2;
-  }
-}
 
 static esp_err_t sendCrossOriginHeader(httpd_req_t *req) {
   // prevent CORS from blocking request
@@ -700,6 +688,7 @@ bool startWebServer() {
     config.max_uri_handlers = MAX_HANDLERS;
     config.max_open_sockets = HTTP_CLIENTS + MAX_STREAMS;
     config.task_priority = HTTP_PRI;
+    //config.uri_match_fn = httpd_uri_match_wildcard;
     config.send_wait_timeout = 3;
     config.recv_wait_timeout = 5;
     res = httpd_start(&httpServer, &config);
@@ -732,6 +721,9 @@ bool startWebServer() {
 
     LOG_INF("Starting web server on port: %u", useHttps ? HTTPS_PORT : HTTP_PORT);
     LOG_INF("Remote server certificates %s checked", useSecure ? "are" : "not");
+  #if INCLUDE_WEBDAV
+    LOG_INF("Webdav server available");
+  #endif
     if (DEBUG_MEM) {
       uint32_t freeStack = (uint32_t)uxTaskGetStackHighWaterMark(NULL);
       LOG_INF("Task httpServer stack space %u", freeStack);
@@ -739,7 +731,7 @@ bool startWebServer() {
   } else snprintf(startupFailure, SF_LEN, STARTUP_FAIL "Failed to start webserver %s",espErrMsg(res));
   if (!DBG_ON) esp_log_level_set("*", ESP_LOG_NONE); // suppress ESP_LOG_ERROR messages
   debugMemory("startWebserver");
-  if (startupFailure[0] != '\0') {
+  if (startupFailure[0]) {
     LOG_WRN("%s", startupFailure);
     return false;
   }

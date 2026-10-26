@@ -168,3 +168,6 @@
 ## 2024-05-24 - O(1) String token boundary detection
 **Learning:** To improve C/C++ string parsing performance when searching for the first occurrence of multiple possible delimiter characters (e.g., finding the end of a JSON value string by looking for either a comma or a closing brace), avoid chaining multiple sequential `strchr` combined with `strlen` checks. Instead, use a single `strcspn(str, ",}")` call to perform the search in one optimized O(N) pass, eliminating redundant string traversals.
 **Action:** When searching a string for the first match from a set of characters, use `strcspn` instead of multiple `strchr` calls.
+## 2024-11-26 - Optimized Hex Validations in Network Path
+**Learning:** Checking valid hex characters via generic `isxdigit` in hot decoding paths incurs function call overhead that compounds for long queries.
+**Action:** Replace `isxdigit` calls in URL decoding or similar hot loops with a static boolean lookup table (LUT) array `isXDigitLUT[256]` for O(1) condition checks.

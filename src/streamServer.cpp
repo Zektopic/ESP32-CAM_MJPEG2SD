@@ -43,12 +43,6 @@ struct httpd_sustain_req_t {
 };
 httpd_sustain_req_t sustainReq[MAX_STREAMS];
 
-#if INCLUDE_RTSP
-static const bool includeRTSP = true;
-#else
-static const bool includeRTSP = false;
-#endif
-
 static void showPlayback(httpd_req_t* req) {
   // output playback file to browser
   esp_err_t res = ESP_OK; 
@@ -142,7 +136,7 @@ static void showStream(httpd_req_t* req, uint8_t taskNum) {
         }
       }
 
-      // If we haven't received a frame for 10 consecutive timeouts (~12s)
+      // If haven't received a frame for 10 consecutive timeouts (~12s)
       if (consecutiveTimeouts >= 10) {
         LOG_WRN("Stream task %u stalled: 10 consecutive frame timeouts, aborting stream", taskNum);
         isStreaming[taskNum] = false;
@@ -287,9 +281,9 @@ static void sustainTask(void* p) {
 
 void startSustainTasks() {
   // start httpd sustain tasks
-  if (streamVid) numStreams = vidStreams = 2;
-  if (streamAud) numStreams = 3;
-  if (streamSrt) numStreams = 4;
+  if (streamVid || rtspVideo) numStreams = vidStreams = 2;
+  if (streamAud || rtspAudio) numStreams = 3;
+  if (streamSrt || rtspSubtitles) numStreams = 4;
   if (numStreams > MAX_STREAMS) {
     LOG_WRN("numStreams %d exceeds MAX_STREAMS %d", numStreams, MAX_STREAMS);
     numStreams = MAX_STREAMS;
@@ -304,8 +298,9 @@ void startSustainTasks() {
 
   for (int i = 0; i < numStreams; i++) {
     sustainReq[i].taskNum = i; // so task knows its number
-    if (includeRTSP && i > 0) continue; // as RTSP tasks created in rtsp.cpp
-    xTaskCreateWithCaps(sustainTask, "sustainTask", SUSTAIN_STACK_SIZE, &sustainReq[i].taskNum, SUSTAIN_PRI, &sustainHandle[i], STACK_MEM); 
+    if ((i == 1 && rtspVideo) || (i == 2 && rtspAudio) || (i == 3 && rtspSubtitles)) continue; // RTSP tasks created in rtsp.cpp
+    uint16_t streamStackSize = i == 0 ? SUSTAIN0_STACK_SIZE : SUSTAINn_STACK_SIZE;
+    xTaskCreateWithCaps(sustainTask, "sustainTask", streamStackSize, &sustainReq[i].taskNum, SUSTAIN_PRI, &sustainHandle[i], STACK_MEM);
   }
   
   LOG_INF("Started %d sustain tasks", numStreams);
@@ -318,18 +313,16 @@ esp_err_t appSpecificSustainHandler(httpd_req_t* req) {
   if (checkAuth(req)) { 
     // handle long running request as separate task
     // obtain details from query string
-    if (extractQueryKeyVal(req, variable, value) == ESP_OK) {
+    if (extractQueryKeyVal(req, variable, value, sizeof(value)) == ESP_OK) {
       // playback, download, web streaming uses task 0
       // remote streaming eg video uses task 1, audio task 2, srt task 3
       uint8_t taskNum = 99;
       if (!strcmp(variable, "download")) taskNum = 0;
       else if (!strcmp(variable, "playback")) taskNum = 0;
       else if (!strcmp(variable, "stream")) taskNum = 0;
-      else if (!strcmp(variable, "video")) taskNum = 1;
-      else if (!strcmp(variable, "audio")) taskNum = 2;
-      else if (!strcmp(variable, "srt")) taskNum = 3;
-      // http(s) streams not available if RTSP being used
-      if (includeRTSP && taskNum > 0) taskNum = 99;
+      else if (!strcmp(variable, "video") && !rtspVideo) taskNum = 1;
+      else if (!strcmp(variable, "audio") && !rtspAudio) taskNum = 2;
+      else if (!strcmp(variable, "srt") && !rtspSubtitles) taskNum = 3;
       if (taskNum < numStreams) {
         if (taskNum == 0) {
           if (req->method == HTTP_HEAD) { 
@@ -387,7 +380,7 @@ esp_err_t appSpecificSustainHandler(httpd_req_t* req) {
         } else httpd_resp_set_status(req, "500 No free task");
       } else {
         if (taskNum < MAX_STREAMS) LOG_WRN("Task not created for stream: %s, numStreams %d", variable, numStreams);
-        else LOG_WRN("Invalid task id: %s", variable);
+        else LOG_WRN("Invalid: %s, as using RTSP", variable);
         httpd_resp_set_status(req, "400 Invalid url");
       }
     } else httpd_resp_set_status(req, "400 Bad URL");
