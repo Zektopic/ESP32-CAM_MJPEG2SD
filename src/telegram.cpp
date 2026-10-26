@@ -33,10 +33,6 @@
 #define PARSE_MODE ",\"parse_mode\":\"%s\"}"
 #define END_BOUNDARY "\r\n--" BOUNDARY_VAL "--\r\n"
 
-#if (!INCLUDE_CERTS)
-const char* telegram_rootCACertificate = "";
-#endif
-
 // set via web interface
 bool tgramUse = false;
 char tgramToken[MAX_PWD_LEN] = "";
@@ -52,7 +48,7 @@ NetworkClientSecure tclient;
 
 static inline bool connectTelegram() {
   // Connect to Telegram server if not already connected
-  return remoteServerConnect(tclient, TELEGRAM_HOST, HTTPS_PORT, telegram_rootCACertificate, TGRAMCONN);
+  return remoteServerConnect(tclient, TELEGRAM_HOST, HTTPS_PORT, TGRAMCONN);
 }
 
 static bool searchJsonResponse(const char* keyName) {
@@ -72,7 +68,7 @@ static bool searchJsonResponse(const char* keyName) {
   return true;
 }
 
-size_t getResponseHeader(NetworkClientSecure& sclient, const char* host, int waitSecs) {
+static size_t getResponseHeader(NetworkClientSecure& sclient, const char* host, int waitSecs) {
   // get response header from remote server if available
   if (!waitSecs) waitSecs = responseTimeoutSecs;
   bool endOfHeader = false;
@@ -109,15 +105,13 @@ static bool getTgramResponse() {
     while (contentLen - readLen > 0 && millis() - startTime < responseTimeoutSecs * 1000) {
       // retrieve response content
       size_t availLen = tclient.available();
-      // ⚡ Bolt optimization: Use block read() instead of readBytes() to bypass per-byte timedRead() overhead
+// ⚡ Bolt optimization: Use block read() instead of readBytes() to bypass per-byte timedRead() overhead
       if (availLen) {
         size_t toRead = min(availLen, (size_t)(contentLen - readLen));
         int bytesRead = tclient.read((uint8_t*)tgramBuff + readLen, toRead);
         if (bytesRead <= 0) break;
         readLen += (size_t)bytesRead;
-      } else {
-        vTaskDelay(pdMS_TO_TICKS(10));
-      }
+} else delay(10);
     }
     if (contentLen - readLen > 0) LOG_WRN("Timed out waiting for telegram response");
     else {
@@ -203,25 +197,26 @@ static bool sendTgramBuff(uint8_t* buffData, size_t buffSize) {
 bool prepTelegram() {
   // setup and check access to Telegram if required
   if (tgramUse) {
-    if (tgramToken[0] != '\0') {
+    if (tgramToken[0]) {
       if (tgramBuff == NULL) tgramBuff = psramFound() ? (char*)ps_malloc(MAX_HTTP_MSG) : (char*)malloc(MAX_HTTP_MSG); 
       // check connection with getme request
       bool res = false;
-      sendTgramHeader("getMe", NULL, NULL, 0, NULL, NULL);
-      uint32_t startTime = millis();
-      while (!res && (millis() - startTime < responseTimeoutSecs * 1000)) {
-        if (getTgramResponse()) res = true;
-        delay(200);
-      }
-      if (res) {
-        // response loaded into tgramBuff
-        if (searchJsonResponse("username:")) {      
-          LOG_INF("Connected to Telegram Bot Handle: %s", keyValue);
-          xTaskCreateWithCaps(appSpecificTelegramTask, "telegramTask", TGRAM_STACK_SIZE, NULL, TGRAM_PRI, &telegramHandle, STACK_MEM); 
-          debugMemory("setupTelegramTask");
-          return true;
-        } else LOG_WRN("getMe response not parsed %s", tgramBuff);
-      } else LOG_WRN("Failed to communicate with Telegram server");
+      if (sendTgramHeader("getMe", NULL, NULL, 0, NULL, NULL)) {
+        uint32_t startTime = millis();
+        while (!res && (millis() - startTime < responseTimeoutSecs * 1000)) {
+          if (getTgramResponse()) res = true;
+          delay(200);
+        }
+        if (res) {
+          // response loaded into tgramBuff
+          if (searchJsonResponse("username:")) {      
+            LOG_INF("Connected to Telegram Bot Handle: %s", keyValue);
+            xTaskCreateWithCaps(appSpecificTelegramTask, "telegramTask", TGRAM_STACK_SIZE, NULL, TGRAM_PRI, &telegramHandle, STACK_MEM); 
+            debugMemory("setupTelegramTask");
+            return true;
+          } else LOG_WRN("getMe response not parsed %s", tgramBuff);
+        } else LOG_WRN("Failed to communicate with Telegram server");
+      } // no network conn
     } else LOG_WRN("No Telegram Bot token supplied");
   } else LOG_INF("Telegram not being used");
   return false;
@@ -276,8 +271,10 @@ bool sendTgramMessage(const char* info, const char* item, const char* parseMode)
 bool sendTgramPhoto(uint8_t* photoData, size_t photoSize, const char* caption) {
   // send photo stored in buffer to Telegram
   // max size of photo upload to Telegram is 10MB, bigger than ESP camera maximum
-  if (sendTgramHeader("sendPhoto", "image/jpeg", "photo", photoSize, "frame.jpg", caption))
-    return sendTgramBuff(photoData, photoSize);
+  if (sendTgramHeader("sendPhoto", "image/jpeg", "photo", photoSize, "frame.jpg", caption)) {
+    sendTgramBuff(photoData, photoSize);
+    return true;
+  }
   return false;
 }
 
@@ -301,7 +298,7 @@ bool sendTgramFile(const char* fileName, const char* contentType, const char* ca
         tclient.println(END_BOUNDARY);
       } else snprintf(errMsg, sizeof(errMsg) - 1, "File size too large: %s", fmtSize(df.size()));        
     } else snprintf(errMsg, sizeof(errMsg) - 1, "File does not exist or cannot be opened: %s", fileName);
-    if (errMsg[0] != '\0') {
+    if (errMsg[0]) {
       LOG_WRN("%s", errMsg);
       sendTgramMessage("ERROR: ", errMsg, "");
     }

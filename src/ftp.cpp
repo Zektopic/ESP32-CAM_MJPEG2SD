@@ -5,10 +5,6 @@
 #include "appGlobals.h"
 
 #if INCLUDE_FTP_HFS
-#if (!INCLUDE_CERTS)
-const char* hfs_rootCACertificate = "";
-const char* ftps_rootCACertificate = "";
-#endif
 
 // File server params (FTP or HTTPS), setup via web page
 char fsServer[MAX_HOST_LEN];
@@ -117,9 +113,15 @@ static bool hfsStoreFile(File &fh) {
   while ((chunksize = fh.read((uint8_t*)fsChunk, CHUNKSIZE))) {
     hclient.write((uint8_t*)fsChunk, chunksize);
     totalSent += chunksize;
-    if (calcProgress(totalSent, fh.size(), 5, percentLoaded)) LOG_INF("Uploaded %u%%", percentLoaded); 
+    if (calcProgress(totalSent, fh.size(), 5, percentLoaded)) {
+      char pcntStr[10];
+      sprintf(pcntStr, "#P%u", percentLoaded);
+      sendSSE("cmd", pcntStr); 
+      LOG_INF("Uploaded %u%%", percentLoaded); 
+    }
   }
   percentLoaded = 100;
+  sendSSE("cmd", "#P0");
   hclient.println(END_BOUNDARY);
   return true;
 }
@@ -139,7 +141,7 @@ NetworkClient dclient;
 
 static bool sendFtpCommand(const char* cmd, const char* param, const char* respCode, const char* respCode2 = NO_CHECK) {
   // build and send ftp command
-  if (cmd[0] != '\0') {
+  if (cmd[0]) {
     rclient.print(cmd);
     rclient.println(param);
   }
@@ -265,11 +267,17 @@ static bool ftpStoreFile(File &fh) {
         LOG_WRN("Upload file to ftp failed");
         return false;
       }
-      if (calcProgress(writeBytes, fileSize, 5, percentLoaded)) LOG_INF("Uploaded %u%%", percentLoaded); 
+      if (calcProgress(writeBytes, fileSize, 5, percentLoaded)) {
+        char pcntStr[10];
+        sprintf(pcntStr, "#P%u", percentLoaded);
+        sendSSE("cmd", pcntStr); 
+        LOG_INF("Uploaded %u%%", percentLoaded);
+      }
     }
   } while (readLen > 0);
   dclient.stop();
   percentLoaded = 100;
+  sendSSE("cmd", "#P0");
   bool res = sendFtpCommand("", "", "226");
   if (res) {
     LOG_ALT("Uploaded %s in %lu sec", fmtSize(writeBytes), (millis() - uploadStart) / 1000);
@@ -299,7 +307,7 @@ static bool uploadFolderOrFileFs(const char* fileOrFolder) {
   // Upload a single file or whole folder using FTP or HTTPS server
   // folder is uploaded file by file
   fsBuff = (char*)fsChunk;
-  bool res = fsUse ? remoteServerConnect(hclient, fsServer, fsPort, hfs_rootCACertificate, FSFTP) : ftpConnect();
+  bool res = fsUse ? remoteServerConnect(hclient, fsServer, fsPort, FSFTP) : ftpConnect();
 
   if (!res) {
     LOG_WRN("Unable to connect to %s server", fsUse ? "HTTPS" : "FTP");
@@ -376,7 +384,7 @@ static void fileServerTask(void* parameter) {
 
 bool fsStartTransfer(const char* fileFolder) {
   // called from other functions to commence transfer of file or folder to file server
-  setFolderName(fileFolder, storedPathName);
+  setFolderName(fileFolder, storedPathName, sizeof(storedPathName));
   if (!uploadInProgress) {
     uploadInProgress = true;
     if (fsHandle == NULL) xTaskCreateWithCaps(&fileServerTask, "fileServerTask", FS_STACK_SIZE, NULL, FTP_PRI, &fsHandle, STACK_MEM);    
