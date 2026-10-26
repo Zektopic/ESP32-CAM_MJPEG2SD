@@ -226,7 +226,24 @@
         outline: 2px solid var(--buttonActive);
         outline-offset: 2px;
       }
+      .password-wrapper {
+        position: relative;
+        display: flex;
+        width: 100%;
+        align-items: center;
+      }
+
       .password-toggle {
+        position: absolute;
+        right: var(--buttonHalf);
+        background: transparent;
+        border: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
         cursor: pointer;
         transition: 0.3s;
       }
@@ -1826,12 +1843,12 @@
         const p = document.getElementById(inputId);
         if (p.type === 'password') {
           p.type = 'text';
-          btn.innerHTML = '<span aria-hidden="true">🙈</span>';
+          btn.innerHTML = '<span aria-hidden=\'true\'>🙈</span>';
           btn.title = 'Hide password';
           btn.setAttribute('aria-pressed', 'true');
         } else {
           p.type = 'password';
-          btn.innerHTML = '<span aria-hidden="true">👁️</span>';
+          btn.innerHTML = '<span aria-hidden=\'true\'>👁️</span>';
           btn.title = 'Show password';
           btn.setAttribute('aria-pressed', 'false');
         }
