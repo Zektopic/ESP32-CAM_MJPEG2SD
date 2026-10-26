@@ -36,7 +36,7 @@ static bool deviceStatus[128] = {false}; // whether device present
 static const char* clientName[128] = {
   "", "", "", "", "", "", "", "", "", "", "", "", "AK8963", "", "", "",
   "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "PY260",
-  "", "", "", "", "", "", "", "LCD1602", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "LCD1602", "", "VL531LX", "", "", "", "", "", "",
   "OV2640", "", "", "", "", "", "", "", "", "", "", "", "OV5640/SSD1306", "SSD1306", "", "",
   "", "", "", "", "", "", "", "", "PCF8591", "", "", "", "", "", "", "",
   "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -421,14 +421,14 @@ static void updateMPU6050data() {
 
 /*
 MPU9250 on GY-91
-VIN: Voltage Supply Pin
-3V3: 3.3v Regulator output
+VIN: Voltage Supply Pin for > 3V3, if not used can be connected to pull high SDO/SAO or CSB
+3V3: 3.3v Regulator output / or 3V3 input
 GND: 0V Power Supply
 SCL: I2C Clock
 SDA: I2C Data
-SDO/SAO: I2C Address selection MPU9250
+SDO/SAO: I2C Address selection MPU9250, pull high for Alt addr
 NCS: n/a
-CSB: I2C Address selection BMP280
+CSB: I2C Address selection BMP280, pull high for Alt addr
 */
 
 #if __has_include("../libraries/MPU9250/MPU9250.h")

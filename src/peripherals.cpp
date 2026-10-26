@@ -12,7 +12,7 @@
 // - 4 wire Bipolar Stepper Motor with MX1508 H-Bridge Motor Driver
 //
 // Peripherals can be hosted directly on the client ESP, or on
-// a separate IO Extender ESP if the client ESP has limited free
+// a separate Auxiliary ESP if the client ESP has limited free
 // pins, eg ESP-Cam module
 // External peripherals should have low data rate and not require fast response,
 // so interrupt driven input pins should be monitored internally by the client.
@@ -139,11 +139,15 @@ void buzzerAlert(bool buzzerOn) {
 
 // Control a Pan-Tilt-Camera stand using two servos connected to pins specified above
 // Or control an RC servo
-// Only tested for SG90 style servos
+// Only tested for SG90 9g and DS-M005 2g style servos
 // Typically, wiring is:
-// - orange: signal
-// - red: 5V
+// - orange: 3V3 signal
+// - red: 3V3 or 5V
 // - brown: GND
+
+// Pulse width values
+// SG90:    min 544, max 2400
+// DS-M005: min 500, max 2500
 //
 #define PWM_FREQ 50 // hertz
 #define DUTY_BIT_DEPTH 12 // max for ESP32-C3 is 14
