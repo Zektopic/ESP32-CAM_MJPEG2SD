@@ -216,7 +216,7 @@
               // server command
               applyMessageCmd(event.data);
             });
-            
+
             // unhandled events
             eventSource.onerror = (err) => {
               console.error("SSE error:", err);
@@ -932,7 +932,7 @@
                   let valCntr = 0;
                   switch (value.charAt(0)) {
                     case 'A': // action button
-                      inputHtml = '<button type=\"button\" class=\"btn-reset\" aria-label=\"' + saveVal + '\" style=\"display:inline-block;\"><svg class=\"svgCols nochange\" aria-hidden=\"true\"><rect class=\"buttonRect\"/><text id=\"' + saveKey + '\" class=\"midText\" text-anchor=\"middle\" dominant-baseline=\"middle\">' + saveVal + '</text></svg></button>';
+                      inputHtml = '<button type=\"button\" class=\"btn-reset\" aria-label="' + saveVal + '" style=\"display:inline-block;\"><svg class=\"svgCols nochange\" aria-hidden=\"true\"><rect class=\"buttonRect\"/><text id=\"' + saveKey + '\" class=\"midText\" text-anchor=\"middle\" dominant-baseline=\"middle\">' + saveVal + '</text></svg></button>';
                     break;
                     case 'B': // B:lab1:lab2:etc
                       // radio button group

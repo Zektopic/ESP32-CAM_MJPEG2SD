@@ -130,6 +130,8 @@ bool checkAuth(httpd_req_t* req) {
   return true; // authentication ok or not required
 }
 
+
+
 static esp_err_t indexHandler(httpd_req_t* req) {
   if (!checkAuth(req)) return ESP_OK;
   snprintf(inFileName, IN_FILE_NAME_LEN, "%s", INDEX_PAGE_PATH);
