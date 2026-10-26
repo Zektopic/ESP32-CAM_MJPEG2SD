@@ -226,7 +226,24 @@
         outline: 2px solid var(--buttonActive);
         outline-offset: 2px;
       }
+      .password-wrapper {
+        position: relative;
+        display: flex;
+        width: 100%;
+        align-items: center;
+      }
+
       .password-toggle {
+        position: absolute;
+        right: var(--buttonHalf);
+        background: transparent;
+        border: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
         cursor: pointer;
         transition: 0.3s;
       }
@@ -1044,11 +1061,11 @@
                 <button type="button" class="quick-nav btn-reset" id="accSettings" name="access-settings" title="Access Settings" aria-label="Access Settings"><span aria-hidden="true">🔧</span></button>
                 <div class="micContainer">
                   <button class="quick-nav audButtons disabled" id="micRem" title="Microphone Control" aria-label="Microphone Control" disabled aria-disabled="true"><span aria-hidden="true">🎤</span></button>
-                  <canvas id="micLevel" role="meter" aria-hidden="true" aria-label="Microphone volume level"></canvas>
+                  <canvas id="micLevel" role="meter" aria-label="Microphone volume level" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></canvas>
                 </div>
                 <div class="spkrContainer">
                   <button class="quick-nav audButtons disabled" id="spkrRem" title="Speaker Control" aria-label="Speaker Control" disabled aria-disabled="true"><span aria-hidden="true">🔈</span></button>
-                  <canvas id="spkrLevel" role="meter" aria-hidden="true" aria-label="Speaker volume level"></canvas>
+                  <canvas id="spkrLevel" role="meter" aria-label="Speaker volume level" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></canvas>
                 </div>
               </nav>
               <div id="menu-top" class="menu-pinned">
@@ -1826,12 +1843,12 @@
         const p = document.getElementById(inputId);
         if (p.type === 'password') {
           p.type = 'text';
-          btn.innerHTML = '<span aria-hidden="true">🙈</span>';
+          btn.innerHTML = '<span aria-hidden=\'true\'>🙈</span>';
           btn.title = 'Hide password';
           btn.setAttribute('aria-pressed', 'true');
         } else {
           p.type = 'password';
-          btn.innerHTML = '<span aria-hidden="true">👁️</span>';
+          btn.innerHTML = '<span aria-hidden=\'true\'>👁️</span>';
           btn.title = 'Show password';
           btn.setAttribute('aria-pressed', 'false');
         }
