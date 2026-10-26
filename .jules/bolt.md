@@ -172,3 +172,7 @@
 ## 2024-11-26 - Optimize static array string length checks in loops
 **Learning:** Using `strlen()` inside a parsing loop (e.g., `getMimeType`) against a static array of constant string literals (like file extensions) causes redundant O(N) traversals on every iteration for lengths that are known at compile time.
 **Action:** Replace runtime `strlen(ext)` calls inside loops iterating over static string arrays with a parallel array of precomputed `size_t` lengths (e.g., `static const size_t extensions_len[] = {...}`) to enable O(1) length lookups.
+
+## 2024-11-26 - Optimize Hex Checking in urlDecode
+**Learning:** Using `isxdigit` on characters during URL decoding in a hot loop incurs function call overhead and locale checking.
+**Action:** Replaced `isxdigit` calls with a precomputed static boolean lookup table (LUT) array (`isXDigitLUT`) to evaluate whether a character is a valid hex digit in O(1) time.
