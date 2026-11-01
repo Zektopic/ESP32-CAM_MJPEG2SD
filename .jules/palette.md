@@ -7,3 +7,6 @@
 ## 2024-11-01 - Input Type Number Accessibility
 **Learning:** For `<input type="number">`, `minlength` and `maxlength` attributes are invalid and ignored by browsers. `min` and `max` should be used instead to set boundaries for the value.
 **Action:** Use `min` and `max` attributes when creating `<input type="number">` elements to ensure proper validation and accessibility.
+## 2026-10-30 - Fix minlength and maxlength on number inputs
+**Learning:** `minlength` and `maxlength` attributes are not supported on `<input type="number">` and are ignored by browsers, which prevents native HTML validation and affects screen reader context.
+**Action:** Always replace `minlength` and `maxlength` with `min` and `max` on `<input type="number">` to ensure proper native form validation and accessible boundary hints.
