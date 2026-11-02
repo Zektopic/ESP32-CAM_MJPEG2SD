@@ -135,7 +135,7 @@ static bool emailSend(const char* mimeType = MIME_TYPE, const char* fileName = A
       }
       if (outLen > 0) client.write(outBuf, outLen);
       client.println(); // end of base64 body
-      sprintf(content, "--%s--", BOUNDARY_VAL);
+      snprintf(content, sizeof(content), "--%s--", BOUNDARY_VAL);
       client.println(content);
     }
     // close message data and quit
