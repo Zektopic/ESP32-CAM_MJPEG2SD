@@ -115,7 +115,7 @@ static bool hfsStoreFile(File &fh) {
     totalSent += chunksize;
     if (calcProgress(totalSent, fh.size(), 5, percentLoaded)) {
       char pcntStr[10];
-      sprintf(pcntStr, "#P%u", percentLoaded);
+      snprintf(pcntStr, sizeof(pcntStr), "#P%u", percentLoaded);
       sendSSE("cmd", pcntStr); 
       LOG_INF("Uploaded %u%%", percentLoaded); 
     }
@@ -269,7 +269,7 @@ static bool ftpStoreFile(File &fh) {
       }
       if (calcProgress(writeBytes, fileSize, 5, percentLoaded)) {
         char pcntStr[10];
-        sprintf(pcntStr, "#P%u", percentLoaded);
+        snprintf(pcntStr, sizeof(pcntStr), "#P%u", percentLoaded);
         sendSSE("cmd", pcntStr); 
         LOG_INF("Uploaded %u%%", percentLoaded);
       }
