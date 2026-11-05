@@ -10,3 +10,6 @@
 ## 2026-10-30 - Fix minlength and maxlength on number inputs
 **Learning:** `minlength` and `maxlength` attributes are not supported on `<input type="number">` and are ignored by browsers, which prevents native HTML validation and affects screen reader context.
 **Action:** Always replace `minlength` and `maxlength` with `min` and `max` on `<input type="number">` to ensure proper native form validation and accessible boundary hints.
+## 2024-11-20 - Adding ARIA Labels to CSS Toggle Checkboxes
+**Learning:** For user interfaces built without frameworks where structural CSS relies on toggling hidden input checkboxes (e.g., `.menu-action`), standard screen readers rely exclusively on those native elements for focus and context. Adding semantic `aria-label`s to these interactive toggle points significantly aids blind users navigating the menu hierarchy.
+**Action:** When working on pure CSS toggles for standard layouts, locate the controlling input element and ensure it has an action-oriented descriptive text in `aria-label`.
