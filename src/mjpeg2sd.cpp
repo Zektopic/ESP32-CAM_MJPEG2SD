@@ -337,7 +337,7 @@ static bool closeAvi() {
   uint32_t hTime = millis();
 #if INCLUDE_MQTT
   if (mqtt_active) {
-    sprintf(jsonBuff, "{\"RECORD\":\"OFF\", \"TIME\":\"%s\"}", esp_log_system_timestamp());
+    snprintf(jsonBuff, JSON_BUFF_LEN, "{\"RECORD\":\"OFF\", \"TIME\":\"%s\"}", esp_log_system_timestamp());
     mqttPublish(jsonBuff);
     mqttPublishPath("record", "off");
   }
@@ -656,7 +656,8 @@ static fnameStruct extractMeta(const char* fname) {
   // extract FPS, duration, and frame count from avi filename
   fnameStruct fnameMeta = {0, 0, 0};
   char fnameStr[FILE_NAME_LEN];
-  strcpy(fnameStr, fname);
+  strncpy(fnameStr, fname, FILE_NAME_LEN - 1);
+  fnameStr[FILE_NAME_LEN - 1] = 0;
   // replace all '_' with space for sscanf
   replaceChar(fnameStr, '_', ' ');
   int items = sscanf(fnameStr, "%*s %*s %*s %hhu %lu", &fnameMeta.recFPS, &fnameMeta.recDuration);
@@ -695,7 +696,8 @@ void openSDfile(const char* streamFile) {
   if (stopPlayback) LOG_WRN("Playback refused - capture in progress");
   else {
     stopPlaying(); // in case already running
-    strcpy(aviFileName, streamFile);
+    strncpy(aviFileName, streamFile, FILE_NAME_LEN - 1);
+    aviFileName[FILE_NAME_LEN - 1] = 0;
     LOG_INF("Playing %s", aviFileName);
     playbackFile = STORAGE.open(aviFileName, FILE_READ);
     playbackFile.seek(AVI_HEADER_LEN, SeekSet); // skip over header
@@ -1148,13 +1150,16 @@ bool prepCam() {
       PID = s->id.PID;
       switch (PID) {
         case (OV2640_PID):
-          strcpy(camModel, "OV2640");
+          strncpy(camModel, "OV2640", sizeof(camModel) - 1);
+          camModel[sizeof(camModel) - 1] = 0;
           break;
         case (OV3660_PID):
-          strcpy(camModel, "OV3660");
+          strncpy(camModel, "OV3660", sizeof(camModel) - 1);
+          camModel[sizeof(camModel) - 1] = 0;
           break;
         case (OV5640_PID): {
-          strcpy(camModel, "OV5640");
+          strncpy(camModel, "OV5640", sizeof(camModel) - 1);
+          camModel[sizeof(camModel) - 1] = 0;
 #if INCLUDE_AF
           // enable autofocus for OV5640 if equipped - see https://github.com/0015/ESP32-OV5640-AF
           ov5640AF.start(s);
@@ -1166,7 +1171,8 @@ bool prepCam() {
           break;
         }
         case (MEGA_CCM_PID):
-          strcpy(camModel, "PY260");
+          strncpy(camModel, "PY260", sizeof(camModel) - 1);
+          camModel[sizeof(camModel) - 1] = 0;
           break;
         default:
           // not recognised
