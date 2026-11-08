@@ -1150,16 +1150,13 @@ bool prepCam() {
       PID = s->id.PID;
       switch (PID) {
         case (OV2640_PID):
-          strncpy(camModel, "OV2640", sizeof(camModel) - 1);
-          camModel[sizeof(camModel) - 1] = 0;
+          snprintf(camModel, sizeof(camModel), "OV2640");
           break;
         case (OV3660_PID):
-          strncpy(camModel, "OV3660", sizeof(camModel) - 1);
-          camModel[sizeof(camModel) - 1] = 0;
+          snprintf(camModel, sizeof(camModel), "OV3660");
           break;
         case (OV5640_PID): {
-          strncpy(camModel, "OV5640", sizeof(camModel) - 1);
-          camModel[sizeof(camModel) - 1] = 0;
+          snprintf(camModel, sizeof(camModel), "OV5640");
 #if INCLUDE_AF
           // enable autofocus for OV5640 if equipped - see https://github.com/0015/ESP32-OV5640-AF
           ov5640AF.start(s);
@@ -1171,13 +1168,12 @@ bool prepCam() {
           break;
         }
         case (MEGA_CCM_PID):
-          strncpy(camModel, "PY260", sizeof(camModel) - 1);
-          camModel[sizeof(camModel) - 1] = 0;
+          snprintf(camModel, sizeof(camModel), "PY260");
           break;
         default:
           // not recognised
           // 16 bytes is sufficient for "PID=0xXXXX\0", preventing buffer overflow
-          snprintf(camModel, 16, "PID=0x%X", s->id.PID);
+          snprintf(camModel, sizeof(camModel), "PID=0x%X", s->id.PID);
           break;
       }
       
