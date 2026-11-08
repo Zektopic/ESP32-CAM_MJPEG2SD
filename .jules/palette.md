@@ -16,3 +16,6 @@
 ## 2024-11-20 - Ensure aria-label matches visible text (Label in Name)
 **Learning:** When adding `aria-label` attributes to elements (like CSS-driven accordion menu toggles that use the checkbox hack), the `aria-label` string must contain the exact visible text of the corresponding `<label>` element. This satisfies WCAG 2.1 Success Criterion 2.5.3 (Label in Name) and ensures voice-dictation software works correctly when users say the visible text.
 **Action:** Always verify that any new `aria-label` includes the element's visible text verbatim (e.g., if visible text is "Camera Control", aria-label should be "Toggle Camera Control Menu").
+## 2026-11-08 - Accessible Labels for Menu Checkboxes in Auxil and MJPEG2SD
+**Learning:** Both `data/MJPEG2SD.htm` and `data/Auxil.htm` use hidden `<input type="checkbox" class="menu-action">` elements to toggle navigation panels, requiring explicit `aria-label` attributes across both templates for consistent screen reader support.
+**Action:** Ensure all `.menu-action` checkboxes across primary and auxiliary HTML templates include descriptive `aria-label` attributes matching their panel titles.
