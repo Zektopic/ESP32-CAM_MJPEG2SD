@@ -337,7 +337,7 @@ static bool closeAvi() {
   uint32_t hTime = millis();
 #if INCLUDE_MQTT
   if (mqtt_active) {
-    sprintf(jsonBuff, "{\"RECORD\":\"OFF\", \"TIME\":\"%s\"}", esp_log_system_timestamp());
+    snprintf(jsonBuff, JSON_BUFF_LEN, "{\"RECORD\":\"OFF\", \"TIME\":\"%s\"}", esp_log_system_timestamp());
     mqttPublish(jsonBuff);
     mqttPublishPath("record", "off");
   }
@@ -382,7 +382,7 @@ static bool closeAvi() {
         char subjectMsg[100];
         snprintf(subjectMsg, sizeof(subjectMsg) - 1, "from %s, in file %s", hostName, aviFileName);
         emailAlert("Motion Alert", subjectMsg);
-      } 
+      }
 #endif
 #if INCLUDE_TGRAM
       tgramAlert(aviFileName, "");
@@ -421,12 +421,12 @@ static bool processFrame() { // Changed legacy 'boolean' to standard C++ 'bool' 
 
   // Configurable rate limiting parameters for stall warnings.
   // Adjust STALL_LOG_INTERVAL_MS to change the minimum time between warnings.
-  constexpr uint32_t STALL_LOG_INTERVAL_MS = 5000; 
+  constexpr uint32_t STALL_LOG_INTERVAL_MS = 5000;
   static uint32_t lastStallLogTime = 0;
   static int lastStalledStream = -1;
 
   camera_fb_t* fb = esp_camera_fb_get();
-  
+
   if (fb == NULL) {
     uint32_t currentTime = millis();
 
@@ -436,19 +436,19 @@ static bool processFrame() { // Changed legacy 'boolean' to standard C++ 'bool' 
       recoveryAttempts++;
 
       if (recoveryAttempts <= MAX_RECOVERY_ATTEMPTS) {
-        LOG_WRN("Camera fb_get returned NULL - attempting sensor recovery (attempt %u/%u)", 
+        LOG_WRN("Camera fb_get returned NULL - attempting sensor recovery (attempt %u/%u)",
                 (unsigned int)recoveryAttempts, (unsigned int)MAX_RECOVERY_ATTEMPTS);
-        
+
         sensor_t* s = esp_camera_sensor_get();
         if (s != NULL && s->reset != NULL) {
           s->reset(s);
-          
+
           char fsizePtrStr[8] = {0}; // Increased buffer size and zero-initialized to prevent overflow.
           if (retrieveConfigVal("framesize", fsizePtrStr, sizeof(fsizePtrStr))) {
             int parsed_framesize = 0;
             // Replaced unsafe old 'atoi' with bounded and faster 'std::from_chars' to prevent undefined behavior.
             const auto result = std::from_chars(fsizePtrStr, fsizePtrStr + sizeof(fsizePtrStr), parsed_framesize);
-            
+
             // Added bounds check to prevent invalid enum cast and undefined behavior.
             if (result.ec == std::errc{} && parsed_framesize >= 0 && parsed_framesize <= 11) {
               s->set_framesize(s, static_cast<framesize_t>(parsed_framesize)); // Used static_cast for type safety.
@@ -461,7 +461,7 @@ static bool processFrame() { // Changed legacy 'boolean' to standard C++ 'bool' 
         }
       } else {
         // Display an error log after maximum consecutive attempts.
-        LOG_ERR("Camera fb_get failed %u times. Recovery limit reached. System requires hard reset.", 
+        LOG_ERR("Camera fb_get failed %u times. Recovery limit reached. System requires hard reset.",
                 (unsigned int)recoveryAttempts);
       }
     }
@@ -470,7 +470,7 @@ static bool processFrame() { // Changed legacy 'boolean' to standard C++ 'bool' 
     vTaskDelay(pdMS_TO_TICKS(10));
     return false;
   }
-  
+
   // Reset recovery counters when a valid frame is received.
   recoveryAttempts = 0;
   lastRecoveryTime = 0;
@@ -480,15 +480,15 @@ static bool processFrame() { // Changed legacy 'boolean' to standard C++ 'bool' 
     esp_camera_fb_return(fb);
     return false;
   }
-  
+
   timeLapse(fb);
 
   for (int i = 0; i < vidStreams; i++) {
     if (streamBuffer[i] != NULL && streamBufferSize[i] == 0) { // Reordered null check first to prevent potential dereference.
       memcpy(streamBuffer[i], fb->buf, fb->len);
       streamBufferSize[i] = fb->len;
-      
-      // Added semaphore return check with configurable rate limiting to detect and log stalled stream 
+
+      // Added semaphore return check with configurable rate limiting to detect and log stalled stream
       // consumers without causing excessive log messages or flash wear.
       if (xSemaphoreGive(frameSemaphore[i]) != pdPASS) {
         uint32_t currentTime = millis();
@@ -500,7 +500,7 @@ static bool processFrame() { // Changed legacy 'boolean' to standard C++ 'bool' 
       }
     }
   }
-  
+
   if (doKeepFrame) {
     keepFrame(fb);
     doKeepFrame = false;
@@ -508,10 +508,10 @@ static bool processFrame() { // Changed legacy 'boolean' to standard C++ 'bool' 
 
   uint8_t reasonMask = 0; // Changed from single 'reasonId' to bitmask to capture multiple trigger sources.
   bool prevMotion = haveMotion;
-  
+
   // Extracted complex ternary logic into a named boolean variable for readability.
   bool shouldMonitor = doRecording ? isCapturing : !dbgMotion;
-  
+
   if (doMonitor(shouldMonitor)) {
     if (useMotion && checkMotion(fb, isCapturing)) {
       reasonMask |= 1; // Use bitwise OR to accumulate camera motion trigger.
@@ -542,7 +542,7 @@ static bool processFrame() { // Changed legacy 'boolean' to standard C++ 'bool' 
     }
 #endif
   }
-  
+
   if (!haveMotion) {
 #if INCLUDE_PERIPH
     if (lampAuto) {
@@ -555,21 +555,21 @@ static bool processFrame() { // Changed legacy 'boolean' to standard C++ 'bool' 
   // recording status
   bool prevCapture = isCapturing;
   isCapturing = haveMotion || forceRecord; // Changed bitwise OR to logical OR for correct boolean evaluation.
-  
+
   if (isCapturing && !prevCapture) {
     // new movement has occurred or record button pressed, start recording
     stopPlaying(); // terminate any playback
     stopPlayback = true; // stop any subsequent playback
-    
+
     if (!dashCamOn) {
       // Updated logging to evaluate bitmask flags and display all active trigger sources.
-      LOG_ALT("Capture started by %s%s%s%s", 
-              (reasonMask == 0) ? "Button " : "", 
-              (reasonMask & 1) ? "Camera " : "", 
-              (reasonMask & 2) ? "PIR " : "", 
+      LOG_ALT("Capture started by %s%s%s%s",
+              (reasonMask == 0) ? "Button " : "",
+              (reasonMask & 1) ? "Camera " : "",
+              (reasonMask & 2) ? "PIR " : "",
               (reasonMask & 4) ? "Accelerometer " : "");
     }
-    
+
 #if INCLUDE_MQTT
     if (mqtt_active) {
       // Replaced unsafe 'sprintf' with 'snprintf' to prevent buffer overflow.
@@ -588,19 +588,19 @@ static bool processFrame() { // Changed legacy 'boolean' to standard C++ 'bool' 
     if (frameCnt < frameLimit) {
       dTimeTot += (millis() - dTime);
       saveFrame(fb);
-      
+
       if (frameCnt >= frameLimit) {
         // stop saving frames for this avi as limit reached
         isCapturing = false;
         // Removed automatic clearing of 'forceRecord' to allow external controller to manage state.
-        
+
         if (!dashCamOn) {
           logLine();
           LOG_WRN("Auto closed recording after %u frames", (unsigned int)frameLimit);
         }
       }
     }
-    
+
 #if INCLUDE_PERIPH
     // Replaced expensive integer division with multiplication for Xtensa performance, with zero-check.
     if (buzzerUse && FPS > 0 && frameCnt >= (static_cast<uint32_t>(buzzerDuration) * static_cast<uint32_t>(FPS))) {
@@ -610,14 +610,14 @@ static bool processFrame() { // Changed legacy 'boolean' to standard C++ 'bool' 
   }
 
   esp_camera_fb_return(fb);
-  
+
   if (!isCapturing && prevCapture) {
     // finish recording (normal or forced)
     closeAvi();
     wsAsyncSendJson("ustatus", "\"showRecord\":0");
     stopPlayback = false; // allow for playbacks
   }
-  
+
   return res;
 }
 
@@ -656,7 +656,8 @@ static fnameStruct extractMeta(const char* fname) {
   // extract FPS, duration, and frame count from avi filename
   fnameStruct fnameMeta = {0, 0, 0};
   char fnameStr[FILE_NAME_LEN];
-  strcpy(fnameStr, fname);
+  strncpy(fnameStr, fname, FILE_NAME_LEN - 1);
+  fnameStr[FILE_NAME_LEN - 1] = '\0';
   // replace all '_' with space for sscanf
   replaceChar(fnameStr, '_', ' ');
   int items = sscanf(fnameStr, "%*s %*s %*s %hhu %lu", &fnameMeta.recFPS, &fnameMeta.recDuration);
@@ -695,7 +696,8 @@ void openSDfile(const char* streamFile) {
   if (stopPlayback) LOG_WRN("Playback refused - capture in progress");
   else {
     stopPlaying(); // in case already running
-    strcpy(aviFileName, streamFile);
+    strncpy(aviFileName, streamFile, FILE_NAME_LEN - 1);
+    aviFileName[FILE_NAME_LEN - 1] = '\0';
     LOG_INF("Playing %s", aviFileName);
     playbackFile = STORAGE.open(aviFileName, FILE_READ);
     playbackFile.seek(AVI_HEADER_LEN, SeekSet); // skip over header
@@ -710,7 +712,7 @@ mjpegStruct getNextFrame(bool firstCall) {
   // get next cluster on demand when ready for opened avi
   mjpegStruct mjpegData = {0, 0, 0};
   static bool remainingBuff;
-  static bool completedPlayback; // indicates that playback completed 
+  static bool completedPlayback; // indicates that playback completed
   static size_t buffOffset;
   static uint32_t hTimeTot;
   static uint32_t tTimeTot;
@@ -1047,7 +1049,7 @@ bool prepCam() {
 #endif
 
   bool res = false;
-  
+
   // Cache PSRAM size to avoid multiple hardware/register reads
   const size_t psramSize = ESP.getPsramSize();
 
@@ -1061,15 +1063,15 @@ bool prepCam() {
   // PY260 camera has different frame sizes
   maxFS = (psramSize > 5 * ONEMEG) ? FRAMESIZE_5MP : FRAMESIZE_HD;
 #endif
-  
+
   // Cache frame data reference to avoid repeated array indexing
   const auto& frameInfo = frameData[maxFS];
-  
+
   // define buffer size depending on maximum frame size available, esp32-camera/driver/cam_hal.c: cam_obj->recv_size
   // Use size_t to prevent integer overflow during multiplication
   size_t requiredBuffSize = static_cast<size_t>(frameInfo.frameWidth) * frameInfo.frameHeight / 5;
   maxFrameBuffSize = maxAlertBuffSize = requiredBuffSize;
-  
+
   if (alertBuffer == NULL) {
     alertBuffer = psramFound() ? static_cast<uint8_t*>(ps_malloc(maxAlertBuffSize)) : static_cast<uint8_t*>(malloc(maxAlertBuffSize));
     if (alertBuffer == NULL) {
@@ -1078,7 +1080,7 @@ bool prepCam() {
       return false;
     }
   }
-  
+
   LOG_INF("Max frame size for %s PSRAM is %s ", fmtSize(psramSize), frameInfo.frameSizeStr);
 
   // configure camera
@@ -1136,7 +1138,7 @@ bool prepCam() {
       retries--;
     }
   }
-  
+
   uint16_t PID = 0;
   if (err != ESP_OK) {
     snprintf(startupFailure, SF_LEN, STARTUP_FAIL "Camera init error 0x%X:%s on %s", err, espErrMsg(err), CAM_BOARD);
@@ -1148,13 +1150,16 @@ bool prepCam() {
       PID = s->id.PID;
       switch (PID) {
         case (OV2640_PID):
-          strcpy(camModel, "OV2640");
+          strncpy(camModel, "OV2640", sizeof(camModel) - 1);
+          camModel[sizeof(camModel) - 1] = '\0';
           break;
         case (OV3660_PID):
-          strcpy(camModel, "OV3660");
+          strncpy(camModel, "OV3660", sizeof(camModel) - 1);
+          camModel[sizeof(camModel) - 1] = '\0';
           break;
         case (OV5640_PID): {
-          strcpy(camModel, "OV5640");
+          strncpy(camModel, "OV5640", sizeof(camModel) - 1);
+          camModel[sizeof(camModel) - 1] = '\0';
 #if INCLUDE_AF
           // enable autofocus for OV5640 if equipped - see https://github.com/0015/ESP32-OV5640-AF
           ov5640AF.start(s);
@@ -1166,7 +1171,8 @@ bool prepCam() {
           break;
         }
         case (MEGA_CCM_PID):
-          strcpy(camModel, "PY260");
+          strncpy(camModel, "PY260", sizeof(camModel) - 1);
+          camModel[sizeof(camModel) - 1] = '\0';
           break;
         default:
           // not recognised
@@ -1174,7 +1180,7 @@ bool prepCam() {
           snprintf(camModel, 16, "PID=0x%X", s->id.PID);
           break;
       }
-      
+
       // set frame size to configured value
       char fsizePtrStr[8] = {0};
       if (retrieveConfigVal("framesize", fsizePtrStr, sizeof(fsizePtrStr))) {
@@ -1214,14 +1220,14 @@ bool prepCam() {
       res = true;
     }
   }
-  
+
   // check that camera data is accessible and allow sensor AEC/AWB to settle
   if (res) {
     // Discard first few frames to allow automatic exposure and white balance to settle.
     // OV2640 and similar sensors need ~1-2 seconds; 3 frames with small delays is effective.
     const uint8_t warmupFrames = 3;
     camera_fb_t* fb = NULL;
-    
+
     for (uint8_t i = 0; i < warmupFrames; ++i) {
       fb = esp_camera_fb_get();
       if (fb != NULL) {
