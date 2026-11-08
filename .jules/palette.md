@@ -19,3 +19,6 @@
 ## 2026-11-08 - Accessible Labels for Menu Checkboxes in Auxil and MJPEG2SD
 **Learning:** Both `data/MJPEG2SD.htm` and `data/Auxil.htm` use hidden `<input type="checkbox" class="menu-action">` elements to toggle navigation panels, requiring explicit `aria-label` attributes across both templates for consistent screen reader support.
 **Action:** Ensure all `.menu-action` checkboxes across primary and auxiliary HTML templates include descriptive `aria-label` attributes matching their panel titles.
+## 2024-11-20 - Add aria-labels to CSS-driven menu checkboxes
+**Learning:** In the ESP32-CAM_MJPEG2SD repository, CSS-driven menus are toggled via \`<input type="checkbox" class="menu-action">\` elements. Adding descriptive \`aria-label\` attributes (e.g., 'Toggle Camera Control Menu') to these checkboxes provides a strong accessibility enhancement for screen reader users.
+**Action:** When working with CSS-driven menus that use invisible checkboxes for state management, ensure those checkboxes have clear \`aria-label\` attributes to explain their purpose.
