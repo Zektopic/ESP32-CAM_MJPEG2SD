@@ -10,3 +10,6 @@
 ## 2026-10-30 - Fix minlength and maxlength on number inputs
 **Learning:** `minlength` and `maxlength` attributes are not supported on `<input type="number">` and are ignored by browsers, which prevents native HTML validation and affects screen reader context.
 **Action:** Always replace `minlength` and `maxlength` with `min` and `max` on `<input type="number">` to ensure proper native form validation and accessible boundary hints.
+## 2024-11-20 - Add aria-labels to CSS-driven menu checkboxes
+**Learning:** In the ESP32-CAM_MJPEG2SD repository, CSS-driven menus are toggled via \`<input type="checkbox" class="menu-action">\` elements. Adding descriptive \`aria-label\` attributes (e.g., 'Toggle Camera Control Menu') to these checkboxes provides a strong accessibility enhancement for screen reader users.
+**Action:** When working with CSS-driven menus that use invisible checkboxes for state management, ensure those checkboxes have clear \`aria-label\` attributes to explain their purpose.
