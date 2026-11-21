@@ -1,5 +1,8 @@
 name: Build and Release Firmware
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: [ main, master ]
@@ -18,13 +21,13 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
 
     - name: Configure Git safe directory
       run: git config --global --add safe.directory '*'
 
     - name: Cache Arduino cores and packages
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: |
           ~/.arduino15/packages
@@ -52,7 +55,7 @@ jobs:
         ./bin/arduino-cli compile --fqbn esp32:esp32:esp32cam:PartitionScheme=min_spiffs --output-dir build/esp32.esp32.esp32cam ESP32-CAM_MJPEG2SD.ino
 
     - name: Archive firmware
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: firmware
         path: |
@@ -68,44 +71,24 @@ jobs:
       contents: write
     steps:
       - name: Download firmware artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: firmware
           path: firmware
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
+      - name: Stage release assets
+        run: |
+          cp firmware/ESP32-CAM_MJPEG2SD.ino.bin firmware/firmware.bin
+          cp firmware/ESP32-CAM_MJPEG2SD.ino.partitions.bin firmware/partitions.bin
+      - name: Create Release and upload assets
+        uses: softprops/action-gh-release@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
           draft: false
           prerelease: false
-      - name: Upload firmware to release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: firmware/ESP32-CAM_MJPEG2SD.ino.bin
-          asset_name: firmware.bin
-          asset_content_type: application/octet-stream
-      - name: Upload partitions to release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: firmware/ESP32-CAM_MJPEG2SD.ino.partitions.bin
-          asset_name: partitions.bin
-          asset_content_type: application/octet-stream
-      - name: Upload bootloader to release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: firmware/bootloader.bin
-          asset_name: bootloader.bin
-          asset_content_type: application/octet-stream
+          files: |
+            firmware/firmware.bin
+            firmware/partitions.bin
+            firmware/bootloader.bin
